@@ -1,0 +1,4 @@
+{
+    "mongoURI": "mongodb+srv://han:xus4dnut7@squirrelnote.lw9rw.gcp.mongodb.net/SquirrelNote?retryWrites=true&w=majority",
+    "jwtSecret": "qqnut"
+}
