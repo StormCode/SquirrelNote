@@ -4,6 +4,9 @@ const jwt = require('jsonwebtoken');
 const config = require('config');
 const router = express.Router();
 const { check, validationResult } = require('express-validator');
+const {
+    DUPLICATED_USER
+} = require('../status');
 
 const User = require('../models/User');
 
@@ -30,7 +33,7 @@ router.post('/', [
         let user = await User.findOne({email});
 
         if(user) {
-            return res.status(400).json({msg: '您的email已經被註冊過'});
+            return res.status(400).json({msg: '您的email已經被註冊過', status: DUPLICATED_USER});
         }
 
         user = new User({

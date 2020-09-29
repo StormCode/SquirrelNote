@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { check, validationResult } = require('express-validator');
+const {
+    NOT_AUTHORIZED,
+    NOT_FOUND
+} = require('../status');
 
 const Notebook = require('../models/Notebook');
 const Note = require('../models/Note');
@@ -35,7 +39,7 @@ router.post('/', auth, async(req, res) => {
         let notebook = await Notebook.findById(req.body.notebook);
 
         // 確認使用者是否真的擁有這個筆記本
-        if(notebook.user.toString() !== req.user.id) return res.status(401).json({msg: '未授權'});
+        if(notebook.user.toString() !== req.user.id) return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
 
         // 新增筆記
         const newNote = new Note({
@@ -70,13 +74,13 @@ router.put('/:id', auth, async(req, res) => {
         // 修改筆記
         let note = await Note.findById(req.params.id);
         
-        if(!note) return res.status(404).json({msg: '找不到筆記'});
+        if(!note) return res.status(404).json({msg: '找不到筆記', status: NOT_FOUND});
 
         //取得此筆記的筆記本
         let notebook = await Notebook.findById(req.body.notebook);
 
         // 確認使用者是否真的擁有這個筆記本
-        if(notebook.user.toString() !== req.user.id) return res.status(401).json({msg: '未授權'});
+        if(notebook.user.toString() !== req.user.id) return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
 
         note = await Note.findByIdAndUpdate(req.params.id,
             { $set: noteField },
@@ -97,13 +101,13 @@ router.delete('/:id', auth, async(req, res) => {
         // 刪除筆記
         let note = await Note.findById(req.params.id);
 
-        if(!note) return res.status(404).json({msg: '找不到此筆記'});
+        if(!note) return res.status(404).json({msg: '找不到此筆記', status: NOT_FOUND});
 
         //取得此筆記的筆記本
         let notebook = await Notebook.findById(note.notebook);
 
         // 確認使用者是否真的擁有這個筆記本
-        if(notebook.user.toString() !== req.user.id) return res.status(401).json({msg: '未授權'});
+        if(notebook.user.toString() !== req.user.id) return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
 
         await Note.findByIdAndRemove(req.params.id);
 

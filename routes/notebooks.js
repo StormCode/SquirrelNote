@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { check, validationResult } = require('express-validator');
+const {
+    NOT_AUTHORIZED,
+    NOT_FOUND
+} = require('../status');
 
 const Notebook = require('../models/Notebook');
 const auth = require('../middleware/auth');
@@ -33,7 +37,7 @@ router.post('/', [auth, [
     }
 
     const { title, desc } = req.body;
-
+    
     try {
         // 新增筆記本
         const newNotebook = new Notebook({
@@ -76,10 +80,10 @@ router.put('/:id', [auth, [
         // 修改筆記本
         let notebook = await Notebook.findById(req.params.id);
 
-        if(!notebook) return res.status(404).json({msg: '找不到此筆記本'});
+        if(!notebook) return res.status(404).json({msg: '找不到此筆記本', status: NOT_FOUND});
 
         // 確認使用者是否真的擁有這個筆記本
-        if(notebook.user.toString() !== req.user.id) return res.status(401).json({msg: '未授權'});
+        if(notebook.user.toString() !== req.user.id) return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
 
         notebook = await Notebook.findByIdAndUpdate(req.params.id,
             { $set: notebookField },
@@ -100,10 +104,10 @@ router.delete('/:id', auth, async(req, res) => {
         // 刪除筆記本
         const notebook = await Notebook.findById(req.params.id);
 
-        if(!notebook) return res.status(404).json({msg: '找不到此筆記本'});
+        if(!notebook) return res.status(404).json({msg: '找不到此筆記本', status: NOT_FOUND});
 
         // 確認使用者是否真的擁有這個筆記本
-        if(notebook.user.toString() !== req.user.id) return res.status(401).json({msg: '未授權'});
+        if(notebook.user.toString() !== req.user.id) return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
 
         await Notebook.findByIdAndRemove(req.params.id);
 

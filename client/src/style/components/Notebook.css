@@ -1,0 +1,33 @@
+.notebook {
+    flex: 1 1 25%;
+    max-width: 25%;
+    padding: 0 10px;
+}
+
+.card {
+    margin: auto 30px;
+    background-color: rgb(173, 216, 230);
+    border: 1px solid #ccc;
+    padding: 20px 10px;
+    width: 100%;
+    min-height: 250px;
+    max-height: 250px;
+}
+
+.card-title {
+        font-size: 2rem;
+        font-weight: bold;
+    }
+
+    .card-text {
+        font-size: 1rem;
+    }
+
+.notebook:hover > .card {
+    cursor: pointer;
+    background-color: rgba(173, 216, 230, 0.8);
+}
+
+.danger-alert {
+    border: 2px solid #FF0000;
+}

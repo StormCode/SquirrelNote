@@ -4,6 +4,9 @@ const config = require('config');
 const bcrypt = require('bcryptjs');
 const router = express.Router();
 const { check, validationResult } = require('express-validator');
+const { 
+    INVALID_CREDENTIALS
+} = require('../status');
 
 const User = require('../models/User');
 const auth = require('../middleware/auth');
@@ -40,13 +43,13 @@ router.post('/', [
         let user = await User.findOne({email});
 
         if(!user){
-            return res.status(400).json({msg: '憑證無效'});
+            return res.status(400).json({msg: '憑證無效', status: INVALID_CREDENTIALS});
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
 
         if(!isMatch){
-            return res.status(400).json({msg: '憑證無效'});
+            return res.status(400).json({msg: '憑證無效', status: INVALID_CREDENTIALS});
         }
 
         const payload = {
