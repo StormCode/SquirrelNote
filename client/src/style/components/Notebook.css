@@ -5,22 +5,29 @@
 }
 
 .card {
-    margin: auto 30px;
     background-color: rgb(173, 216, 230);
     border: 1px solid #ccc;
-    padding: 20px 10px;
+    padding: 10px;
     width: 100%;
     min-height: 250px;
     max-height: 250px;
 }
 
-.card-title {
-        font-size: 2rem;
-        font-weight: bold;
+    .card .card-body {
+        margin-top: 32px;
     }
 
-    .card-text {
+    .card .card-title {
+        font-size: 2rem;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .card .card-text {
         font-size: 1rem;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
     }
 
 .notebook:hover > .card {
@@ -31,3 +38,19 @@
 .danger-alert {
     border: 2px solid #FF0000;
 }
+
+.tool-panel {
+    position: absolute;
+    right: 0;
+    display: flex;
+    flex-flow: nowrap row;
+    justify-content: flex-end;
+}
+
+    .tool-panel > button {
+        margin: 0 5px;
+        border: 0;
+        border-radius: 5px;
+        width: 32px;
+        height: 32px;
+    }

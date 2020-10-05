@@ -5,10 +5,10 @@ import NotebookContext from '../context/notebooks/notebookContext'
 const NotebookSorter = () => {
     const notebookContext = useContext(NotebookContext);
 
-    const { sort, sortBy, sortNotebook } = notebookContext;
+    const { orderBy, sortBy, sortNotebook } = notebookContext;
 
     const onSortBy = e => {
-        sortNotebook(sort, e.target.value)
+        sortNotebook(orderBy, e.target.value)
     }
 
     const onToggleSort = e => {
@@ -24,8 +24,8 @@ const NotebookSorter = () => {
                 <DropdownItem value='title' onClick={onSortBy} active={sortBy === 'title'}>名稱</DropdownItem>
                 <DropdownItem value='create-date' onClick={onSortBy} active={sortBy === 'create-date'}>建立日期</DropdownItem>
                 <DropdownItem divider />
-                <DropdownItem value='asc' onClick={onToggleSort} active={sort === 'asc'}>升冪</DropdownItem>
-                <DropdownItem value='desc' onClick={onToggleSort} active={sort === 'desc'}>降冪</DropdownItem>
+                <DropdownItem value='asc' onClick={onToggleSort} active={orderBy === 'asc'}>升冪</DropdownItem>
+                <DropdownItem value='desc' onClick={onToggleSort} active={orderBy === 'desc'}>降冪</DropdownItem>
             </DropdownMenu>
         </UncontrolledDropdown>
     )

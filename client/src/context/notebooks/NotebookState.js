@@ -23,7 +23,7 @@ const NotebookState = props => {
     const initialState = {
         notebooks: null,
         filtered: null,
-        sort: 'asc',
+        orderBy: 'asc',
         sortBy: 'title',
         addNotebookVisible: false,
         currentEditNotebook: null,
@@ -109,10 +109,10 @@ const NotebookState = props => {
     }
 
     //排序筆記本
-    const sortNotebook = (sort, sortBy) => {
+    const sortNotebook = (orderBy, sortBy) => {
         dispatch({
             type: SORT_NOTEBOOK,
-            payload: {sort, sortBy}
+            payload: {orderBy, sortBy}
         });
     }
 
@@ -163,7 +163,7 @@ const NotebookState = props => {
                 notebooks: state.notebooks,
                 filtered: state.filtered,
                 error: state.error,
-                sort: state.sort,
+                orderBy: state.orderBy,
                 sortBy: state.sortBy,
                 addNotebookVisible: state.addNotebookVisible,
                 currentEditNotebook: state.currentEditNotebook,

@@ -9,3 +9,7 @@ input[type='text'] {
   border-radius: 5px;
   padding: 3px !important;
 }
+
+button > img:not(.inline-img) {
+    width: 100%;
+}

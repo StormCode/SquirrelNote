@@ -1,0 +1,11 @@
+.main-subpanel {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 3rem 5rem;
+    overflow: hidden;
+}
+
+#add-notebook-btn {
+    float: left;
+}

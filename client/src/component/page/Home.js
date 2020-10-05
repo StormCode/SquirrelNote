@@ -6,6 +6,9 @@ import NotebookSorter from '../../notebooks/NotebookSorter';
 import AuthContext from '../../context/auth/authContext';
 import NotebookContext from '../../context/notebooks/notebookContext';
 
+import '../../style/page/Home.css';
+import addNotebookImg from '../../assets/notebook/add_notebook_32x32.png';
+
 const Home = () => {
     const authContext = useContext(AuthContext);
     const notebookContext = useContext(NotebookContext);
@@ -17,15 +20,10 @@ const Home = () => {
     }, []);
 
     return (
-        <div style={{
-            position: 'relative',
-            width: '100%',
-            height: '100%',
-            paddingTop: '3rem'
-        }}>
-            <Button color="primary" onClick={() => {
+        <div className='main-subpanel'>
+            <Button id='add-notebook-btn' color='primary' onClick={() => {
                 notebookContext.enableAddNotebook();
-            }}>新增筆記本</Button>
+            }}><img className='inline-img' src={addNotebookImg} />新增筆記本</Button>
             <NotebookSorter />
             <NotebookFilter />
             <Notebooks />

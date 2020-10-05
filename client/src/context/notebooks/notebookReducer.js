@@ -16,14 +16,17 @@ import {
 
 export default (state, action) => {
     const sortNotebook = (a,b) => {
-        if(action.payload.sortBy === 'title'){
-            if(action.payload.sort === 'asc')
+        let sort = action.payload.orderBy || state.orderBy;
+        let sortBy = action.payload.sortBy || state.sortBy;
+
+        if(sortBy === 'title'){
+            if(sort === 'asc')
                 return a.title < b.title ? -1 : 1
             else
                 return a.title > b.title ? -1 : 1
         }
         else {
-            if(action.payload.sort === 'asc')
+            if(sort === 'asc')
                 return a.date < b.date ? -1 : 1
             else
                 return a.date > b.date ? -1 : 1
@@ -34,7 +37,7 @@ export default (state, action) => {
         case GET_NOTEBOOKS:
             return {
                 ...state,
-                notebooks: action.payload,
+                notebooks: action.payload.sort(sortNotebook),
                 loading: false
             };
         case ADD_NOTEBOOK:
@@ -68,7 +71,7 @@ export default (state, action) => {
         case SORT_NOTEBOOK:
             return {
                 ...state,
-                sort: action.payload.sort,
+                orderBy: action.payload.orderBy,
                 sortBy: action.payload.sortBy,
                 filtered: state.filtered === null ? state.filtered : state.filtered.sort(sortNotebook),
                 notebooks: state.notebooks === null ? state.notebooks : state.notebooks.sort(sortNotebook),
