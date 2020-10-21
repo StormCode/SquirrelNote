@@ -1,22 +1,18 @@
 #container {
-    display: grid;
-    grid-template-columns: [main-column] 100% [column-end];
-    grid-template-rows: [header-row] auto [main-row] 90% [footer-row] 20vh [row-end];
-    grid-template-areas: "header"
-                         "main"
-                         "footer"; 
-    height: 120vh;
+    display: flex;
+    flex-flow: nowrap column;
+    width: 100vw;
+    height: 100vh;
 }
 
 .header {
-    grid-area: header;
     position: sticky;
     top: 0;
     z-index: 1;
 }
 
 .main {
-    grid-area: main;
+    flex: 1 0 80%;
     display: flex;
     flex-flow: wrap row;
     justify-content: center;
@@ -24,7 +20,7 @@
 }
 
 .footer {
-    grid-area: footer;
+    flex: 1 0 auto;
     background-color: black;
 }
 

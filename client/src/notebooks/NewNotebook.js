@@ -4,7 +4,10 @@ import {
     CardTitle, CardSubtitle, Button, UncontrolledTooltip
   } from 'reactstrap';
 
+// Import Style
 import '../style/components/Notebook.css';
+
+// Import Resource
 import confirmImg from '../assets/general/confirm_32x32.png';
 import cancelImg from '../assets/general/close_32x32.png';
 
@@ -26,19 +29,32 @@ const NewNotebook = () => {
         ...notebook, [e.target.name]: e.target.value
     });
 
+    const onAddNotebook = e => {
+        e.preventDefault();
+        addNotebook(notebook);
+    };
+
+    const onDisableAddNotebook = e => {
+        e.preventDefault();
+        //清除筆記本內容
+        setNotebook({
+            title: '',
+            desc: ''
+        });
+        disableAddNotebook();
+    };
+
     return (
         <Fragment>
             {addNotebookVisible ? (<div className='notebook'>
                 <Card>
                     <div className='tool-panel'>
-                        <button id='add-confirm-btn' onClick={e => {
-                            e.preventDefault();
-                            addNotebook(notebook);
-                        }}><img src={confirmImg} alt='新增' /></button>
-                        <button id='cancel-btn' onClick={e => {
-                            e.preventDefault();
-                            disableAddNotebook();
-                        }}><img src={cancelImg} alt='取消' /></button>
+                        <button id='add-confirm-btn' onClick={onAddNotebook}>
+                            <img src={confirmImg} alt='新增' />
+                        </button>
+                        <button id='cancel-btn' onClick={onDisableAddNotebook}>
+                            <img src={cancelImg} alt='取消' />
+                        </button>
                         <UncontrolledTooltip placement="bottom" target="add-confirm-btn">
                             確定新增
                         </UncontrolledTooltip>

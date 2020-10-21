@@ -4,6 +4,8 @@ import NotebookContext from './notebookContext';
 import NotebookReducer from './notebookReducer';
 import {
     GET_NOTEBOOKS,
+    SET_NOTEBOOK,
+    CLEAR_NOTEBOOK,
     ADD_NOTEBOOK,
     UPDATE_NOTEBOOK,
     DELETE_NOTEBOOK,
@@ -19,9 +21,11 @@ import {
     NOTEBOOK_ERROR
 } from '../types';
 
+const localNotebook = JSON.parse(localStorage.getItem('notebook'));
 const NotebookState = props => {
     const initialState = {
         notebooks: null,
+        current: localNotebook || null,
         filtered: null,
         orderBy: 'asc',
         sortBy: 'title',
@@ -32,6 +36,27 @@ const NotebookState = props => {
     };
 
     const [state, dispatch] = useReducer(NotebookReducer, initialState);
+
+    //設定目前正在使用的筆記本
+    const setCurrentNotebook = async notebook => {
+        try {
+            dispatch({
+                type: SET_NOTEBOOK,
+                payload: notebook
+            })
+        } catch (err) {
+            dispatch({ type: NOTEBOOK_ERROR });
+        }
+    };
+
+    //清除目前正在使用的筆記本
+    const clearNotebook = async () => {
+        try {
+            dispatch({ type: CLEAR_NOTEBOOK })
+        } catch (err) {
+            dispatch({ type: NOTEBOOK_ERROR });
+        }
+    };
 
     //取得筆記本
     const getNotebooks = async () => {
@@ -67,7 +92,7 @@ const NotebookState = props => {
     }
 
     //編輯筆記本
-    const updateNotebook = async notebook => {
+    const updateNotebook = async (id, notebook) => {
         const config = {
             headers: {
                 'Content-Type': 'application/json'
@@ -75,7 +100,7 @@ const NotebookState = props => {
         };
 
         try {
-            const res = await axios.put(`/api/notebooks/${notebook._id}`, notebook, config);
+            const res = await axios.put(`/api/notebooks/${id}`, notebook, config);
             dispatch({
                 type: UPDATE_NOTEBOOK,
                 payload: res.data
@@ -161,6 +186,7 @@ const NotebookState = props => {
         <NotebookContext.Provider
             value={{
                 notebooks: state.notebooks,
+                current: state.current,
                 filtered: state.filtered,
                 error: state.error,
                 orderBy: state.orderBy,
@@ -169,6 +195,8 @@ const NotebookState = props => {
                 currentEditNotebook: state.currentEditNotebook,
                 currentDeleteNotebook: state.currentDeleteNotebook,
                 getNotebooks,
+                setCurrentNotebook,
+                clearNotebook,
                 addNotebook,
                 updateNotebook,
                 deleteNotebook,

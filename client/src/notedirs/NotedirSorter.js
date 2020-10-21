@@ -1,19 +1,19 @@
 import React, { useContext } from 'react';
 import Sorter from '../component/layout/Sorter';
 
-import NotebookContext from '../context/notebooks/notebookContext'
+import NotedirContext from '../context/notedirs/notedirContext'
 
-const NotebookSorter = () => {
-    const notebookContext = useContext(NotebookContext);
+const NotedirSorter = () => {
+    const notedirContext = useContext(NotedirContext);
 
-    const { orderBy, sortBy, sortNotebook } = notebookContext;
+    const { orderBy, sortBy, sortNotedir } = notedirContext;
 
     const onSortBy = e => {
-        sortNotebook(orderBy, e.target.value)
+        sortNotedir(orderBy, e.target.value)
     };
 
     const onToggleSort = e => {
-        sortNotebook(e.target.value, sortBy);
+        sortNotedir(e.target.value, sortBy);
     };
 
     const sortFields = [{text: '名稱', value: 'title'},
@@ -25,8 +25,9 @@ const NotebookSorter = () => {
             sortBy={sortBy}
             onSortBy={onSortBy}
             onToggleSort={onToggleSort}
+            sorterStyle={{margin: '0 10px'}}
         />
     )
 }
 
-export default NotebookSorter;
+export default NotedirSorter;

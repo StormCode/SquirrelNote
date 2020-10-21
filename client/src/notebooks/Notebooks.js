@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect } from 'react';
+import React, { Fragment, useContext, useState, useEffect } from 'react';
 import Spinner from '../component/layout/Spinner';
 import Notebook from './Notebook';
 import NewNotebook from './NewNotebook';
@@ -17,6 +17,13 @@ const Notebooks = () => {
     
         // eslint-disable-next-line
     }, []);
+    
+    //目前正在使用的ToolPanel
+    const [currentToolPanel, setCurrentToolPanel] = useState(null);
+
+    const setToolPanel = id => {
+        setCurrentToolPanel(id);
+    }
 
     return <Fragment>
             { notebooks != null && !loading ?
@@ -24,10 +31,16 @@ const Notebooks = () => {
                     <NewNotebook />
                     { filtered !== null ?
                     (filtered.map(notebook => 
-                        <Notebook key={notebook._id} notebook={notebook} />
+                        <Notebook key={notebook._id} 
+                            notebook={notebook} 
+                            toolPanel={currentToolPanel} 
+                            setToolPanel={setToolPanel} />
                     )) :
                     (notebooks.map(notebook => 
-                        <Notebook key={notebook._id} notebook={notebook} />
+                        <Notebook key={notebook._id} 
+                            notebook={notebook} 
+                            toolPanel={currentToolPanel} 
+                            setToolPanel={setToolPanel} />
                     ))}
                 </div> : <Spinner />
             }

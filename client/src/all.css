@@ -13,3 +13,15 @@ input[type='text'] {
 button > img:not(.inline-img) {
     width: 100%;
 }
+
+ul > li {
+  list-style: none;
+}
+
+.warning {
+  color: #FF0000;
+}
+
+.right-align {
+  float: right;
+}

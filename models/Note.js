@@ -1,15 +1,15 @@
 const mongoose = require('mongoose');
 
 const NoteSchema = mongoose.Schema({
-    notebook: {
+    notedir: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'notebook'
+        ref: 'notedir'
     },
     title: {
         type: String,
         required: true
     },
-    context: {
+    content: {
         type: String,
         required: true
     },

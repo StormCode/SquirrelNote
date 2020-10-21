@@ -1,0 +1,88 @@
+.note-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 4fr;
+    grid-template-rows: .1fr .12fr auto .1fr;
+    grid-template-areas: 
+        "header header header"
+        "notedir-list note-list note-header"
+        "notedir-list note-list editor"
+        "recycle-bin note-list editor";
+    width: 100%;
+    height: 100%;
+}
+
+    .note-container .header {
+        grid-area: header;
+        background-color: #33ffee;
+    }
+
+        .note-container .header::before {
+            content: 'header';
+        }
+
+    .note-container .note-list {
+        grid-area: note-list;
+        background-color: #ccc;
+    }
+
+    .note-container .notedir-list {
+        grid-area: notedir-list;
+        background-color: #808080;
+    }
+
+        .note-container .note-list > ul,
+        .note-container .notedir-list > ul {
+            margin: 0;
+            padding: 0;
+        }
+
+            .note-container .note-list > ul > li,
+            .note-container .notedir-list > ul > li {
+                padding: 10px;
+                font-size: 1rem;
+                height: 3rem;
+                border: 1px solid #00ffee;
+            }
+
+    .note-container .note-header {
+        grid-area: note-header;
+        padding: 0 10px;
+        background-color: #77ff00;
+    }
+
+        .note-container .note-header button {
+            margin-left: 10px;
+        }
+
+    .note-container .note-title-container {
+        display: flex;
+        flex-flow: row nowrap;
+        margin-top: 10px;
+        width: 100%;
+    }
+
+        .note-container .note-title-container .note-title {
+            flex: 1 1 auto;
+            border: none;
+            border-radius: 0;
+            outline: none;
+            padding: 10px;
+        }
+
+        .note-container .note-title-container .note-save-btn {
+            flex: 0 1 15%;
+        }
+
+    .note-container .editor {
+        grid-area: editor;
+        background-color: #99ff99;
+    }
+
+    .note-container .recycle-bin {
+        grid-area: recycle-bin;
+        background-color: rgb(255, 0, 234);
+    }
+
+        .note-container .recycle-bin::before {
+            content: 'recycle bin';
+        }

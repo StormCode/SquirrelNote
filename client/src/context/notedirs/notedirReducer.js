@@ -1,0 +1,101 @@
+import {
+    GET_NOTEDIRS,
+    SET_NOTEDIR,
+    ADD_NOTEDIR,
+    UPDATE_NOTEDIR,
+    DELETE_NOTEDIR,
+    SORT_NOTEDIR,
+    ENABLE_EDITNOTEDIR,
+    DISABLE_EDITNOTEDIR,
+    ENABLE_DELETENOTEDIR,
+    DISABLE_DELETENOTEDIR,
+    NOTEDIR_ERROR
+} from '../types.js';
+
+export default (state, action) => {
+    const sortNotedir = (a,b) => {
+        let sort = action.payload.orderBy || state.orderBy;
+        let sortBy = action.payload.sortBy || state.sortBy;
+
+        if(sortBy === 'title'){
+            if(sort === 'asc')
+                return a.title < b.title ? -1 : 1
+            else
+                return a.title > b.title ? -1 : 1
+        }
+        else {
+            if(sort === 'asc')
+                return a.date < b.date ? -1 : 1
+            else
+                return a.date > b.date ? -1 : 1
+        }
+    };
+
+    switch(action.type){
+        case GET_NOTEDIRS:
+            return {
+                ...state,
+                notedirs: action.payload.sort(sortNotedir),
+                loading: false
+            }
+        case SET_NOTEDIR:
+            return {
+                ...state,
+                current: state.notedirs && state.notedirs.find(notedir => action.payload ? 
+                    notedir._id == action.payload : notedir.default == true),
+                loading: false
+            }
+        case ADD_NOTEDIR:
+            return {
+                ...state,
+                notedirs: [action.payload, ...state.notedirs]
+            }
+        case UPDATE_NOTEDIR:
+            return {
+                ...state,
+                notedirs: state.notedirs.map(notedir =>
+                    notedir._id !== action.payload._id ? notedir : action.payload
+                )
+            }
+        case DELETE_NOTEDIR:
+            return {
+                ...state,
+                notedirs: state.notedirs.filter(notedir => {
+                    return notedir._id !== action.payload
+                })
+            }
+        case SORT_NOTEDIR:
+            return {
+                ...state,
+                orderBy: action.payload.orderBy,
+                sortBy: action.payload.sortBy,
+                notedirs: state.notedirs === null ? state.notedirs : state.notedirs.sort(sortNotedir)
+            }
+        case ENABLE_EDITNOTEDIR:
+            return {
+                ...state,
+                currentEditNotedir: action.payload
+            }
+        case DISABLE_EDITNOTEDIR:
+            return {
+                ...state,
+                currentEditNotedir: null
+            }
+        case ENABLE_DELETENOTEDIR:
+            return {
+                ...state,
+                currentDeleteNotedir: action.payload
+            }
+        case DISABLE_DELETENOTEDIR:
+            return {
+                ...state,
+                currentDeleteNotedir: null
+            }
+        case NOTEDIR_ERROR:
+            return {
+                error: action.payload
+            }
+        default:
+            return state;
+    }
+}

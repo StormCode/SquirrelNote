@@ -1,4 +1,5 @@
 import React, { Fragment, useState, useContext } from 'react';
+import { useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import {
   Collapse,
@@ -13,6 +14,8 @@ import {
 import AuthContext from '../../context/auth/authContext';
 
 const MainNavbar = ({ title }) => {
+    const location = useLocation();
+
     const authContext = useContext(AuthContext)
 
     const [isOpen, setIsOpen] = useState(false);
@@ -45,6 +48,8 @@ const MainNavbar = ({ title }) => {
     );
 
     return (
+        //當路徑在筆記頁面的時候要隱藏Navbar
+        location.pathname.match('/notebook/') ? null :
         <Navbar className="header" color="dark" dark expand="md">
             <NavbarBrand href="/">{title}</NavbarBrand>
             <NavbarToggler onClick={toggle} />

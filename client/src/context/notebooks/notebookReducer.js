@@ -1,5 +1,7 @@
 import {
     GET_NOTEBOOKS,
+    SET_NOTEBOOK,
+    CLEAR_NOTEBOOK,
     ADD_NOTEBOOK,
     UPDATE_NOTEBOOK,
     DELETE_NOTEBOOK,
@@ -40,6 +42,18 @@ export default (state, action) => {
                 notebooks: action.payload.sort(sortNotebook),
                 loading: false
             };
+        case SET_NOTEBOOK:
+            localStorage.setItem('notebook', JSON.stringify(action.payload));
+            return {
+                ...state,
+                current: action.payload
+            }
+        case CLEAR_NOTEBOOK:
+            localStorage.removeItem('notebook');
+            return {
+                ...state,
+                current: null
+            }
         case ADD_NOTEBOOK:
             return {
                 ...state,
@@ -65,8 +79,7 @@ export default (state, action) => {
                 filtered: state.notebooks.filter(notebook => {
                     const regex = new RegExp(`${action.payload}`, 'gi');
                     return (notebook.title.match(regex) || notebook.desc.match(regex));
-                }),
-                loading: false
+                })
             }
         case SORT_NOTEBOOK:
             return {
@@ -74,8 +87,7 @@ export default (state, action) => {
                 orderBy: action.payload.orderBy,
                 sortBy: action.payload.sortBy,
                 filtered: state.filtered === null ? state.filtered : state.filtered.sort(sortNotebook),
-                notebooks: state.notebooks === null ? state.notebooks : state.notebooks.sort(sortNotebook),
-                loading: false
+                notebooks: state.notebooks === null ? state.notebooks : state.notebooks.sort(sortNotebook)
             }
         case ENABLE_ADDNOTEBOOK:
             return {

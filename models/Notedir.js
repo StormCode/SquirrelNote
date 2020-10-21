@@ -1,27 +1,24 @@
 const mongoose = require('mongoose');
 
-const NotebookSchema = mongoose.Schema({
-    author: {
+const NotedirSchema = mongoose.Schema({
+    notebook: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'users'
+        ref: 'notebook'
     },
     title: {
         type: String,
         required: true
     },
-    desc: {
-        type: String
-    },
     date: {
         type: Date,
         default: Date.now
     },
-    notedirs: [{
+    notes: [{
         _id: mongoose.Schema.Types.ObjectId,
         title: String,
-        date: Date,
-        default: Boolean
+        summary: String,
+        date: Date
     }]
 });
 
-module.exports = mongoose.model('notebook', NotebookSchema);
+module.exports = mongoose.model('notedir', NotedirSchema);
