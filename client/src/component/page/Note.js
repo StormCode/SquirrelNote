@@ -1,9 +1,9 @@
 import React, { useContext, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Notedirs from '../../notedirs/NoteDirs';
-import Notes from '../../notes/Notes';
-import NoteEditor from '../../notes/NoteEditor';
-import NotedirSorter from '../../notedirs/NotedirSorter';
+import Notedirs from '../notedirs/NoteDirs';
+import Notes from '../notes/Notes';
+import NoteEditor from '../notes/NoteEditor';
+import NotedirSorter from '../notedirs/NotedirSorter';
 
 import NotedirContext from '../../context/notedirs/notedirContext';
 import NoteContext from '../../context/notes/noteContext';
@@ -17,43 +17,62 @@ const Note = ({ match }) => {
 
     const { notes, 
         current, 
+        cacheNotes, 
+        appendCacheNote, 
         modifyCacheNote, 
         removeCacheNote, 
+        discardCacheNote,
         setCurrentNote, 
         editorEnable, 
         enableEditor, 
+        disableEditor, 
         saveEnable, 
         enableSave,
         disableSave,
+        deleteEnable,
+        enableDelete,
+        disableDelete,
         addNote,
         updateNote,
+        deleteNote, 
         error,
         loading } = noteContext;
 
     useEffect(() => {
-        current && 
-            (current.title !== '' || current.content !== '') ? enableSave() : disableSave()
-    },[current]);
+        //控制儲存、刪除、編輯器狀態
+        if(current) {
+            ((cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) 
+                && (current.title !== '' || current.content !== '') ? enableSave() : disableSave());
+            notes.map(note => note._id).indexOf(current._id) !== -1 ? enableDelete() : disableDelete();
+        } else {
+            disableEditor();
+            disableSave();
+            disableDelete();
+        }
+    },[current, cacheNotes, notes]);
 
     const titleChange = e => {
         e.preventDefault();
         let note = {
             _id: current._id,
-            title: e.target.value
+            title: e.target.value,
+            content: current.content
         };
-
-        setCurrentNote({ ...note, content: current.content});
-        modifyCacheNote({ ...note, content: current.content});
+        setCurrentNote(note);
+        cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1 ?
+            modifyCacheNote(note) : appendCacheNote(note);
     }
 
     const contentChange = content => {
         let note = {
             _id: current._id,
-            title: current.title
+            title: current.title,
+            content
         };
 
-        setCurrentNote({ ...note, content});
-        modifyCacheNote({ ...note, content});
+        setCurrentNote(note);
+        cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1 ?
+            modifyCacheNote(note) : appendCacheNote(note);
     }
 
     const onEdit = e => {
@@ -61,8 +80,14 @@ const Note = ({ match }) => {
         current && enableEditor();
     }
 
-    const onDelete = e => {
+    const onDelete = async e => {
         e.preventDefault();
+        current && await deleteNote(notedirContext.current._id, current._id);
+    }
+
+    const onDiscard = e => {
+        e.preventDefault();
+        current && discardCacheNote(current._id);
     }
 
     const onSave = async e => {
@@ -95,11 +120,12 @@ const Note = ({ match }) => {
             <Notedirs notebookId={match.params.id} />
             <Notes notedirId={notedirContext.current ? notedirContext.current._id : null} />
             <div className='note-header'>
-                <button className='note-delete-btn right-align' onClick={onDelete} disabled={!editorEnable}>刪除</button>
+                {deleteEnable ? (<button className='note-delete-btn right-align' onClick={onDelete}>刪除</button>)
+                : (<button className='note-discard-btn right-align' onClick={onDiscard} disabled={!current}>捨棄</button>)}
                 <button className='note-edit-btn right-align' onClick={onEdit} disabled={!editorEnable}>編輯</button>
                 <div className='note-title-container'>
                     <input type='text' placeholder='新筆記' className='note-title' value={current ? current.title : ''} onChange={titleChange} disabled={!editorEnable}/>
-                    <button className='note-save-btn' onClick={onSave} disabled={!(editorEnable && saveEnable)}>儲存</button>
+                    <button className='note-save-btn' onClick={onSave} disabled={!saveEnable}>儲存</button>
                 </div>
             </div>
             <NoteEditor 

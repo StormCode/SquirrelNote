@@ -1,15 +1,14 @@
 import React, { useContext, useEffect } from 'react'
-import Spinner from '../component/layout/Spinner'
+import Spinner from '../layout/Spinner'
 import Note from './Note';
 
-import NoteContext from '../context/notes/noteContext';
+import NoteContext from '../../context/notes/noteContext';
 
 const Notes = ({ notedirId }) => {
     const noteContext = useContext(NoteContext);
 
     const { notes, 
         cacheNotes, 
-        current, 
         getNotes, 
         getNoteDetail, 
         loading, 
@@ -54,16 +53,19 @@ const Notes = ({ notedirId }) => {
     }
 
     const setNoteContent = async note => {
-        let currentNote = cacheNotes.map(cacheNote => cacheNote._id).indexOf(note._id) == -1 ?
-            await getNoteDetail(note._id) 
-            : cacheNotes.find(cacheNote => {
+        if(cacheNotes.map(cacheNote => cacheNote._id).indexOf(note._id) == -1) {
+            await getNoteDetail(note._id);
+        } else {
+            let currentNote = cacheNotes.find(cacheNote => {
                 return cacheNote._id == note._id
             });
-        setCurrentNote({
-            _id: note._id,
-            title: note.title,
-            content: currentNote.content
-        });
+            setCurrentNote({
+                _id: note._id,
+                title: note.title,
+                content: currentNote.content
+            });
+        }
+
         enableEditor();
     };
 
@@ -78,15 +80,15 @@ const Notes = ({ notedirId }) => {
             <div id='add-note' onClick={onAddNote} style={enableAddNoteStyle}>
                 新增筆記
             </div>
-            { notes && !loading ?
+            {notes && !loading ?
                 (notes.length == 0 && cacheNotes.length == 0) ? <p>還沒有東西~趕緊去新增筆記~</p>
                             : (<ul>
-                                {cacheNotes.map(note => {
-                                    return <Note key={note._id} 
+                                {cacheNotes.map(cacheNote => {
+                                    return <Note key={cacheNote._id} 
                                         note= {{
-                                            _id: note._id,
-                                            title: note.title,
-                                            summary: note.content.substring(0,10)
+                                            _id: cacheNote._id,
+                                            title: cacheNote.title,
+                                            summary: cacheNote.content.substring(0,10)
                                         }} 
                                         setCurrentNote={setCacheNoteContent} />
                                 })}

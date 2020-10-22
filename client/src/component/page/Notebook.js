@@ -1,8 +1,8 @@
 import React, { useContext, useEffect } from 'react';
 import { Button } from 'reactstrap';
-import Notebooks from '../../notebooks/Notebooks';
-import NotebookFilter from '../../notebooks/NotebookFilter';
-import NotebookSorter from '../../notebooks/NotebookSorter';
+import Notebooks from '../notebooks/Notebooks';
+import NotebookFilter from '../notebooks/NotebookFilter';
+import NotebookSorter from '../notebooks/NotebookSorter';
 import AuthContext from '../../context/auth/authContext';
 import NotebookContext from '../../context/notebooks/notebookContext';
 

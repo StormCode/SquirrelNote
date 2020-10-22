@@ -4,18 +4,18 @@ import {
     Card, CardImg, CardText, CardBody,
     CardTitle, CardSubtitle, Button, UncontrolledTooltip 
   } from 'reactstrap';
-import ToolPanel from '../component/layout/ToolPanel';
+import ToolPanel from '../../component/layout/ToolPanel';
 
 // Import Style
-import '../style/components/Notebook.css';
+import '../../style/components/Notebook.css';
 
 // Import Resource
-import editImgSrc from '../assets/general/edit_32x32.png';
-import deleteImgSrc from '../assets/general/delete_32x32.png';
-import confirmImgSrc from '../assets/general/confirm_32x32.png';
-import cancelImgSrc from '../assets/general/close_32x32.png';
+import editImgSrc from '../../assets/general/edit_32x32.png';
+import deleteImgSrc from '../../assets/general/delete_32x32.png';
+import confirmImgSrc from '../../assets/general/confirm_32x32.png';
+import cancelImgSrc from '../../assets/general/close_32x32.png';
 
-import NotebookContext from '../context/notebooks/notebookContext';
+import NotebookContext from '../../context/notebooks/notebookContext';
 
 const Notebook = props => {
     const notebookContext = useContext(NotebookContext);

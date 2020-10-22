@@ -16,7 +16,7 @@ const auth = require('../middleware/auth');
 // access           Private
 router.get('/', auth, async(req, res) => {
     try {
-        //從header取得notebook
+        //從header取得notedir
         const notedirId = req.header('x-notedir');
 
         if(!notedirId) return res.status(400).json({msg: '缺少參數', status: MISSING_PARAM});
@@ -115,9 +115,7 @@ router.post('/', auth, async(req, res) => {
 
         await notedir.save();
 
-        await notebook.save();
-
-        res.json(newNotedirNote);
+        res.json(note);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -167,10 +165,10 @@ router.put('/:id', auth, async(req, res) => {
         await Notedir.findOneAndUpdate({_id: req.body.notedir, 'notes._id': id},
             { $set: {'notes.$.title': title, 'notes.$.summary': summary}}
         );
-
-        const updateNotedirNote = notedir.notes.find(notedirNote => {
-            return notedirNote._id.toString() === note._id.toString();
-        });
+        
+        //取得新的筆記目錄
+        notedir = await Notedir.findById(req.body.notedir);
+        const updateNotedirNote = notedir.notes.find(note => note._id == id);
         
         res.json(updateNotedirNote);
     } catch (err) {
@@ -186,12 +184,15 @@ router.delete('/:id', auth, async(req, res) => {
     try {
         const id = req.params.id;
 
+        //從header取得notebook
+        const notedirId = req.header('x-notedir');
+
         let note = await Note.findById(id);
 
         if(!note) return res.status(404).json({msg: '找不到此筆記', status: NOT_FOUND});
 
         // 取得此筆記的筆記目錄
-        let notedir = await Notedir.findById(req.body.notedir);
+        let notedir = await Notedir.findById(notedirId);
 
         if(!notedir) return res.status(404).json({msg: '找不到此筆記的存放目錄', status: NOT_FOUND});
 

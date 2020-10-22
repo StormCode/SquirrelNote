@@ -1,11 +1,11 @@
 import React, { Fragment, useContext, useState, useEffect } from 'react';
-import Spinner from '../component/layout/Spinner';
+import Spinner from '../../component/layout/Spinner';
 import Notebook from './Notebook';
 import NewNotebook from './NewNotebook';
 
-import NotebookContext from '../context/notebooks/notebookContext';
+import NotebookContext from '../../context/notebooks/notebookContext';
 
-import '../style/components/Notebooks.css';
+import '../../style/components/Notebooks.css';
 
 const Notebooks = () => {
     const notebookContext = useContext(NotebookContext);

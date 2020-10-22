@@ -1,6 +1,6 @@
 import React, { useContext, useRef, useEffect } from 'react';
 
-import NotebookContext from '../context/notebooks/notebookContext';
+import NotebookContext from '../../context/notebooks/notebookContext';
 
 const NotebookFilter = () => {
     const notebookContext = useContext(NotebookContext);

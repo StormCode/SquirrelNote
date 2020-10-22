@@ -6,6 +6,7 @@ import {
     GET_NOTES,
     GET_NOTE_DETAIL,
     SET_CURRENT_NOTE,
+    CLEAR_CURRENT_NOTE,
     ADD_NOTE,
     UPDATE_NOTE,
     DELETE_NOTE,
@@ -18,6 +19,8 @@ import {
     DISABLE_EDITOR,
     ENABLE_SAVE,
     DISABLE_SAVE,
+    ENABLE_DELETE,
+    DISABLE_DELETE,
     NOTE_ERROR
 } from '../types.js';
 
@@ -28,6 +31,7 @@ const NoteState = props => {
         cacheNotes: [],
         editorEnable: false,
         saveEnable: false,
+        deleteEnable: false,
         filtered: null,
         orderBy: 'asc',
         sortBy: 'title',
@@ -103,6 +107,10 @@ const NoteState = props => {
                 type: ADD_NOTE,
                 payload: res.data
             });
+            dispatch({
+                type: SET_CURRENT_NOTE,
+                payload: res.data
+            });
         } catch (err) {
             dispatch({
                 type: NOTE_ERROR,
@@ -125,14 +133,36 @@ const NoteState = props => {
                 type: UPDATE_NOTE,
                 payload: res.data
             });
+            dispatch({
+                type: SET_CURRENT_NOTE,
+                payload: res.data
+            });
         } catch (err) {
             dispatch({ type: NOTE_ERROR});
         }
     }
 
     //刪除筆記
-    const deleteNote = () => {
+    const deleteNote = async (notedirId, noteId) => {
+        const config = {
+            headers: {
+                'x-notedir': notedirId
+            }
+        };
 
+        try {
+            await axios.delete(`/api/notes/${noteId}`,config);
+            dispatch({
+                type: DELETE_NOTE,
+                payload: noteId
+            });
+            dispatch({
+                type: SET_CURRENT_NOTE,
+                payload: null
+            });
+        } catch (err) {
+            dispatch({ type: NOTE_ERROR});
+        }
     }
 
     //篩選筆記
@@ -175,9 +205,22 @@ const NoteState = props => {
             dispatch({
                 type: REMOVE_CACHE_NOTE,
                 payload: id
-            })
+            });
         } catch (err) {
             dispatch({type: NOTE_ERROR})
+        }
+    }
+
+    //捨棄暫存筆記
+    const discardCacheNote = id => {
+        try {
+            dispatch({
+                type: REMOVE_CACHE_NOTE,
+                payload: id
+            });
+            dispatch({ type: CLEAR_CURRENT_NOTE });
+        } catch (err) {
+            dispatch({ type: NOTE_ERROR});
         }
     }
 
@@ -217,6 +260,24 @@ const NoteState = props => {
         }
     }
 
+    //啟用刪除功能
+    const enableDelete = () => {
+        try {
+            dispatch({ type: ENABLE_DELETE });
+        } catch (err) {
+            dispatch({type: NOTE_ERROR});
+        }
+    }
+
+    //停用刪除功能
+    const disableDelete = () => {
+        try {
+            dispatch({ type: DISABLE_DELETE });
+        } catch (err) {
+            dispatch({type: NOTE_ERROR});
+        }
+    }
+
     return (
         <NoteContext.Provider
         value={{
@@ -225,6 +286,7 @@ const NoteState = props => {
             cacheNotes: state.cacheNotes,
             editorEnable: state.editorEnable,
             saveEnable: state.saveEnable,
+            deleteEnable: state.deleteEnable,
             filtered: state.filtered,
             orderBy: state.orderBy,
             sortBy: state.sortBy,
@@ -242,8 +304,11 @@ const NoteState = props => {
             appendCacheNote,
             modifyCacheNote,
             removeCacheNote,
+            discardCacheNote,
             enableSave,
-            disableSave
+            disableSave,
+            enableDelete,
+            disableDelete
         }}>
             {props.children}
         </NoteContext.Provider>

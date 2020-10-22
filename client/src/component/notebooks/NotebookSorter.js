@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
-import Sorter from '../component/layout/Sorter';
+import Sorter from '../layout/Sorter';
 
-import NotebookContext from '../context/notebooks/notebookContext'
+import NotebookContext from '../../context/notebooks/notebookContext'
 
 const NotebookSorter = () => {
     const notebookContext = useContext(NotebookContext);

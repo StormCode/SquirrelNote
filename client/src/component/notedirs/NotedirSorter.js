@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
-import Sorter from '../component/layout/Sorter';
+import Sorter from '../layout/Sorter';
 
-import NotedirContext from '../context/notedirs/notedirContext'
+import NotedirContext from '../../context/notedirs/notedirContext'
 
 const NotedirSorter = () => {
     const notedirContext = useContext(NotedirContext);

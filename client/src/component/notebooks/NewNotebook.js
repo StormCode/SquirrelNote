@@ -5,13 +5,13 @@ import {
   } from 'reactstrap';
 
 // Import Style
-import '../style/components/Notebook.css';
+import '../../style/components/Notebook.css';
 
 // Import Resource
-import confirmImg from '../assets/general/confirm_32x32.png';
-import cancelImg from '../assets/general/close_32x32.png';
+import confirmImg from '../../assets/general/confirm_32x32.png';
+import cancelImg from '../../assets/general/close_32x32.png';
 
-import NotebookContext from '../context/notebooks/notebookContext';
+import NotebookContext from '../../context/notebooks/notebookContext';
 
 const NewNotebook = () => {
     const notebookContext = useContext(NotebookContext);

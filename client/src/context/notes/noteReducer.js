@@ -2,6 +2,7 @@ import {
     GET_NOTES,
     GET_NOTE_DETAIL,
     SET_CURRENT_NOTE,
+    CLEAR_CURRENT_NOTE,
     ADD_NOTE,
     UPDATE_NOTE,
     DELETE_NOTE,
@@ -14,6 +15,8 @@ import {
     DISABLE_EDITOR,
     ENABLE_SAVE,
     DISABLE_SAVE,
+    ENABLE_DELETE,
+    DISABLE_DELETE,
     NOTE_ERROR
 } from '../types.js';
 
@@ -31,6 +34,11 @@ export default (state, action) => {
                 ...state,
                 current: action.payload
             }
+        case CLEAR_CURRENT_NOTE:
+            return {
+                ...state,
+                current: null
+            }
         case ADD_NOTE:
             return {
                 ...state,
@@ -42,6 +50,12 @@ export default (state, action) => {
                 notes: state.notes.map(note => 
                     note._id === action.payload._id ? action.payload : note
                 )
+            }
+        case DELETE_NOTE:
+            return {
+                ...state,
+                notes: state.notes.filter(note => 
+                    note._id !== action.payload)
             }
         case ENABLE_EDITOR:
             return {
@@ -81,6 +95,16 @@ export default (state, action) => {
             return {
                 ...state,
                 saveEnable: false
+            }
+        case ENABLE_DELETE:
+            return {
+                ...state,
+                deleteEnable: true
+            }
+        case DISABLE_DELETE:
+            return {
+                ...state,
+                deleteEnable: false
             }
         case NOTE_ERROR:
             return {

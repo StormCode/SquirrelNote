@@ -1,14 +1,14 @@
-import React, { Fragment, useState, useContext, useEffect } from 'react'
-import ToolPanel from '../component/layout/ToolPanel';
+import React, { useState, useContext, useEffect } from 'react'
+import ToolPanel from '../../component/layout/ToolPanel';
 
-import NotebookContext from '../context/notebooks/notebookContext';
-import NotedirContext from '../context/notedirs/notedirContext';
+import NotebookContext from '../../context/notebooks/notebookContext';
+import NotedirContext from '../../context/notedirs/notedirContext';
 
 // Import Resource
-import editImgSrc from '../assets/general/edit_32x32.png';
-import deleteImgSrc from '../assets/general/delete_32x32.png';
-import confirmImgSrc from '../assets/general/confirm_32x32.png';
-import cancelImgSrc from '../assets/general/close_32x32.png';
+import editImgSrc from '../../assets/general/edit_32x32.png';
+import deleteImgSrc from '../../assets/general/delete_32x32.png';
+import confirmImgSrc from '../../assets/general/confirm_32x32.png';
+import cancelImgSrc from '../../assets/general/close_32x32.png';
 
 const Notedir = (props) => {
     const [notedir, setNotedir] = useState({
