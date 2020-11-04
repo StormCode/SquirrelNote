@@ -10,27 +10,30 @@ import {
     ADD_NOTE,
     UPDATE_NOTE,
     DELETE_NOTE,
-    FILTER_NOTE,
-    SORT_NOTE,
     APPEND_CACHE_NOTE,
     MODIFY_CACHE_NOTE,
     REMOVE_CACHE_NOTE,
     ENABLE_EDITOR,
     DISABLE_EDITOR,
-    ENABLE_SAVE,
-    DISABLE_SAVE,
+    SET_SAVE,
     ENABLE_DELETE,
     DISABLE_DELETE,
     NOTE_ERROR
 } from '../types.js';
+import {
+    UNSAVE,
+    SAVING,
+    SAVED,
+    DISABLESAVE
+} from '../../saveState';
 
 const NoteState = props => {
     const initialState = {
         notes: null,
         current: null,
+        save: DISABLESAVE,
         cacheNotes: [],
         editorEnable: false,
-        saveEnable: false,
         deleteEnable: false,
         filtered: null,
         orderBy: 'asc',
@@ -165,16 +168,6 @@ const NoteState = props => {
         }
     }
 
-    //篩選筆記
-    const filterNote = () => {
-
-    }
-
-    //排序筆記
-    const sortNote = () => {
-
-    }
-
     //新增暫存的筆記
     const appendCacheNote = note => {
         try {
@@ -242,19 +235,13 @@ const NoteState = props => {
         }
     };
 
-    //啟用儲存功能
-    const enableSave = () => {
+    //設定儲存狀態
+    const setSave = saveState => {
         try {
-            dispatch({ type: ENABLE_SAVE });
-        } catch (err) {
-            dispatch({type: NOTE_ERROR});
-        }
-    }
-
-    //停用儲存功能
-    const disableSave = () => {
-        try {
-            dispatch({ type: DISABLE_SAVE });
+            dispatch({ 
+                type: SET_SAVE,
+                payload: saveState
+            });
         } catch (err) {
             dispatch({type: NOTE_ERROR});
         }
@@ -299,14 +286,11 @@ const NoteState = props => {
             addNote,
             updateNote,
             deleteNote,
-            filterNote,
-            sortNote,
             appendCacheNote,
             modifyCacheNote,
             removeCacheNote,
             discardCacheNote,
-            enableSave,
-            disableSave,
+            setSave,
             enableDelete,
             disableDelete
         }}>

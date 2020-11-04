@@ -12,7 +12,6 @@ const Notes = ({ notedirId }) => {
         getNotes, 
         getNoteDetail, 
         loading, 
-        enableEditor, 
         appendCacheNote,
         modifyCacheNote, 
         setCurrentNote } = noteContext;
@@ -36,7 +35,6 @@ const Notes = ({ notedirId }) => {
         };
         setCurrentNote(newNote);
         appendCacheNote(newNote);
-        enableEditor();
     };
 
     const setCacheNoteContent = note => {
@@ -48,8 +46,7 @@ const Notes = ({ notedirId }) => {
             }).content
         };
         setCurrentNote(currentNote);
-        modifyCacheNote(currentNote)
-        enableEditor();
+        modifyCacheNote(currentNote);
     }
 
     const setNoteContent = async note => {
@@ -65,8 +62,6 @@ const Notes = ({ notedirId }) => {
                 content: currentNote.content
             });
         }
-
-        enableEditor();
     };
 
     const enableAddNoteStyle = {

@@ -6,19 +6,23 @@ import {
     ADD_NOTE,
     UPDATE_NOTE,
     DELETE_NOTE,
-    FILTER_NOTE,
-    SORT_NOTE,
     APPEND_CACHE_NOTE,
     MODIFY_CACHE_NOTE,
     REMOVE_CACHE_NOTE,
     ENABLE_EDITOR,
     DISABLE_EDITOR,
-    ENABLE_SAVE,
-    DISABLE_SAVE,
+    SET_SAVE,
     ENABLE_DELETE,
     DISABLE_DELETE,
     NOTE_ERROR
 } from '../types.js';
+import {
+    UNSAVE,
+    SAVING,
+    SAVED,
+    DISABLESAVE
+} from '../../saveState';
+
 
 export default (state, action) => {
     switch(action.type){
@@ -32,6 +36,11 @@ export default (state, action) => {
         case SET_CURRENT_NOTE:
             return {
                 ...state,
+                save: state.cacheNotes ? 
+                    state.cacheNotes.find(cacheNote => cacheNote._id === action.payload._id) !== null ? 
+                        UNSAVE : SAVED
+                    : DISABLESAVE,
+                editorEnable: true,
                 current: action.payload
             }
         case CLEAR_CURRENT_NOTE:
@@ -42,11 +51,13 @@ export default (state, action) => {
         case ADD_NOTE:
             return {
                 ...state,
+                save: SAVED,
                 notes: [...state.notes, action.payload]
             }
         case UPDATE_NOTE:
             return {
                 ...state,
+                save: SAVED,
                 notes: state.notes.map(note => 
                     note._id === action.payload._id ? action.payload : note
                 )
@@ -86,15 +97,10 @@ export default (state, action) => {
                     return cacheNote._id !== action.payload;
                 })
             }
-        case ENABLE_SAVE:
+        case SET_SAVE:
             return {
                 ...state,
-                saveEnable: true
-            }
-        case DISABLE_SAVE:
-            return {
-                ...state,
-                saveEnable: false
+                save: action.payload
             }
         case ENABLE_DELETE:
             return {
