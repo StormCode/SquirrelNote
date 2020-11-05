@@ -1,4 +1,5 @@
 const express = require('express');
+const DomParser = require('dom-parser');
 const router = express.Router();
 const {
     NOT_AUTHORIZED,
@@ -106,7 +107,7 @@ router.post('/', auth, async(req, res) => {
         const newNotedirNote = {
             _id: note._id,
             title,
-            summary: content.substring(0,10),
+            summary: getSummary(content),
             date: note.date
         };
 
@@ -161,7 +162,7 @@ router.put('/:id', auth, async(req, res) => {
             { new: true });
 
         // 連帶修改筆記目錄的筆記資訊
-        let summary = content.substring(0, 10);
+        let summary = getSummary(content);
         await Notedir.findOneAndUpdate({_id: req.body.notedir, 'notes._id': id},
             { $set: {'notes.$.title': title, 'notes.$.summary': summary}}
         );
@@ -223,5 +224,18 @@ router.delete('/:id', auth, async(req, res) => {
         res.status(500).send('Server Error');
     }
 });
+
+function getSummary(data){
+    let dom = new DomParser().parseFromString( data, 'text/html' );
+    let elements = dom.getElementsByTagName( 'p' )
+        || dom.getElementsByTagName( 'h1' )
+        || dom.getElementsByTagName( 'h2' )
+        || dom.getElementsByTagName( 'h3' )
+        || dom.getElementsByTagName( 'blockquote' )
+        || dom.getElementsByTagName( 'q' )
+        || dom.getElementsByTagName( 'cite' )
+        || dom.getElementsByTagName( 'code' );
+    return elements[0] ? elements[0].textContent : '';
+}
 
 module.exports = router;

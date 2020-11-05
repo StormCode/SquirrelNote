@@ -4,17 +4,13 @@ import Note from './Note';
 
 import NoteContext from '../../context/notes/noteContext';
 
-const Notes = ({ notedirId }) => {
+const Notes = ({ notedirId, addEvent, setCacheNoteContent, setNoteContent }) => {
     const noteContext = useContext(NoteContext);
 
     const { notes, 
         cacheNotes, 
         getNotes, 
-        getNoteDetail, 
-        loading, 
-        appendCacheNote,
-        modifyCacheNote, 
-        setCurrentNote } = noteContext;
+        loading } = noteContext;
 
     useEffect(() => {
         notedirId && getNotes(notedirId);
@@ -22,57 +18,21 @@ const Notes = ({ notedirId }) => {
         // eslint-disable-next-line
     }, [notedirId]);
 
-    const getId = () => {
-        return cacheNotes.length == 0 ? 1 : Math.max(...cacheNotes.map(cacheNote => cacheNote._id)) + 1;
-    }
-
-    const onAddNote = e => {
-        e.preventDefault();
-        let newNote = {
-            _id: getId(),
-            title: '',
-            content: ''
-        };
-        setCurrentNote(newNote);
-        appendCacheNote(newNote);
-    };
-
-    const setCacheNoteContent = note => {
-        let currentNote = {
-            _id: note._id,
-            title: note.title,
-            content: cacheNotes.find(cacheNote => {
-                return cacheNote._id == note._id
-            }).content
-        };
-        setCurrentNote(currentNote);
-        modifyCacheNote(currentNote);
-    }
-
-    const setNoteContent = async note => {
-        if(cacheNotes.map(cacheNote => cacheNote._id).indexOf(note._id) == -1) {
-            await getNoteDetail(note._id);
-        } else {
-            let currentNote = cacheNotes.find(cacheNote => {
-                return cacheNote._id == note._id
-            });
-            setCurrentNote({
-                _id: note._id,
-                title: note.title,
-                content: currentNote.content
-            });
-        }
-    };
-
     const enableAddNoteStyle = {
         cursor: 'pointer',
         paddingLeft: '10px',
         fontSize: '1.2rem'
     };
 
+    const getSummary = data => {
+        let element = Array.from( new DOMParser().parseFromString( data, 'text/html' )
+                .querySelectorAll( 'p, h1, h2, h3, blockquote, q, cite, code' ) )[0];
+        return element ? element.textContent.substring(0,10) : '';
+    }
+
     return (
         <div className='note-list'>
-            <div id='add-note' onClick={onAddNote} style={enableAddNoteStyle}>
+            <div id='add-note' onClick={addEvent} style={enableAddNoteStyle}>
                 新增筆記
             </div>
             {notes && !loading ?
@@ -83,7 +43,7 @@ const Notes = ({ notedirId }) => {
                                         note= {{
                                             _id: cacheNote._id,
                                             title: cacheNote.title,
-                                            summary: cacheNote.content.substring(0,10)
+                                            summary: getSummary(cacheNote.content)
                                         }} 
                                         setCurrentNote={setCacheNoteContent} />
                                 })}

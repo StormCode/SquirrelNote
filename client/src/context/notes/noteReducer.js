@@ -36,10 +36,6 @@ export default (state, action) => {
         case SET_CURRENT_NOTE:
             return {
                 ...state,
-                save: state.cacheNotes ? 
-                    state.cacheNotes.find(cacheNote => cacheNote._id === action.payload._id) !== null ? 
-                        UNSAVE : SAVED
-                    : DISABLESAVE,
                 editorEnable: true,
                 current: action.payload
             }
@@ -51,13 +47,12 @@ export default (state, action) => {
         case ADD_NOTE:
             return {
                 ...state,
-                save: SAVED,
+                current: action.payload,
                 notes: [...state.notes, action.payload]
             }
         case UPDATE_NOTE:
             return {
                 ...state,
-                save: SAVED,
                 notes: state.notes.map(note => 
                     note._id === action.payload._id ? action.payload : note
                 )
@@ -65,6 +60,7 @@ export default (state, action) => {
         case DELETE_NOTE:
             return {
                 ...state,
+                current: null,
                 notes: state.notes.filter(note => 
                     note._id !== action.payload)
             }

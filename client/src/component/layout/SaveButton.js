@@ -14,9 +14,9 @@ import {
 // 儲存狀態(string)
 // 儲存事件(function)
 //
-const SaveButton = (state, onSave) => {
-    const btnText = '儲存';
-    const btnEnable = false;
+const SaveButton = ({state, onSave}) => {
+    let btnText;
+    let btnEnable;
     switch(state) {
         case UNSAVE:
             btnEnable = true;
@@ -34,10 +34,13 @@ const SaveButton = (state, onSave) => {
             btnEnable = false;
             btnText = '儲存';
             break;
+        default:
+            btnText = '儲存';
+            btnEnable = false;
     }
 
     return (
-        <button className='note-save-btn' onClick={() => onSave} disabled={!btnEnable}>{btnText}</button>
+        <button className='note-save-btn' onClick={() => {onSave();}} disabled={!btnEnable}>{btnText}</button>
     )
 }
 

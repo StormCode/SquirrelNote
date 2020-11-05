@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 /********* CKEditor *********/
 import { CKEditor } from '@ckeditor/ckeditor5-react';
@@ -16,12 +16,7 @@ import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
 
 import UploadAdapter from '../../utils/uploadAdapter';
 
-const NoteEditor = ({enable, content, loading, contentChange, autoSave, autoSaveInterval, saveEvent}) => {
-
-    let autoSaveIntervalToken;
-    
-    // const [editorData, setEditorData] = useState(content);
-    // const [editorData, setEditorData] = useState('<p>Squirrel Note</p>');
+const NoteEditor = ({enable, content, loading, contentChange}) => {
     
     // 自訂Upload Adapter
     function UploadAdapterPlugin( editor ) {
@@ -35,29 +30,6 @@ const NoteEditor = ({enable, content, loading, contentChange, autoSave, autoSave
         toolbar: [ 'bold', 'italic', 'imageUpload' ],
         extraPlugins: [ UploadAdapterPlugin ]
     };
-      
-    function AutoSave(saveCB, interval, enable) {
-        if(enable){
-            console.log('autosave launch');
-            
-            autoSaveIntervalToken = setInterval(saveCB, interval);
-        }
-        else{
-            console.log('auto closed');
-            
-            clearInterval(autoSaveIntervalToken);
-        }
-    }
-
-    useEffect(() => {
-
-        // clear autosave interval token
-        autoSaveIntervalToken && clearInterval(autoSaveIntervalToken);
-    
-        // 當自動儲存開啟/關閉改變時執行(清除setinterval或設定setinterval)
-        AutoSave(saveEvent, autoSaveInterval, autoSave);
-    
-    }, [autoSave, saveEvent]);
 
     return (
         <div className='editor'>

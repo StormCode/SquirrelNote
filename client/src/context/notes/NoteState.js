@@ -63,7 +63,7 @@ const NoteState = props => {
         } catch (err) {
             dispatch({
                 type: NOTE_ERROR,
-                payload: err.msg
+                payload: err.msg || 'Server Error'
             })
         }
     }
@@ -80,6 +80,14 @@ const NoteState = props => {
         }
     }
 
+    const clearCurrentNote = () => {
+        try {
+            dispatch({ type: CLEAR_CURRENT_NOTE })
+        } catch (err) {
+            dispatch({type: NOTE_ERROR})
+        }
+    }
+
     //查詢筆記內容
     const getNoteDetail = async id => {
         try {
@@ -91,7 +99,7 @@ const NoteState = props => {
         } catch (err) {
             dispatch({
                 type: NOTE_ERROR,
-                payload: err.msg
+                payload: err.msg || 'Server Error'
             })
         }
     }
@@ -110,14 +118,10 @@ const NoteState = props => {
                 type: ADD_NOTE,
                 payload: res.data
             });
-            dispatch({
-                type: SET_CURRENT_NOTE,
-                payload: res.data
-            });
         } catch (err) {
             dispatch({
                 type: NOTE_ERROR,
-                payload: err.msg
+                payload: err.msg || 'Server Error'
             });
         }
     }
@@ -134,10 +138,6 @@ const NoteState = props => {
             const res = await axios.put(`/api/notes/${id}`, note, config);
             dispatch({
                 type: UPDATE_NOTE,
-                payload: res.data
-            });
-            dispatch({
-                type: SET_CURRENT_NOTE,
                 payload: res.data
             });
         } catch (err) {
@@ -158,10 +158,6 @@ const NoteState = props => {
             dispatch({
                 type: DELETE_NOTE,
                 payload: noteId
-            });
-            dispatch({
-                type: SET_CURRENT_NOTE,
-                payload: null
             });
         } catch (err) {
             dispatch({ type: NOTE_ERROR});
@@ -272,8 +268,8 @@ const NoteState = props => {
             current: state.current,
             cacheNotes: state.cacheNotes,
             editorEnable: state.editorEnable,
-            saveEnable: state.saveEnable,
             deleteEnable: state.deleteEnable,
+            save: state.save,
             filtered: state.filtered,
             orderBy: state.orderBy,
             sortBy: state.sortBy,
@@ -281,6 +277,7 @@ const NoteState = props => {
             getNotes,
             getNoteDetail,
             setCurrentNote,
+            clearCurrentNote,
             enableEditor,
             disableEditor,
             addNote,

@@ -8,7 +8,7 @@
         "notedir-list note-list editor"
         "recycle-bin note-list editor";
     width: 100%;
-    height: 100%;
+    height: 100vh;
 }
 
     .note-container .header {
@@ -23,6 +23,8 @@
     .note-container .note-list {
         grid-area: note-list;
         background-color: #ccc;
+        height: 100%;
+        overflow-y: auto;
     }
 
     .note-container .notedir-list {

@@ -32,6 +32,7 @@ const Note = ({ match }) => {
         removeCacheNote, 
         discardCacheNote,
         setCurrentNote, 
+        getNoteDetail,
         editorEnable, 
         enableEditor, 
         disableEditor, 
@@ -42,28 +43,37 @@ const Note = ({ match }) => {
         disableDelete,
         addNote,
         updateNote,
-        deleteNote, 
+        deleteNote,
         error,
         loading } = noteContext;
 
-    const [autoSave, setAutoSave] = useState(true);
     const autoSaveInterval = 10000;
+    const [autoSave, setAutoSave] = useState(true);
+    const [autoSaveIntervalToken, setAutoSaveIntervalToken] = useState({});
+
     const host = `${window.location.protocol}//${window.location.host}`;
+    
+    const getId = () => {
+        return cacheNotes.length == 0 ? 1 : Math.max(...cacheNotes.map(cacheNote => cacheNote._id)) + 1;
+    }
 
     useEffect(() => {
-        //控制儲存、刪除狀態
+        //控制儲存、編輯器狀態
         if(current) {
             ((cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) 
                 ? (current.title !== '' || current.content !== '') 
                     ? setSave(UNSAVE) : setSave(DISABLESAVE)
                 : setSave(SAVED));
-            notes.map(note => note._id).indexOf(current._id) !== -1 ? enableDelete() : disableDelete();
         } else {
             disableEditor();
             setSave(DISABLESAVE);
-            disableDelete();
         }
-    },[current, cacheNotes, notes]);
+    },[current, cacheNotes]);
+
+    useEffect(() => {
+        //控制刪除狀態
+        current && notes.map(note => note._id).indexOf(current._id) !== -1 ? enableDelete() : disableDelete();
+    },[current, notes]);
 
     const titleChange = e => {
         e.preventDefault();
@@ -89,6 +99,44 @@ const Note = ({ match }) => {
             modifyCacheNote(note) : appendCacheNote(note);
     }
 
+    const setCacheNoteContent = note => {
+        let currentNote = {
+            _id: note._id,
+            title: note.title,
+            content: cacheNotes.find(cacheNote => {
+                return cacheNote._id == note._id
+            }).content
+        };
+        setCurrentNote(currentNote);
+        modifyCacheNote(currentNote);
+    }
+
+    const setNoteContent = async note => {
+        if(cacheNotes.map(cacheNote => cacheNote._id).indexOf(note._id) == -1) {
+            await getNoteDetail(note._id);
+        } else {
+            let currentNote = cacheNotes.find(cacheNote => {
+                return cacheNote._id == note._id
+            });
+            setCurrentNote({
+                _id: note._id,
+                title: note.title,
+                content: currentNote.content
+            });
+        }
+    };
+
+    const onAdd = e => {
+        e.preventDefault();
+        let newNote = {
+            _id: getId(),
+            title: '',
+            content: ''
+        };
+        setCurrentNote(newNote);
+        appendCacheNote(newNote);
+    };
+
     const onEdit = e => {
         e.preventDefault();
         current && enableEditor();
@@ -105,55 +153,19 @@ const Note = ({ match }) => {
     }
 
     const onSave = useCallback(async () => {
-        if(current && (current.title !== '' || current.content !== '')) {
+
+        console.log('test');
+        
+        if(current && (current.title !== '' || current.content !== '')
+            && (cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1)) {
             console.log('save editor');
         
             let newContent = await ReplaceImage(current.content);
-            contentChange(newContent);
 
-            async function ReplaceImage(content){
-                let _content = content;
-                // 替換圖片src(只抓出Blob)
-                let imgSrcArr = Array.from( new DOMParser().parseFromString( content, 'text/html' )
-                .querySelectorAll( 'img' ) )
-                .map(img => img.getAttribute('src'))
-                .filter((val) => {
-                    return val ? val.indexOf('blob') !== -1 : false;
-                });
-
-                for(let i = 0; i < imgSrcArr.length; i++){
-                    let imgSrc = imgSrcArr[i];
-                    try{
-                        let imgBlob = await fetch(imgSrc).then(r => r.blob());
-                        let imgFile = new File([imgBlob], 'image', { lastModified: new Date().getTime(), type: imgBlob.type });
-                        const config = {
-                            headers: {
-                            'Content-Type': 'multipart/form-data'
-                            }
-                        };
-                        
-                        // 上傳圖片至Server
-                        const data = new FormData();
-                        data.append( 'image', imgFile );
-                        const res = await axios.post('/images/upload', data, config);
-
-                        // 釋放掉Blob參照   
-                        window.URL.revokeObjectURL(imgSrc);
-
-                        // 把圖片的src重新設定為server上的檔案位置
-                        _content = _content.replace(imgSrc, `${host}/images/${res.data.filename}`);
-                    }
-                    catch(err){
-                    //todo
-                    }
-                }
-
-                return _content;
-            }
-
+            // 儲存筆記
             let saveNote = {
                 title: current.title,
-                content: current.content,
+                content: newContent,
                 notedir: notedirContext.current._id
             };
 
@@ -163,17 +175,78 @@ const Note = ({ match }) => {
             if(notes.map(note => note._id).indexOf(current._id) === -1) {
                 //新增筆記到資料庫
                 await addNote(saveNote);
-            } else if(cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) {
+            } else {
                 //更新筆記到資料庫
                 await updateNote(current._id, saveNote);
             }
             if(error){
                 setSave(UNSAVE);
+
+                console.log('error')
             } else {
                 removeCacheNote(current._id);
+                console.log('executed');
             }
         }
-    }, [current]);
+
+        async function ReplaceImage(content){
+            let _content = content;
+            // 替換圖片src(只抓出Blob)
+            let imgSrcArr = Array.from( new DOMParser().parseFromString( content, 'text/html' )
+            .querySelectorAll( 'img' ) )
+            .map(img => img.getAttribute('src'))
+            .filter((val) => {
+                return val ? val.indexOf('blob') !== -1 : false;
+            });
+
+            for(let i = 0; i < imgSrcArr.length; i++){
+                let imgSrc = imgSrcArr[i];
+                try{
+                    let imgBlob = await fetch(imgSrc).then(r => r.blob());
+                    let imgFile = new File([imgBlob], 'image', { lastModified: new Date().getTime(), type: imgBlob.type });
+                    const config = {
+                        headers: {
+                        'Content-Type': 'multipart/form-data'
+                        }
+                    };
+                    
+                    // 上傳圖片至Server
+                    const data = new FormData();
+                    data.append( 'image', imgFile );
+                    const res = await axios.post('/images/upload', data, config);
+
+                    // 釋放掉Blob參照   
+                    window.URL.revokeObjectURL(imgSrc);
+
+                    // 把圖片的src重新設定為server上的檔案位置
+                    _content = _content.replace(imgSrc, `${host}/images/${res.data.filename}`);
+                }
+                catch(err){
+                    //todo
+                }
+            }
+
+            return _content;
+        }
+    }, [current, cacheNotes, notedirContext]);
+
+    useEffect(() => {
+        // 清除上一次的token
+        autoSaveIntervalToken && clearInterval(autoSaveIntervalToken);
+    
+        // 當自動儲存開啟/關閉改變時執行(清除setinterval或設定setinterval)
+        if(autoSave){
+            console.log('autosave launch');
+            
+            setAutoSaveIntervalToken(setInterval(onSave, autoSaveInterval));
+        }
+        else{
+            console.log('auto closed');
+
+            autoSaveIntervalToken && clearInterval(autoSaveIntervalToken);
+        }
+    
+    }, [autoSave, onSave]);
 
     return (
         <div className='note-container'>
@@ -182,7 +255,10 @@ const Note = ({ match }) => {
                 <NotedirSorter />
             </div>
             <Notedirs notebookId={match.params.id} />
-            <Notes notedirId={notedirContext.current ? notedirContext.current._id : null} />
+            <Notes notedirId={notedirContext.current ? notedirContext.current._id : null} 
+                addEvent={onAdd} 
+                setCacheNoteContent={setCacheNoteContent} 
+                setNoteContent = {setNoteContent} />
             <div className='note-header'>
                 {deleteEnable ? (<button className='note-delete-btn right-align' onClick={onDelete}>刪除</button>)
                 : (<button className='note-discard-btn right-align' onClick={onDiscard} disabled={!current}>捨棄</button>)}
@@ -196,10 +272,7 @@ const Note = ({ match }) => {
                 enable={editorEnable}
                 content={current ? current.content : ''} 
                 loading={loading} 
-                contentChange={contentChange}
-                autoSave={autoSave}
-                autoSaveInterval={autoSaveInterval}
-                saveEvent={onSave} />
+                contentChange={contentChange} />
             <div className='recycle-bin'></div>
         </div>
     )
