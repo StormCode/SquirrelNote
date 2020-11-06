@@ -87,18 +87,6 @@ const Note = ({ match }) => {
             modifyCacheNote(note) : appendCacheNote(note);
     }
 
-    const contentChange = content => {
-        let note = {
-            _id: current._id,
-            title: current.title,
-            content
-        };
-
-        setCurrentNote(note);
-        cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1 ?
-            modifyCacheNote(note) : appendCacheNote(note);
-    }
-
     const setCacheNoteContent = note => {
         let currentNote = {
             _id: note._id,
@@ -112,18 +100,19 @@ const Note = ({ match }) => {
     }
 
     const setNoteContent = async note => {
-        if(cacheNotes.map(cacheNote => cacheNote._id).indexOf(note._id) == -1) {
+        // if(cacheNotes.map(cacheNote => cacheNote._id).indexOf(note._id) == -1) {
             await getNoteDetail(note._id);
-        } else {
-            let currentNote = cacheNotes.find(cacheNote => {
-                return cacheNote._id == note._id
-            });
-            setCurrentNote({
-                _id: note._id,
-                title: note.title,
-                content: currentNote.content
-            });
-        }
+            
+        // } else {
+        //     let currentNote = await cacheNotes.find(cacheNote => {
+        //         return cacheNote._id == note._id
+        //     });
+        //     setCurrentNote({
+        //         _id: note._id,
+        //         title: note.title,
+        //         content: currentNote.content
+        //     });
+        // }
     };
 
     const onAdd = e => {
@@ -152,10 +141,8 @@ const Note = ({ match }) => {
         current && discardCacheNote(current._id);
     }
 
-    const onSave = useCallback(async () => {
+    const onSave = async () => {
 
-        console.log('test');
-        
         if(current && (current.title !== '' || current.content !== '')
             && (cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1)) {
             console.log('save editor');
@@ -228,7 +215,7 @@ const Note = ({ match }) => {
 
             return _content;
         }
-    }, [current, cacheNotes, notedirContext]);
+    };
 
     useEffect(() => {
         // 清除上一次的token
@@ -269,10 +256,9 @@ const Note = ({ match }) => {
                 </div>
             </div>
             <NoteEditor 
+                note={current}
                 enable={editorEnable}
-                content={current ? current.content : ''} 
-                loading={loading} 
-                contentChange={contentChange} />
+                loading={loading} />
             <div className='recycle-bin'></div>
         </div>
     )

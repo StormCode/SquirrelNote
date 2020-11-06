@@ -92,15 +92,18 @@ const NoteState = props => {
     const getNoteDetail = async id => {
         try {
             const res = await axios.get(`/api/notes/${id}`);
+            
             dispatch({
                 type: GET_NOTE_DETAIL,
                 payload: res.data
             });
         } catch (err) {
+            console.log('err: ' + err);
+            
             dispatch({
                 type: NOTE_ERROR,
                 payload: err.msg || 'Server Error'
-            })
+            });
         }
     }
 

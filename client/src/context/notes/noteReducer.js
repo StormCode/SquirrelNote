@@ -33,6 +33,11 @@ export default (state, action) => {
                 loading: false
             }
         case GET_NOTE_DETAIL:
+            return {
+                ...state,
+                editorEnable: true,
+                current: action.payload
+            }
         case SET_CURRENT_NOTE:
             return {
                 ...state,
