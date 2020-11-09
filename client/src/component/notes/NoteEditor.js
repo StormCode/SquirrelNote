@@ -13,16 +13,27 @@ const NoteEditor = ({note, enable, loading }) => {
         appendCacheNote,
         modifyCacheNote } = noteContext;
 
-    const editorContentChange = async data => {
-        let noteData = {
-            _id: note._id,
-            title: note.title,
-            content: data
-        };
+    const editorContentChange = data => {
+        (async (_note, _data) => {
+            let noteData = {
+                _id: _note._id,
+                title: _note.title,
+                content: _data
+            };
+            
+            await setCurrentNote(noteData);
+            cacheNotes.map(cacheNote => cacheNote._id).indexOf(noteData._id) !== -1 ?
+                modifyCacheNote(noteData) : appendCacheNote(noteData);
+        })(note, data);
+        // let noteData = {
+        //     _id: note._id,
+        //     title: note.title,
+        //     content: data
+        // };
         
-        await setCurrentNote(noteData);
-        cacheNotes.map(cacheNote => cacheNote._id).indexOf(noteData._id) !== -1 ?
-            modifyCacheNote(noteData) : appendCacheNote(noteData);
+        // await setCurrentNote(noteData);
+        // cacheNotes.map(cacheNote => cacheNote._id).indexOf(noteData._id) !== -1 ?
+        //     modifyCacheNote(noteData) : appendCacheNote(noteData);
     }
 
     return (

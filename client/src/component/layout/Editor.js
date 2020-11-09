@@ -17,7 +17,6 @@ import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
 import UploadAdapter from '../../utils/uploadAdapter';
 
 const Editor = ({enable, content, loading, contentChange}) => {
-
     // 自訂Upload Adapter
     function UploadAdapterPlugin( editor ) {
       editor.plugins.get( 'FileRepository' ).createUploadAdapter = ( loader ) => {

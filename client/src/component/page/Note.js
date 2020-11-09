@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Notedirs from '../notedirs/NoteDirs';
 import Notes from '../notes/Notes';
-import NoteEditor from '../notes/NoteEditor';
+// import NoteEditor from '../notes/NoteEditor';
+import Editor from '../layout/Editor';
 import NotedirSorter from '../notedirs/NotedirSorter';
+import useAsyncReference from '../../utils/useAsyncReference';
 
 import NotedirContext from '../../context/notedirs/notedirContext';
 import NoteContext from '../../context/notes/noteContext';
@@ -47,6 +49,8 @@ const Note = ({ match }) => {
         error,
         loading } = noteContext;
 
+    const [currentRef, setCurrentRef] = useAsyncReference(current);
+
     const autoSaveInterval = 10000;
     const [autoSave, setAutoSave] = useState(true);
     const [autoSaveIntervalToken, setAutoSaveIntervalToken] = useState({});
@@ -75,16 +79,19 @@ const Note = ({ match }) => {
         current && notes.map(note => note._id).indexOf(current._id) !== -1 ? enableDelete() : disableDelete();
     },[current, notes]);
 
+    useEffect(() => {
+        setCurrentRef(current);
+    }, [current]);
+
     const titleChange = e => {
         e.preventDefault();
-        let note = {
-            _id: current._id,
-            title: e.target.value,
-            content: current.content
-        };
-        setCurrentNote(note);
-        cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1 ?
-            modifyCacheNote(note) : appendCacheNote(note);
+
+        if(current){
+            let note = Object.assign({},current,{title: e.target.value});
+            setCurrentNote(note);
+            cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1 ?
+                modifyCacheNote(note) : appendCacheNote(note);
+        }
     }
 
     const setCacheNoteContent = note => {
@@ -115,6 +122,20 @@ const Note = ({ match }) => {
         // }
     };
 
+    const editorContentChange = async data => {
+        if(current) {
+            let note = {
+                _id: current._id,
+                title: current.title,
+                content: data
+            };
+            
+            await setCurrentNote(note);
+            cacheNotes.map(cacheNote => cacheNote._id).indexOf(note._id) !== -1 ?
+                modifyCacheNote(note) : appendCacheNote(note);
+        }
+    }
+
     const onAdd = e => {
         e.preventDefault();
         let newNote = {
@@ -142,16 +163,15 @@ const Note = ({ match }) => {
     }
 
     const onSave = async () => {
-
-        if(current && (current.title !== '' || current.content !== '')
-            && (cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1)) {
+        if(currentRef.current && (currentRef.current.title !== '' || currentRef.current.content !== '')
+            && (cacheNotes.map(cacheNote => cacheNote._id).indexOf(currentRef.current._id) !== -1)) {
             console.log('save editor');
         
-            let newContent = await ReplaceImage(current.content);
+            let newContent = await ReplaceImage(currentRef.current.content);
 
             // 儲存筆記
             let saveNote = {
-                title: current.title,
+                title: currentRef.current.title,
                 content: newContent,
                 notedir: notedirContext.current._id
             };
@@ -159,19 +179,19 @@ const Note = ({ match }) => {
             //設定儲存狀態為正在儲存
             setSave(SAVING);
             //判斷要做Add還是Update
-            if(notes.map(note => note._id).indexOf(current._id) === -1) {
+            if(notes.map(note => note._id).indexOf(currentRef.current._id) === -1) {
                 //新增筆記到資料庫
                 await addNote(saveNote);
             } else {
                 //更新筆記到資料庫
-                await updateNote(current._id, saveNote);
+                await updateNote(currentRef.current._id, saveNote);
             }
             if(error){
                 setSave(UNSAVE);
 
-                console.log('error')
+                console.log('error');
             } else {
-                removeCacheNote(current._id);
+                removeCacheNote(currentRef.current._id);
                 console.log('executed');
             }
         }
@@ -232,8 +252,12 @@ const Note = ({ match }) => {
 
             autoSaveIntervalToken && clearInterval(autoSaveIntervalToken);
         }
+
+        return () => {
+            autoSaveIntervalToken && clearInterval(autoSaveIntervalToken);
+        }
     
-    }, [autoSave, onSave]);
+    }, [autoSave]);
 
     return (
         <div className='note-container'>
@@ -255,10 +279,15 @@ const Note = ({ match }) => {
                     <SaveButton state={save} onSave={onSave} />
                 </div>
             </div>
-            <NoteEditor 
+            {/* <NoteEditor 
                 note={current}
                 enable={editorEnable}
-                loading={loading} />
+                loading={loading} /> */}
+            <Editor 
+                enable={editorEnable}
+                content={currentRef.current ? currentRef.current.content : ''} 
+                loading={loading} 
+                contentChange={editorContentChange} />
             <div className='recycle-bin'></div>
         </div>
     )
