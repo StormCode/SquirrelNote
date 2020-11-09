@@ -168,11 +168,11 @@ const NoteState = props => {
     }
 
     //新增暫存的筆記
-    const appendCacheNote = note => {
+    const appendCacheNote = id => {
         try {
             dispatch({
                 type: APPEND_CACHE_NOTE,
-                payload: note
+                payload: id
             })
         } catch (err) {
             dispatch({type: NOTE_ERROR})

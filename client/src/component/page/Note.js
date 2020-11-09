@@ -87,10 +87,10 @@ const Note = ({ match }) => {
         e.preventDefault();
 
         if(current){
-            let note = Object.assign({},current,{title: e.target.value});
+            let note = Object.assign({}, current, {title: e.target.value});
             setCurrentNote(note);
             cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1 ?
-                modifyCacheNote(note) : appendCacheNote(note);
+                modifyCacheNote(note) : appendCacheNote(getId());
         }
     }
 
@@ -124,27 +124,22 @@ const Note = ({ match }) => {
 
     const editorContentChange = async data => {
         if(current) {
-            let note = {
-                _id: current._id,
-                title: current.title,
-                content: data
-            };
-            
+            // let note = {
+            //     _id: current._id,
+            //     title: current.title,
+            //     content: data
+            // };
+            let note = Object.assign({}, current, {content: data});
+
             await setCurrentNote(note);
             cacheNotes.map(cacheNote => cacheNote._id).indexOf(note._id) !== -1 ?
-                modifyCacheNote(note) : appendCacheNote(note);
+                modifyCacheNote(note) : appendCacheNote(getId());
         }
     }
 
     const onAdd = e => {
         e.preventDefault();
-        let newNote = {
-            _id: getId(),
-            title: '',
-            content: ''
-        };
-        setCurrentNote(newNote);
-        appendCacheNote(newNote);
+        appendCacheNote(getId());
     };
 
     const onEdit = e => {

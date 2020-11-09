@@ -77,7 +77,15 @@ export default (state, action) => {
         case APPEND_CACHE_NOTE:
             return {
                 ...state,
-                cacheNotes: [...state.cacheNotes, action.payload]
+                cacheNotes: [...state.cacheNotes, {
+                    _id: action.payload,
+                    title: '',
+                    content: ''}
+                ],
+                current: {
+                    _id: action.payload,
+                    title: '',
+                    content: ''}
             }
         case MODIFY_CACHE_NOTE:
             return {
