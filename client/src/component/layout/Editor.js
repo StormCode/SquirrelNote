@@ -46,7 +46,7 @@ const Editor = ({enable, content, loading, contentChange}) => {
                     console.log('onchange');
                     
                     const data = editor.getData();
-                    contentChange(data);
+                    data !== content && contentChange(data);
                     console.log( { event, editor, data } );
                 } }
                 onBlur={ ( event, editor ) => {

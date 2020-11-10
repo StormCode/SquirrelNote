@@ -37,7 +37,7 @@ export default (state, action) => {
             return {
                 ...state,
                 editorEnable: true,
-                current: action.payload
+                current: Object.assign({}, state.current, action.payload)
             }
         case CLEAR_CURRENT_NOTE:
             return {
@@ -77,15 +77,7 @@ export default (state, action) => {
         case APPEND_CACHE_NOTE:
             return {
                 ...state,
-                cacheNotes: [...state.cacheNotes, {
-                    _id: action.payload,
-                    title: '',
-                    content: ''}
-                ],
-                current: {
-                    _id: action.payload,
-                    title: '',
-                    content: ''}
+                cacheNotes: [...state.cacheNotes, action.payload]
             }
         case MODIFY_CACHE_NOTE:
             return {
