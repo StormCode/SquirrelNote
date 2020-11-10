@@ -195,7 +195,7 @@ const Note = ({ match }) => {
         current && discardCacheNote(current._id);
     }
 
-    const onSave = useCallback(async () => {
+    const onSave = async () => {
         //設定儲存狀態為正在儲存
         if(current && (current.title !== '' || current.content !== '')
             && (cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1)) {
@@ -268,7 +268,7 @@ const Note = ({ match }) => {
 
             return _content;
         }
-    },[current]);
+    };
 
     useEffect(() => {
         // 清除上一次的token
@@ -278,7 +278,7 @@ const Note = ({ match }) => {
         if(autoSave){
             console.log('autosave launch');
             
-            setAutoSaveIntervalToken(setInterval(onSave, autoSaveInterval));
+            cacheNotes.length > 0 && setAutoSaveIntervalToken(setInterval(onSave, autoSaveInterval));
         }
         else{
             console.log('auto closed');
@@ -286,11 +286,11 @@ const Note = ({ match }) => {
             autoSaveIntervalToken && clearInterval(autoSaveIntervalToken);
         }
 
-        // return () => {
-        //     autoSaveIntervalToken && clearInterval(autoSaveIntervalToken);
-        // }
+        return () => {
+            autoSaveIntervalToken && clearInterval(autoSaveIntervalToken);
+        }
     
-    }, [autoSave]);
+    }, [autoSave, current, cacheNotes]);
 
     return (
         <div className='note-container'>
