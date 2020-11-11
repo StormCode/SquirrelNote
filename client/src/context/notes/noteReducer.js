@@ -41,7 +41,7 @@ export default (state, action) => {
         case ADD_NOTE:
             return {
                 ...state,
-                current: action.payload,
+                current: Object.assign({}, state.current, {_id: action.payload._id}),
                 notes: [...state.notes, action.payload]
             }
         case UPDATE_NOTE:

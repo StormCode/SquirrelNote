@@ -87,6 +87,12 @@ const Note = ({ match }) => {
     },[current]);
 
     useEffect(() => {
+        current && setCurrentNote({
+            content: cacheContent 
+        });
+    },[cacheContent]);
+
+    useEffect(() => {
         //控制儲存狀態
         if(cacheNotes.length > 0) {
             current && current._id
@@ -105,11 +111,9 @@ const Note = ({ match }) => {
     const titleChange = useCallback(e => {
         e.preventDefault();
 
-        current ? current.title !== e.target.value && setCurrentNote({
+        current && current.title !== e.target.value 
+                && setCurrentNote({
                     title: e.target.value
-                }) 
-                : setCurrentNote({
-                    title: ''
                 });
 
         // cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1 ?
@@ -125,12 +129,8 @@ const Note = ({ match }) => {
         console.log('data: ' + data);
         current && console.log('content: ' + current.content);
 
-        current ? current.content !== data && setCurrentNote({
-                    content: data 
-                }) 
-                : setCurrentNote({
-                    content: ''
-                });
+        current && current.content !== data 
+                && setCacheContent(data);
 
         // cacheNotes.map(cacheNote => cacheNote._id).indexOf(note._id) !== -1 ?
         //     modifyCacheNote(note) : appendCacheNote(getId());
@@ -223,6 +223,8 @@ const Note = ({ match }) => {
                 //更新筆記到資料庫
                 await updateNote(current._id, saveNote);
             }
+
+            //wrong
             if(error){
                 setSave({state: UNSAVE, showText: false});
 
