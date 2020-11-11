@@ -52,7 +52,7 @@ const Note = ({ match }) => {
     // const [currentRef, setCurrentRef] = useAsyncReference(current);
 
     const autoSaveInterval = 10000;
-    const [autoSave, setAutoSave] = useState(true);
+    const [autoSave, setAutoSave] = useState(false);
     const [autoSaveIntervalToken, setAutoSaveIntervalToken] = useState({});
     const [cacheContent, setCacheContent] = useState(null);
 

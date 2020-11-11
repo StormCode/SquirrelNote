@@ -43,6 +43,7 @@ const Notes = ({ notedirId, addEvent, setCacheNoteContent, setNoteContent }) => 
                                         note= {{
                                             _id: cacheNote._id,
                                             title: cacheNote.title,
+                                            type: 'cache',
                                             summary: getSummary(cacheNote.content)
                                         }} 
                                         setCurrentNote={setCacheNoteContent} />
