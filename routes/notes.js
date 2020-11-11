@@ -116,7 +116,9 @@ router.post('/', auth, async(req, res) => {
 
         await notedir.save();
 
-        res.json(note);
+        const addNotedirNote = notedir.notes.find(note => note._id == note._id);
+
+        res.json(addNotedirNote);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');

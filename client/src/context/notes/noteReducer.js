@@ -16,12 +16,6 @@ import {
     DISABLE_DELETE,
     NOTE_ERROR
 } from '../types.js';
-import {
-    UNSAVE,
-    SAVING,
-    SAVED,
-    DISABLESAVE
-} from '../../saveState';
 
 
 export default (state, action) => {

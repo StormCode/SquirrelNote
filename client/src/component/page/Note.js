@@ -6,7 +6,6 @@ import Notes from '../notes/Notes';
 // import NoteEditor from '../notes/NoteEditor';
 import Editor from '../layout/Editor';
 import NotedirSorter from '../notedirs/NotedirSorter';
-import useAsyncReference from '../../utils/useAsyncReference';
 
 import NotedirContext from '../../context/notedirs/notedirContext';
 import NoteContext from '../../context/notes/noteContext';
@@ -49,11 +48,10 @@ const Note = ({ match }) => {
         error,
         loading } = noteContext;
 
-    // const [currentRef, setCurrentRef] = useAsyncReference(current);
-
     const autoSaveInterval = 10000;
-    const [autoSave, setAutoSave] = useState(false);
+    const [autoSave, setAutoSave] = useState(true);
     const [autoSaveIntervalToken, setAutoSaveIntervalToken] = useState({});
+    const [saveTextUpdateInterval, setSaveTextUpdateInterval] = useState(10000);
     const [cacheContent, setCacheContent] = useState(null);
 
     const host = `${window.location.protocol}//${window.location.host}`;
@@ -67,32 +65,35 @@ const Note = ({ match }) => {
         
         if(current && current._id) {
             console.log('current: ' + current._id);
-            
+
             //新增/修改快取筆記
             if(cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) {
                 modifyCacheNote(current);
             } else {
                 let currentNote = notes.find(note => note._id === current._id);
-                currentNote && (currentNote.title !== current.title || cacheContent ? cacheContent !== current.content : false) 
+                currentNote && (currentNote.title !== current.title || (cacheContent ? cacheContent !== current.content : false)) 
                             && appendCacheNote(current);
+                
+                //控制儲存狀態(筆記載入時顯示已儲存)
+                setSave({state: SAVED, showText: false});
             }
+
             setCacheContent(current.content);
-            // setCurrentRef(current);
         } else {
+            //控制儲存、編輯器狀態
             disableEditor();
-            setSave(DISABLESAVE);
+            setSave({state: DISABLESAVE, showText: false});
         }
-
-
     },[current]);
 
     useEffect(() => {
-        //控制儲存、編輯器狀態
-        current && current._id 
-                && ((cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) 
-                    ? (current.title !== '' || current.content !== '') 
-                        ? setSave(UNSAVE) : setSave(DISABLESAVE)
-                    : setSave(SAVED));
+        //控制儲存狀態
+        if(cacheNotes.length > 0) {
+            current && current._id
+                    && (cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) 
+                        && (current.title !== '' || current.content !== '') 
+                            ? setSave({state: UNSAVE, showText: false}) : setSave({state: DISABLESAVE, showText: false});
+        }
     },[cacheNotes]);
 
 
@@ -106,8 +107,9 @@ const Note = ({ match }) => {
 
         current ? current.title !== e.target.value && setCurrentNote({
                     title: e.target.value
-                }) : setCurrentNote({
-                    title: e.target.value
+                }) 
+                : setCurrentNote({
+                    title: ''
                 });
 
         // cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1 ?
@@ -127,7 +129,7 @@ const Note = ({ match }) => {
                     content: data 
                 }) 
                 : setCurrentNote({
-                    content: data
+                    content: ''
                 });
 
         // cacheNotes.map(cacheNote => cacheNote._id).indexOf(note._id) !== -1 ?
@@ -173,11 +175,13 @@ const Note = ({ match }) => {
 
     const onAdd = e => {
         e.preventDefault();
-        appendCacheNote({
+        let newNote = {
             _id: getId(),
             title: '',
             content: ''
-        });
+        };
+        appendCacheNote(newNote);
+        setCurrentNote(newNote);
     };
 
     const onEdit = e => {
@@ -200,8 +204,8 @@ const Note = ({ match }) => {
         if(current && (current.title !== '' || current.content !== '')
             && (cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1)) {
             console.log('save editor');
-            setSave(SAVING);
-            
+            setSave({state: SAVING, showText: false});
+
             let newContent = await ReplaceImage(current.content);
 
             // 儲存筆記
@@ -220,11 +224,12 @@ const Note = ({ match }) => {
                 await updateNote(current._id, saveNote);
             }
             if(error){
-                setSave(UNSAVE);
+                setSave({state: UNSAVE, showText: false});
 
                 console.log('error');
             } else {
                 removeCacheNote(current._id);
+                setSave({state: SAVED, showText: true});
                 console.log('executed');
             }
         }
@@ -283,14 +288,11 @@ const Note = ({ match }) => {
         else{
             console.log('auto closed');
 
-            autoSaveIntervalToken && clearInterval(autoSaveIntervalToken);
-        }
-
-        return () => {
-            autoSaveIntervalToken && clearInterval(autoSaveIntervalToken);
+            clearInterval(autoSaveIntervalToken);
+            setAutoSaveIntervalToken(null);
         }
     
-    }, [autoSave, current, cacheNotes]);
+    }, [autoSave, current, cacheNotes , autoSaveInterval]);
 
     return (
         <div className='note-container'>
@@ -308,8 +310,8 @@ const Note = ({ match }) => {
                 : (<button className='note-discard-btn right-align' onClick={onDiscard} disabled={!current}>捨棄</button>)}
                 <button className='note-edit-btn right-align' onClick={onEdit} disabled={!editorEnable}>編輯</button>
                 <div className='note-title-container'>
-                    <input type='text' placeholder='新筆記' className='note-title' value={current ? current.title : ''} onChange={titleChange} disabled={!editorEnable}/>
-                    <SaveButton state={save} onSave={onSave} />
+                    <input type='text' placeholder='新筆記' className='note-title' value={current ? current.title || '' : ''} onChange={titleChange} disabled={!editorEnable}/>
+                    <SaveButton state={save.state} onSave={onSave} showUpdateTime={save.showText} updateInterval={saveTextUpdateInterval} />
                 </div>
             </div>
             {/* <NoteEditor 

@@ -31,7 +31,10 @@ const NoteState = props => {
     const initialState = {
         notes: null,
         current: null,
-        save: DISABLESAVE,
+        save: {
+            state: DISABLESAVE,
+            showText: false
+        },
         cacheNotes: [],
         editorEnable: false,
         deleteEnable: false,

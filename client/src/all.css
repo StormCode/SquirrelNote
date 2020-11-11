@@ -5,6 +5,10 @@ body {
   padding: 0;
 }
 
+p {
+  margin: 0;
+}
+
 input[type='text'] {
   border-radius: 5px;
   padding: 3px !important;

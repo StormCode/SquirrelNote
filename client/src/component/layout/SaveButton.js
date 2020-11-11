@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import {
     UNSAVE,
@@ -7,6 +8,15 @@ import {
     DISABLESAVE
 } from '../../saveState';
 
+const Button = styled.button`
+    text-align: center;
+
+    p {
+        display: ${props => props.state !== SAVED ? 'none' : 'inherit'};
+        font-size: 8px;
+    }
+`;
+
 //
 // 此組件是儲存按鈕，依據儲存狀態控制按鈕文字、啟用/停用
 // 共有四種狀態：未儲存、已儲存、儲存中、禁用
@@ -14,9 +24,29 @@ import {
 // 儲存狀態(string)
 // 儲存事件(function)
 //
-const SaveButton = ({state, onSave}) => {
+const SaveButton = ({state, onSave, showUpdateTime, updateInterval}) => {
     let btnText;
     let btnEnable;
+
+    const [updateText, setUpdateText] = useState('');
+    const [updateTimeToken, setUpdateTimeToken] = useState(null);
+
+    useEffect(() => {
+        updateTimeToken && clearInterval(updateTimeToken);
+        
+        if(showUpdateTime){
+            let nowTime = new Date();
+            setUpdateText(getLeastUpdateTextHelper(nowTime));
+            setUpdateTimeToken(setInterval(() => {
+                setUpdateText(getLeastUpdateTextHelper(nowTime));
+            },updateInterval));
+        } else {
+            clearInterval(updateTimeToken);
+            setUpdateTimeToken(null);
+            setUpdateText('');
+        }
+    }, [state, showUpdateTime, updateInterval]);
+
     switch(state) {
         case UNSAVE:
             btnEnable = true;
@@ -31,27 +61,49 @@ const SaveButton = ({state, onSave}) => {
             btnText = '已儲存';
             break;
         case DISABLESAVE:
+        default:
             btnEnable = false;
             btnText = '儲存';
             break;
-        default:
-            btnText = '儲存';
-            btnEnable = false;
+    }
+
+    const getLeastUpdateTextHelper = (lastUpdateTime) => {
+        let minuteTicks = 60 * 1000;
+        let hourTicks = 60 * minuteTicks;
+        let dayTicks = 24 * hourTicks;
+        let datetimeDiff = new Date() - lastUpdateTime;
+        let dayDiff = Math.floor(datetimeDiff / dayTicks);
+        let hourDiff = Math.floor(datetimeDiff / hourTicks);
+        let minuteDiff = Math.floor(datetimeDiff / minuteTicks);
+        let secondDiff = Math.floor(datetimeDiff / 1000);
+        return dayDiff > 0 ? 
+            `${dayDiff}天前`
+            : hourDiff > 0 ?
+                `${hourDiff}小時前`
+                : minuteDiff > 0 ?
+                    `${minuteDiff}分鐘前`
+                    : secondDiff > 0 ?
+                        `${secondDiff}秒前`
+                        : '剛剛';
     }
 
     return (
-        <button className='note-save-btn' onClick={() => {onSave();}} disabled={!btnEnable}>{btnText}</button>
+        <Button onClick={() => {onSave();}} disabled={!btnEnable} state={state}>{btnText}<p>{updateText}</p></Button>
     )
 }
 
 SaveButton.defaultProps = {
     state: DISABLESAVE,
-    onSave: () => { }
+    onSave: () => { },
+    showUpdateTime: false,
+    updateInterval: 60000
 }
 
 SaveButton.propTypes = {
     state: PropTypes.string.isRequired,
-    onSave: PropTypes.oneOfType([PropTypes.func,PropTypes.object])
+    onSave: PropTypes.oneOfType([PropTypes.func,PropTypes.object]),
+    showUpdateTime: PropTypes.bool,
+    updateInterval: PropTypes.number
 }
 
 export default SaveButton;

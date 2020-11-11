@@ -1,22 +1,37 @@
-import React from 'react';
-import { ReactComponent as Unsaved } from  '../../assets/general/unsaved.svg';
+import React, { Fragment } from 'react';
+import styled from 'styled-components';
+import { ReactComponent as UnsavedMark } from  '../../assets/general/unsaved_mark.svg';
 
-const Note = ({ note, setCurrentNote }) => {
+const NoteContainer = styled.li`
+    position: relative;
+    padding: 10px;
+
+    > svg {
+        display: ${props => props.isUnsaved ? 'inline-block' : 'none'};
+        position: absolute;
+        top: 10px; 
+        right: 10px;
+    }
+`;
+
+const Note = ({ note, setCurrentNote, isUnsaved }) => {
     const onClick = e => {
         e.preventDefault();
         setCurrentNote(note);
     }
 
     return (
-        <li>
+        <Fragment>
             { note !== null ?
-                <div onClick={onClick} style={{position: 'relative'}}>
+                <NoteContainer 
+                    isUnsaved={isUnsaved} 
+                    onClick={onClick}>
                     <p>{note.title}</p>
                     <p>{note.summary}</p>
-                    {note.type == 'cache' && <Unsaved style={{position: 'absolute', top: '0', right: '0'}} alt='unsaved' />}
-                </div> 
+                    <UnsavedMark alt='unsaved' />
+                </NoteContainer>
             : null }
-        </li>
+        </Fragment>
     )
 }
 
