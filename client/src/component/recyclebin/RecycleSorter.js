@@ -1,20 +1,26 @@
-import React, { useContext } from 'react';
+import React, { useContext } from 'react'
 import styled from 'styled-components';
-import Sorter from '../layout/Sorter';
+import Sorter from '../layout/Sorter'
 
-import NotebookContext from '../../context/notebooks/notebookContext'
+import RecyclebinContext from '../../context/recyclebin/recyclebinContext';
 
-const NotebookSorter = () => {
-    const notebookContext = useContext(NotebookContext);
-
-    const { orderBy, sortBy, sortNotebook } = notebookContext;
+const RecycleSorter = () => {
+    const recyclebinContext = useContext(RecyclebinContext);
+    const {
+        orderBy,
+        sortBy,
+        sortRecycleList
+    } = recyclebinContext;
 
     const onSortBy = e => {
-        sortNotebook(orderBy, e.target.value);
+        sortRecycleList(orderBy, e.target.value);
+        console.log('onSortBy');
+        
     };
 
     const onToggleSort = e => {
-        sortNotebook(e.target.value, sortBy);
+        sortRecycleList(e.target.value, sortBy);
+        console.log('onToggleSort');
     };
 
     const SorterContainer = styled.span`
@@ -33,7 +39,7 @@ const NotebookSorter = () => {
                 <Sorter.Title>排序</Sorter.Title>
                 <Sorter.DropdownMenu>
                     <Sorter.Field value='title'>名稱</Sorter.Field>
-                    <Sorter.Field value='date'>建立日期</Sorter.Field>
+                    <Sorter.Field value='date'>刪除日期</Sorter.Field>
                     <Sorter.Divider></Sorter.Divider>
                     <Sorter.Asc>升冪</Sorter.Asc>
                     <Sorter.Desc>降冪</Sorter.Desc>
@@ -43,4 +49,4 @@ const NotebookSorter = () => {
     )
 }
 
-export default NotebookSorter;
+export default RecycleSorter;
