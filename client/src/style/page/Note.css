@@ -23,8 +23,6 @@
     .note-container .note-list {
         grid-area: note-list;
         background-color: #ccc;
-        height: 100%;
-        overflow-y: auto;
     }
 
     .note-container .notedir-list {
@@ -77,19 +75,15 @@
     .note-container .editor {
         grid-area: editor;
         background-color: #99ff99;
+        height: 100%;
+        overflow-y: auto;
     }
 
     .note-container .recycle-bin {
         grid-area: recycle-bin;
         background-color: rgb(255, 0, 234);
-        text-align: center;
     }
 
         .note-container .recycle-bin::before {
             content: 'recycle bin';
         }
-
-    .recycle-bin-btn {
-        border: none;
-        padding: 10px;
-    }
