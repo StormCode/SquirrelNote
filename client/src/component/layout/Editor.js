@@ -16,6 +16,12 @@ import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
 
 import UploadAdapter from '../../utils/uploadAdapter';
 
+import styled from 'styled-components';
+
+const EditorContainer = styled.div`
+    overflow-y: auto;
+`;
+
 const Editor = ({enable, content, loading, contentChange}) => {
     // 自訂Upload Adapter
     function UploadAdapterPlugin( editor ) {
@@ -24,14 +30,31 @@ const Editor = ({enable, content, loading, contentChange}) => {
       };
     }
 
+    function StylePlugin(editor) {
+        this.editor = editor;
+    }
+    
+    StylePlugin.prototype.init = function() {
+        this.editor.ui.view.editable.extendTemplate({
+            attributes: {
+                style: {
+                    // position: 'fixed',
+                    width: '100%',
+                    height: '100%',
+                    minHeight: '100%'
+                }
+            }
+        });
+    };
+
     const editorConfiguration = {
         plugins: [ Essentials, Bold, Italic, Paragraph, Image, ImageCaption, ImageStyle, ImageToolbar, ImageUpload ],
         toolbar: [ 'bold', 'italic', 'imageUpload' ],
-        extraPlugins: [ UploadAdapterPlugin ]
+        extraPlugins: [ UploadAdapterPlugin, StylePlugin ]
     };
 
     return (
-        <div className='editor'>
+        <EditorContainer className='editor'>
             { !loading ? 
             <CKEditor
                 editor={ ClassicEditor }
@@ -39,6 +62,7 @@ const Editor = ({enable, content, loading, contentChange}) => {
                 data={content}
                 disabled={!enable} 
                 onReady={ editor => {
+
                     // You can store the "editor" and use when it is needed.
                     console.log( 'Editor is ready to use!', editor );
                 } }
@@ -57,7 +81,7 @@ const Editor = ({enable, content, loading, contentChange}) => {
                 } }
             />
             : null}
-        </div>
+        </EditorContainer>
     )
 }
 

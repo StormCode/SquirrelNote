@@ -235,7 +235,7 @@ function getSummary(data){
         || dom.getElementsByTagName( 'q' )
         || dom.getElementsByTagName( 'cite' )
         || dom.getElementsByTagName( 'code' );
-    return elements[0] ? elements[0].textContent : '';
+    return elements[0] ? elements[0].textContent.substring(0,10) : '';
 }
 
 module.exports = router;

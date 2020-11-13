@@ -23,8 +23,11 @@ const Button = styled.button`
 // 傳入的屬性：
 // 儲存狀態(string)
 // 儲存事件(function)
+// 是否顯示上次儲存時間(boolean)
+// 上次儲存時間(string)
+// 儲存時間更新頻率(單位: 毫秒)(number)
 //
-const SaveButton = ({state, onSave, showUpdateTime, updateInterval}) => {
+const SaveButton = ({state, onSave, showUpdateTime, updateTime, updateInterval}) => {
     let btnText;
     let btnEnable;
 
@@ -34,18 +37,18 @@ const SaveButton = ({state, onSave, showUpdateTime, updateInterval}) => {
     useEffect(() => {
         updateTimeToken && clearInterval(updateTimeToken);
         
-        if(showUpdateTime){
-            let nowTime = new Date();
-            setUpdateText(getLeastUpdateTextHelper(nowTime));
+        if(showUpdateTime && updateTime !== null){
+            let leastUpdateTime = new Date(updateTime);
+            setUpdateText(getLeastUpdateTextHelper(leastUpdateTime));
             setUpdateTimeToken(setInterval(() => {
-                setUpdateText(getLeastUpdateTextHelper(nowTime));
+                setUpdateText(getLeastUpdateTextHelper(leastUpdateTime));
             },updateInterval));
         } else {
             clearInterval(updateTimeToken);
             setUpdateTimeToken(null);
             setUpdateText('');
         }
-    }, [state, showUpdateTime, updateInterval]);
+    }, [state, showUpdateTime, updateTime, updateInterval]);
 
     switch(state) {
         case UNSAVE:
