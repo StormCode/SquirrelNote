@@ -3,6 +3,8 @@ import {
     GET_NOTE_DETAIL,
     SET_CURRENT_NOTE,
     CLEAR_CURRENT_NOTE,
+    SET_CURRENT_CACHE_NOTE,
+    CLEAR_CURRENT_CACHE_NOTE,
     ADD_NOTE,
     UPDATE_NOTE,
     DELETE_NOTE,
@@ -27,6 +29,15 @@ export default (state, action) => {
                 loading: false
             }
         case GET_NOTE_DETAIL:
+            return {
+                ...state,
+                editorEnable: true,
+                current: action.payload,
+                cacheCurrent: {
+                    title: action.payload.title,
+                    content: action.payload.content
+                }
+            }
         case SET_CURRENT_NOTE:
             return {
                 ...state,
@@ -37,6 +48,16 @@ export default (state, action) => {
             return {
                 ...state,
                 current: null
+            }
+        case SET_CURRENT_CACHE_NOTE:
+            return {
+                ...state,
+                cacheCurrent: action.payload
+            }
+        case CLEAR_CURRENT_CACHE_NOTE:
+            return {
+                ...state,
+                cacheCurrent: null
             }
         case ADD_NOTE:
             return {

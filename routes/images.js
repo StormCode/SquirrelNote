@@ -2,7 +2,7 @@ const express = require('express');
 const config = require('config');
 const multer = require('multer');
 const path = require('path');
-const upload = multer({dest: __dirname + config.get('imageDirectory')});
+const upload = multer({dest: path.join(__dirname, '..', config.get('imageDirectory'))});
 const router = express.Router();
 
 const auth = require('../middleware/auth');
@@ -10,7 +10,7 @@ const auth = require('../middleware/auth');
 // @route           GET /api/images/:filename
 // @desc            接收Client傳過來的檔名並回傳圖檔
 // @access          Private
-router.get('/:filename', auth, async (req, res) => {
+router.get('/:filename', async (req, res) => {
     try {
         let filename = req.params.filename;
         let imageUrl = path.resolve('uploads/images/', filename);
