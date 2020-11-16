@@ -19,7 +19,21 @@ import UploadAdapter from '../../utils/uploadAdapter';
 import styled from 'styled-components';
 
 const EditorContainer = styled.div`
-    overflow-y: auto;
+    > .ck-editor {
+        height: 100%;
+    }
+
+        > .ck-editor > .ck-editor__main,
+        > .ck-editor > .ck-editor__main > .ck-editor__editable_inline {
+            flex: 1 1 100%;
+            overflow-y: auto;
+        }
+
+    > .ck-editor,
+    > .ck-editor > .ck-editor__main {
+        display: flex;
+        flex-flow: column nowrap;
+    }
 `;
 
 const Editor = ({enable, content, loading, contentChange}) => {
@@ -30,27 +44,24 @@ const Editor = ({enable, content, loading, contentChange}) => {
       };
     }
 
-    function StylePlugin(editor) {
-        this.editor = editor;
-    }
+    // function StylePlugin(editor) {
+    //     this.editor = editor;
+    // }
     
-    StylePlugin.prototype.init = function() {
-        this.editor.ui.view.editable.extendTemplate({
-            attributes: {
-                style: {
-                    // position: 'fixed',
-                    width: '100%',
-                    height: '100%',
-                    minHeight: '100%'
-                }
-            }
-        });
-    };
+    // StylePlugin.prototype.init = function() {
+    //     this.editor.ui.view.editable.extendTemplate({
+    //         attributes: {
+    //             style: {
+    //                 flex: '1 0 auto'
+    //             }
+    //         }
+    //     });
+    // };
 
     const editorConfiguration = {
         plugins: [ Essentials, Bold, Italic, Paragraph, Image, ImageCaption, ImageStyle, ImageToolbar, ImageUpload ],
         toolbar: [ 'bold', 'italic', 'imageUpload' ],
-        extraPlugins: [ UploadAdapterPlugin, StylePlugin ]
+        extraPlugins: [ UploadAdapterPlugin ]
     };
 
     return (

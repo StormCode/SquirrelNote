@@ -7,8 +7,6 @@ import {
     GET_NOTE_DETAIL,
     SET_CURRENT_NOTE,
     CLEAR_CURRENT_NOTE,
-    SET_CURRENT_CACHE_NOTE,
-    CLEAR_CURRENT_CACHE_NOTE,
     ADD_NOTE,
     UPDATE_NOTE,
     DELETE_NOTE,
@@ -96,25 +94,25 @@ const NoteState = props => {
     }
 
     //設定目前的快取筆記內容
-    const setCurrentCacheNote = cacheNote => {
-        try {
-            dispatch({
-                type: SET_CURRENT_CACHE_NOTE,
-                payload: cacheNote
-            })
-        } catch (err) {
-            dispatch({type: NOTE_ERROR})
-        }
-    }
+    // const setCurrentCacheNote = cacheNote => {
+    //     try {
+    //         dispatch({
+    //             type: SET_CURRENT_CACHE_NOTE,
+    //             payload: cacheNote
+    //         })
+    //     } catch (err) {
+    //         dispatch({type: NOTE_ERROR})
+    //     }
+    // }
 
-    //清除目前的快取筆記內容
-    const clearCurrentCacheNote = () => {
-        try {
-            dispatch({ type: CLEAR_CURRENT_CACHE_NOTE })
-        } catch (err) {
-            dispatch({type: NOTE_ERROR})
-        }
-    }
+    // //清除目前的快取筆記內容
+    // const clearCurrentCacheNote = () => {
+    //     try {
+    //         dispatch({ type: CLEAR_CURRENT_CACHE_NOTE })
+    //     } catch (err) {
+    //         dispatch({type: NOTE_ERROR})
+    //     }
+    // }
 
     //查詢筆記內容
     const getNoteDetail = async id => {
@@ -238,7 +236,6 @@ const NoteState = props => {
                 type: REMOVE_CACHE_NOTE,
                 payload: id
             });
-            dispatch({ type: CLEAR_CURRENT_NOTE });
         } catch (err) {
             dispatch({ type: NOTE_ERROR});
         }
@@ -310,8 +307,6 @@ const NoteState = props => {
             getNoteDetail,
             setCurrentNote,
             clearCurrentNote,
-            setCurrentCacheNote,
-            clearCurrentCacheNote,
             enableEditor,
             disableEditor,
             addNote,

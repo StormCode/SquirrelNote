@@ -2,6 +2,7 @@ const { addWebpackModuleRule, adjustStyleLoaders, override } = require('customiz
 // Use the `tap` function to output the config files for debugging.
 // const { addWebpackModuleRule, adjustStyleLoaders, override, tap} = require('customize-cra');
 const { styles } = require('@ckeditor/ckeditor5-dev-utils');
+const CKEditorWebpackPlugin = require('@ckeditor/ckeditor5-dev-webpack-plugin');
 
 // These are copies of the regexes defined in CRA's Webpack config:
 // eslint-disable-next-line max-len
@@ -49,6 +50,32 @@ const adjustFileLoader = () => (config) => {
 
     return config;
 };
+
+const adjustWebpackPlugin = () => (config) => {
+    if (!config.plugins) {
+        config.plugins = [];
+    }
+    config.plugins.push(new CKEditorWebpackPlugin( {
+        // The main language that will be built into the main bundle.
+        language: 'zh',
+
+        // Additional languages that will be emitted to the `outputDirectory`.
+        // This option can be set to an array of language codes or `'all'` to build all found languages.
+        // The bundle is optimized for one language when this option is omitted.
+        additionalLanguages: 'all',
+        addMainLanguageTranslationsToAllAssets: true
+
+        // For more advanced options see https://github.com/ckeditor/ckeditor5-dev/tree/master/packages/ckeditor5-dev-webpack-plugin.
+    } ));
+
+    return config;
+}
+
+if (process.env.NODE_ENV === 'development') {//開發模式開啟sourceMap
+    process.env.GENERATE_SOURCEMAP = "true";
+} else if (process.env.NODE_ENV === 'production') {//打包模式關閉sourceMap
+    process.env.GENERATE_SOURCEMAP = "false";
+}
 
 module.exports = override(
     // Outputs current config to "customize-cra--before.log", with a prepended message
@@ -116,6 +143,9 @@ module.exports = override(
 
     // (3) Modify config for file loaders
     adjustFileLoader(),
+
+    // (4) Modify config for Plugins
+    adjustWebpackPlugin(),
 
     // Outputs final config to "customize-cra--after.log", with a prepended message
     // tap({ dest: 'customize-cra--after.log', message: 'After changes for CKEditor' }),

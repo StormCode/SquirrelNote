@@ -131,12 +131,14 @@ router.post('/', auth, async(req, res) => {
 // access           Private
 router.put('/:id', auth, async(req, res) => {
     const { title, content } = req.body;
+    const updateDateTime = new Date();
 
     //建立筆記物件
     const noteField = {
         title,
         content,
-        notedir: req.body.notedir
+        notedir: req.body.notedir,
+        date: updateDateTime
     };
 
     try {
@@ -180,7 +182,7 @@ router.put('/:id', auth, async(req, res) => {
         // 連帶修改筆記目錄的筆記資訊
         let summary = getSummary(content);
         await Notedir.findOneAndUpdate({_id: req.body.notedir, 'notes._id': id},
-            { $set: {'notes.$.title': title, 'notes.$.summary': summary}}
+            { $set: {'notes.$.title': title, 'notes.$.summary': summary, 'notes.$.date': updateDateTime}}
         );
         
         //取得新的筆記目錄

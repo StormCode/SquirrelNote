@@ -3,8 +3,6 @@ import {
     GET_NOTE_DETAIL,
     SET_CURRENT_NOTE,
     CLEAR_CURRENT_NOTE,
-    SET_CURRENT_CACHE_NOTE,
-    CLEAR_CURRENT_CACHE_NOTE,
     ADD_NOTE,
     UPDATE_NOTE,
     DELETE_NOTE,
@@ -49,16 +47,6 @@ export default (state, action) => {
                 ...state,
                 current: null
             }
-        case SET_CURRENT_CACHE_NOTE:
-            return {
-                ...state,
-                cacheCurrent: action.payload
-            }
-        case CLEAR_CURRENT_CACHE_NOTE:
-            return {
-                ...state,
-                cacheCurrent: null
-            }
         case ADD_NOTE:
             return {
                 ...state,
@@ -67,11 +55,24 @@ export default (state, action) => {
                         _id: action.payload._id, 
                         date: action.payload.date
                     }),
+                //因為server回傳的資料中沒有content，所以由current帶給cacheCurrent
+                cacheCurrent: {
+                    title: state.current.title,
+                    content: state.current.content
+                },
                 notes: [...state.notes, action.payload]
             }
         case UPDATE_NOTE:
             return {
                 ...state,
+                current: Object.assign({}, state.current, 
+                    {
+                        date: action.payload.date
+                    }),
+                cacheCurrent: {
+                    title: action.payload.title,
+                    content: action.payload.content
+                },
                 notes: state.notes.map(note => 
                     note._id === action.payload._id ? action.payload : note
                 )
@@ -80,6 +81,7 @@ export default (state, action) => {
             return {
                 ...state,
                 current: null,
+                cacheCurrent: null,
                 notes: state.notes.filter(note => 
                     note._id !== action.payload)
             }
@@ -96,7 +98,13 @@ export default (state, action) => {
         case APPEND_CACHE_NOTE:
             return {
                 ...state,
-                cacheNotes: [...state.cacheNotes, action.payload]
+                cacheNotes: [...state.cacheNotes, action.payload],
+                current: action.payload,
+                cacheCurrent: {
+                    title: action.payload.title,
+                    content: action.payload.content
+                },
+                editorEnable: true
             }
         case MODIFY_CACHE_NOTE:
             return {

@@ -36,8 +36,6 @@ const Note = ({ match }) => {
         removeCacheNote, 
         discardCacheNote,
         setCurrentNote, 
-        setCurrentCacheNote, 
-        clearCurrentCacheNote,
         getNoteDetail,
         editorEnable, 
         enableEditor, 
@@ -57,38 +55,16 @@ const Note = ({ match }) => {
     const [autoSave, setAutoSave] = useState(true);
     const [autoSaveIntervalToken, setAutoSaveIntervalToken] = useState({});
     const [saveTextUpdateInterval, setSaveTextUpdateInterval] = useState(10000);
-    const [noteChanged, setNoteChanged] = useState(false);
 
     const host = `${window.location.protocol}//${window.location.host}`;
 
     useEffect(() => {
-        if(current && current._id) {
+        if(current && current._id && cacheCurrent) {
             console.log('current: ' + current._id);
 
             //控制儲存狀態(筆記載入時顯示已儲存)
             setSave({state: SAVED, showUpdateTime: true});
 
-            // if(cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) {
-            //     modifyCacheNote(current);
-            // } else {
-            //     console.log('cacheCurrent.title: ' + cacheCurrent.title);
-            //     console.log('cacheCurrent.content: ' + cacheCurrent.content);
-            //     console.log('current.title: ' + current.title);
-            //     console.log('current.content: ' + current.content);
-                
-            //     let currentNote = notes.find(note => note._id === current._id);
-            //     currentNote && (cacheCurrent.title !== current.title || cacheCurrent.content !== current.content) 
-            //                 && appendCacheNote(current);
-            // }
-        } else {
-            //控制儲存、編輯器狀態
-            disableEditor();
-            setSave({state: DISABLESAVE, showUpdateTime: false});
-        }
-    },[current]);
-
-    useEffect(() => {
-        if(noteChanged === true) {
             if(cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) {
                 modifyCacheNote(current);
             } else {
@@ -97,10 +73,16 @@ const Note = ({ match }) => {
                 console.log('current.title: ' + current.title);
                 console.log('current.content: ' + current.content);
                 
-                appendCacheNote(current);
+                let currentNote = notes.find(note => note._id === current._id);
+                currentNote && (cacheCurrent.title !== current.title || cacheCurrent.content !== current.content) 
+                            && appendCacheNote(current);
             }
+        } else {
+            //控制儲存、編輯器狀態
+            disableEditor();
+            setSave({state: DISABLESAVE, showUpdateTime: false});
         }
-    },[noteChanged]);
+    },[current]);
 
     // useEffect(() => {
     //     if(current && (cacheTitle || cacheContent)) {
@@ -129,22 +111,15 @@ const Note = ({ match }) => {
         if(cacheNotes.length > 0) {
             current && current._id
                     && (cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) 
-                        && (current.title !== '' || current.content !== '') 
+                        && (current.title !== '' || current.content !== '')
                             ? setSave({state: UNSAVE, showUpdateTime: false}) : setSave({state: DISABLESAVE, showUpdateTime: false});
         }
     },[cacheNotes]);
 
-
     useEffect(() => {
-        if(current && notes) {
-            let currentNote = notes.find(note => note._id === current._id);
-            currentNote && (cacheCurrent.title !== current.title || cacheCurrent.content !== current.content) 
-                        && setNoteChanged(true);
-        }
-
         //控制刪除狀態
         current && notes.map(note => note._id).indexOf(current._id) !== -1 ? enableDelete() : disableDelete();
-    },[current, notes, cacheCurrent]);
+    },[current, notes]);
 
     const titleChange = useCallback(e => {
         e.preventDefault();
@@ -195,8 +170,6 @@ const Note = ({ match }) => {
     const setNoteContent = note => {
         // if(cacheNotes.map(cacheNote => cacheNote._id).indexOf(note._id) == -1) {
         getNoteDetail(note._id);
-
-        setNoteChanged(false);
             
         // } else {
         //     let currentNote = await cacheNotes.find(cacheNote => {
@@ -219,11 +192,11 @@ const Note = ({ match }) => {
             date: null
         };
         appendCacheNote(newNote);
-        setCurrentCacheNote({
-            title: '',
-            content: ''
-        });
-        setCurrentNote(newNote);
+        // setCurrentNote(newNote);
+        // setCurrentCacheNote({
+        //     title: '',
+        //     content: ''
+        // });
     };
 
     const onEdit = e => {
@@ -233,8 +206,7 @@ const Note = ({ match }) => {
 
     const onDelete = e => {
         e.preventDefault();
-        deleteNote(notedirContext.current._id, current._id);
-        clearCurrentCacheNote();
+        current && deleteNote(notedirContext.current._id, current._id);
     }
 
     const onDiscard = e => {
@@ -269,14 +241,14 @@ const Note = ({ match }) => {
                     await updateNote(current._id, saveNote);
                 }
 
-                setCurrentNote({
-                    content: newContent
-                });
+                // setCurrentNote({
+                //     content: newContent
+                // });
 
-                setCurrentCacheNote({
-                    title: current.title,
-                    content: newContent
-                });
+                // setCurrentCacheNote({
+                //     title: current.title,
+                //     content: newContent
+                // });
     
                 //wrong
                 if(error){
