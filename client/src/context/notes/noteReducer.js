@@ -52,13 +52,13 @@ export default (state, action) => {
                 ...state,
                 current: Object.assign({}, state.current, 
                     {
-                        _id: action.payload._id, 
+                        _id: action.payload._id,
+                        content: action.payload.content, 
                         date: action.payload.date
                     }),
-                //因為server回傳的資料中沒有content，所以由current帶給cacheCurrent
                 cacheCurrent: {
                     title: state.current.title,
-                    content: state.current.content
+                    content: action.payload.content
                 },
                 notes: [...state.notes, action.payload]
             }
@@ -67,6 +67,7 @@ export default (state, action) => {
                 ...state,
                 current: Object.assign({}, state.current, 
                     {
+                        content: action.payload.content, 
                         date: action.payload.date
                     }),
                 cacheCurrent: {
@@ -100,10 +101,11 @@ export default (state, action) => {
                 ...state,
                 cacheNotes: [...state.cacheNotes, action.payload],
                 current: action.payload,
-                cacheCurrent: {
-                    title: action.payload.title,
-                    content: action.payload.content
-                },
+                cacheCurrent: state.notes.find(note => note._id === action.payload._id) !== null
+                                ? state.cacheCurrent : {
+                                    title: '',
+                                    content: ''
+                                },
                 editorEnable: true
             }
         case MODIFY_CACHE_NOTE:

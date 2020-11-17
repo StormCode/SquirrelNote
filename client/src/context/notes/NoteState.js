@@ -21,9 +21,6 @@ import {
     NOTE_ERROR
 } from '../types.js';
 import {
-    UNSAVE,
-    SAVING,
-    SAVED,
     DISABLESAVE
 } from '../../saveState';
 
@@ -93,27 +90,6 @@ const NoteState = props => {
         }
     }
 
-    //設定目前的快取筆記內容
-    // const setCurrentCacheNote = cacheNote => {
-    //     try {
-    //         dispatch({
-    //             type: SET_CURRENT_CACHE_NOTE,
-    //             payload: cacheNote
-    //         })
-    //     } catch (err) {
-    //         dispatch({type: NOTE_ERROR})
-    //     }
-    // }
-
-    // //清除目前的快取筆記內容
-    // const clearCurrentCacheNote = () => {
-    //     try {
-    //         dispatch({ type: CLEAR_CURRENT_CACHE_NOTE })
-    //     } catch (err) {
-    //         dispatch({type: NOTE_ERROR})
-    //     }
-    // }
-
     //查詢筆記內容
     const getNoteDetail = async id => {
         try {
@@ -145,7 +121,7 @@ const NoteState = props => {
             const res = await axios.post('/api/notes/', note, config);
             dispatch({
                 type: ADD_NOTE,
-                payload: res.data
+                payload: {...res.data, content: note.content}
             });
         } catch (err) {
             dispatch({
@@ -167,7 +143,7 @@ const NoteState = props => {
             const res = await axios.put(`/api/notes/${id}`, note, config);
             dispatch({
                 type: UPDATE_NOTE,
-                payload: res.data
+                payload: {...res.data, content: note.content}
             });
         } catch (err) {
             dispatch({ type: NOTE_ERROR});

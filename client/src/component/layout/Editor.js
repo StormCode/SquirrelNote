@@ -4,15 +4,32 @@ import React from 'react';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 
 import ClassicEditor from '@ckeditor/ckeditor5-editor-classic/src/classiceditor';
+import Alignment from '@ckeditor/ckeditor5-alignment/src/alignment.js';
+import BlockQuote from '@ckeditor/ckeditor5-block-quote/src/blockquote.js';
 import Bold from '@ckeditor/ckeditor5-basic-styles/src/bold';
-import Italic from '@ckeditor/ckeditor5-basic-styles/src/italic';
+import CodeBlock from '@ckeditor/ckeditor5-code-block/src/codeblock.js';
+import FontBackgroundColor from '@ckeditor/ckeditor5-font/src/fontbackgroundcolor.js';
+import FontColor from '@ckeditor/ckeditor5-font/src/fontcolor.js';
+import FontFamily from '@ckeditor/ckeditor5-font/src/fontfamily.js';
+import FontSize from '@ckeditor/ckeditor5-font/src/fontsize.js';
+import Heading from '@ckeditor/ckeditor5-heading/src/heading.js';
 import Essentials from '@ckeditor/ckeditor5-essentials/src/essentials';
-import Paragraph from '@ckeditor/ckeditor5-paragraph/src/paragraph';
 import Image from '@ckeditor/ckeditor5-image/src/image';
 import ImageCaption from '@ckeditor/ckeditor5-image/src/imagecaption';
 import ImageStyle from '@ckeditor/ckeditor5-image/src/imagestyle';
 import ImageToolbar from '@ckeditor/ckeditor5-image/src/imagetoolbar';
 import ImageUpload from '@ckeditor/ckeditor5-image/src/imageupload';
+import Indent from '@ckeditor/ckeditor5-indent/src/indent.js';
+import Italic from '@ckeditor/ckeditor5-basic-styles/src/italic';
+import Link from '@ckeditor/ckeditor5-link/src/link.js';
+import List from '@ckeditor/ckeditor5-list/src/list.js';
+import MediaEmbed from '@ckeditor/ckeditor5-media-embed/src/mediaembed.js';
+import Paragraph from '@ckeditor/ckeditor5-paragraph/src/paragraph.js';
+import PasteFromOffice from '@ckeditor/ckeditor5-paste-from-office/src/pastefromoffice';
+import Table from '@ckeditor/ckeditor5-table/src/table.js';
+import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar.js';
+import TextTransformation from '@ckeditor/ckeditor5-typing/src/texttransformation.js';
+import Underline from '@ckeditor/ckeditor5-basic-styles/src/underline.js';
 
 import UploadAdapter from '../../utils/uploadAdapter';
 
@@ -44,23 +61,67 @@ const Editor = ({enable, content, loading, contentChange}) => {
       };
     }
 
-    // function StylePlugin(editor) {
-    //     this.editor = editor;
-    // }
-    
-    // StylePlugin.prototype.init = function() {
-    //     this.editor.ui.view.editable.extendTemplate({
-    //         attributes: {
-    //             style: {
-    //                 flex: '1 0 auto'
-    //             }
-    //         }
-    //     });
-    // };
-
     const editorConfiguration = {
-        plugins: [ Essentials, Bold, Italic, Paragraph, Image, ImageCaption, ImageStyle, ImageToolbar, ImageUpload ],
-        toolbar: [ 'bold', 'italic', 'imageUpload' ],
+        plugins: [ 
+	        Alignment,
+            BlockQuote,
+            Bold, 
+            CodeBlock,
+            Essentials, 
+            FontBackgroundColor,
+            FontColor,
+            FontFamily,
+            FontSize,
+            Heading,
+            Image, 
+            ImageCaption, 
+            ImageStyle, 
+            ImageToolbar, 
+            ImageUpload, 
+            Indent, 
+            Italic, 
+            Link,
+            List,
+            MediaEmbed,
+            Paragraph, 
+            PasteFromOffice,
+            Table,
+            TableToolbar,
+            TextTransformation,
+            Underline
+        ],
+        toolbar: [
+            'bold',
+            'italic',
+            'underline',
+            'link',
+            '|',
+            'bulletedList',
+            'numberedList',
+            'indent',
+            'outdent',
+            '|',
+            'fontColor',
+            'fontSize',
+            'fontFamily',
+            'fontBackgroundColor',
+            '|',
+            'blockQuote',
+            'insertTable',
+            'codeBlock',
+            'imageUpload',
+            'mediaEmbed',
+            '|',
+            'undo',
+            'redo'
+        ],
+        table: {
+            contentToolbar: [
+                'tableColumn',
+                'tableRow',
+                'mergeTableCells'
+            ]
+        },
         extraPlugins: [ UploadAdapterPlugin ]
     };
 

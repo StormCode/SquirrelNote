@@ -1,11 +1,10 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
 import ImgSrcParser from '../../utils/imgSrcParser';
 import Notedirs from '../notedirs/NoteDirs';
 import Notes from '../notes/Notes';
-// import NoteEditor from '../notes/NoteEditor';
 import Editor from '../layout/Editor';
 import NotedirSorter from '../notedirs/NotedirSorter';
 
@@ -60,19 +59,12 @@ const Note = ({ match }) => {
 
     useEffect(() => {
         if(current && current._id && cacheCurrent) {
-            console.log('current: ' + current._id);
-
             //控制儲存狀態(筆記載入時顯示已儲存)
             setSave({state: SAVED, showUpdateTime: true});
 
             if(cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) {
                 modifyCacheNote(current);
             } else {
-                console.log('cacheCurrent.title: ' + cacheCurrent.title);
-                console.log('cacheCurrent.content: ' + cacheCurrent.content);
-                console.log('current.title: ' + current.title);
-                console.log('current.content: ' + current.content);
-                
                 let currentNote = notes.find(note => note._id === current._id);
                 currentNote && (cacheCurrent.title !== current.title || cacheCurrent.content !== current.content) 
                             && appendCacheNote(current);
@@ -84,36 +76,13 @@ const Note = ({ match }) => {
         }
     },[current]);
 
-    // useEffect(() => {
-    //     if(current && (cacheTitle || cacheContent)) {
-    //         //設定Current Note的content
-    //         let currentNote = {};
-    //         if(cacheTitle) currentNote.title = cacheTitle;
-    //         if(cacheContent) currentNote.content = cacheContent;
-    //         setCurrentNote(currentNote);
-
-    //         //新增/修改快取筆記
-    //         if(current._id) {
-    //             currentNote._id = current._id;
-    //             if(cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) {
-    //                 modifyCacheNote(currentNote);
-    //             } else {
-    //                 let currentNote = notes.find(note => note._id === current._id);
-    //                 currentNote && (cacheTitle !== current.title || cacheContent !== current.content) 
-    //                             && appendCacheNote(current);
-    //             }
-    //         }
-    //     }
-    // },[cacheTitle, cacheContent]);
-
     useEffect(() => {
         //控制儲存狀態
-        if(cacheNotes.length > 0) {
-            current && current._id
-                    && (cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) 
-                        && (current.title !== '' || current.content !== '')
-                            ? setSave({state: UNSAVE, showUpdateTime: false}) : setSave({state: DISABLESAVE, showUpdateTime: false});
-        }
+        if(current && current._id
+            && cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) {
+                current.title !== '' || current.content !== ''
+                    ? setSave({state: UNSAVE, showUpdateTime: false}) : setSave({state: DISABLESAVE, showUpdateTime: false});
+            }
     },[cacheNotes]);
 
     useEffect(() => {
@@ -124,36 +93,15 @@ const Note = ({ match }) => {
     const titleChange = useCallback(e => {
         e.preventDefault();
         
-        current && current.title !== e.target.value 
-                && setCurrentNote({ title: e.target.value });
-
-        // cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1 ?
-        //     modifyCacheNote(note) : appendCacheNote(getId());
+        current && setCurrentNote({ title: e.target.value });
     },[current]);
 
     const contentChange = useCallback(data => {
-        // let note = {
-        //     _id: current._id,
-        //     title: current.title,
-        //     content: data
-        // };
         console.log('data: ' + data);
         current && console.log('content: ' + current.content);
 
-        current && current.content !== data 
-                && setCurrentNote({ content: data });
-
-        // cacheNotes.map(cacheNote => cacheNote._id).indexOf(note._id) !== -1 ?
-        //     modifyCacheNote(note) : appendCacheNote(getId());
-    },[current, cacheCurrent]);
-
-    // useEffect(() => {
-    //     if(current && current._id) {
-    //         let currentNote = notes.find(note => note._id === current._id);
-    //         currentNote && currentNote.title !== current.title && currentNote.content !== current.content 
-    //                     && appendCacheNote(current);
-    //     }
-    // },[titleChange, contentChange]);
+        current && setCurrentNote({ content: data });
+    },[current]);
 
     const setCacheNoteContent = note => {
         let currentNote = {
@@ -164,23 +112,10 @@ const Note = ({ match }) => {
             }).content
         };
         setCurrentNote(currentNote);
-        // modifyCacheNote(currentNote);
     }
 
     const setNoteContent = note => {
-        // if(cacheNotes.map(cacheNote => cacheNote._id).indexOf(note._id) == -1) {
         getNoteDetail(note._id);
-            
-        // } else {
-        //     let currentNote = await cacheNotes.find(cacheNote => {
-        //         return cacheNote._id == note._id
-        //     });
-        //     setCurrentNote({
-        //         _id: note._id,
-        //         title: note.title,
-        //         content: currentNote.content
-        //     });
-        // }
     };
 
     const onAdd = e => {
@@ -192,11 +127,6 @@ const Note = ({ match }) => {
             date: null
         };
         appendCacheNote(newNote);
-        // setCurrentNote(newNote);
-        // setCurrentCacheNote({
-        //     title: '',
-        //     content: ''
-        // });
     };
 
     const onEdit = e => {
@@ -240,15 +170,6 @@ const Note = ({ match }) => {
                     //更新筆記到資料庫
                     await updateNote(current._id, saveNote);
                 }
-
-                // setCurrentNote({
-                //     content: newContent
-                // });
-
-                // setCurrentCacheNote({
-                //     title: current.title,
-                //     content: newContent
-                // });
     
                 //wrong
                 if(error){
@@ -263,9 +184,7 @@ const Note = ({ match }) => {
             } catch (err) {
                 //todo
                 console.log('儲存錯誤: ' + err);
-                
             }
-
         }
 
         async function ReplaceImage(content){
@@ -348,10 +267,6 @@ const Note = ({ match }) => {
                     <SaveButton state={save.state} onSave={onSave} showUpdateTime={save.showUpdateTime} updateTime={current && current._id ? current.date : null} updateInterval={saveTextUpdateInterval} />
                 </div>
             </div>
-            {/* <NoteEditor 
-                note={current}
-                enable={editorEnable}
-                loading={loading} /> */}
             <Editor 
                 enable={editorEnable}
                 content={current && current.content ? current.content : ''} 
