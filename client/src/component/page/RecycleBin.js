@@ -26,7 +26,7 @@ const RecycleBin = () => {
             <div className='recycle-content'>
                 { notebookId ? 
                     <Link to={`/notebook/${notebookId}`}>回到筆記</Link> 
-                    : <Link to='../'>回到筆記本</Link>}
+                    : <Link to='../Notebook'>回到筆記本</Link>}
                 <h2>回收站</h2>
                 <RecycleList />
             </div>

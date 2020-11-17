@@ -21,11 +21,10 @@ import {
     NOTEBOOK_ERROR
 } from '../types';
 
-const localNotebook = JSON.parse(localStorage.getItem('notebook'));
 const NotebookState = props => {
     const initialState = {
         notebooks: null,
-        current: localNotebook || null,
+        current: null,
         filtered: null,
         orderBy: 'asc',
         sortBy: 'title',
@@ -38,11 +37,11 @@ const NotebookState = props => {
     const [state, dispatch] = useReducer(NotebookReducer, initialState);
 
     //設定目前正在使用的筆記本
-    const setCurrentNotebook = async notebook => {
+    const setCurrentNotebook = async id => {
         try {
             dispatch({
                 type: SET_NOTEBOOK,
-                payload: notebook
+                payload: id
             })
         } catch (err) {
             dispatch({ 

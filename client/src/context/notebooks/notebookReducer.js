@@ -43,13 +43,13 @@ export default (state, action) => {
                 loading: false
             };
         case SET_NOTEBOOK:
-            localStorage.setItem('notebook', JSON.stringify(action.payload));
             return {
                 ...state,
-                current: action.payload
+                current: state.notebooks !== null 
+                    ? state.notebooks.find(notebook => notebook._id === action.payload)
+                    : null
             }
         case CLEAR_NOTEBOOK:
-            localStorage.removeItem('notebook');
             return {
                 ...state,
                 current: null

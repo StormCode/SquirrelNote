@@ -8,6 +8,7 @@ import Notes from '../notes/Notes';
 import Editor from '../layout/Editor';
 import NotedirSorter from '../notedirs/NotedirSorter';
 
+import NotebookContext from '../../context/notebooks/notebookContext';
 import NotedirContext from '../../context/notedirs/notedirContext';
 import NoteContext from '../../context/notes/noteContext';
 
@@ -24,6 +25,7 @@ import '../../style/page/Note.css';
 
 const Note = ({ match }) => {
     const history = useHistory();
+    const notebookContext = useContext(NotebookContext);
     const notedirContext = useContext(NotedirContext);
     const noteContext = useContext(NoteContext);
 
@@ -57,6 +59,12 @@ const Note = ({ match }) => {
     const [saveTextUpdateInterval, setSaveTextUpdateInterval] = useState(10000);
 
     const host = `${window.location.protocol}//${window.location.host}`;
+
+    useEffect(() => {
+        notebookContext.setCurrentNotebook(match.params.id);
+
+        // eslint-disable-next-line
+    }, []);
 
     useEffect(() => {
         if(current && current._id && cacheCurrent) {
@@ -255,7 +263,7 @@ const Note = ({ match }) => {
     return (
         <div className='note-container'>
             <div className='header'>
-                <Link to='../'>回到筆記本</Link>
+                <Link to='../Notebook'>回到筆記本</Link>
                 <NotedirSorter />
             </div>
             <Notedirs notebookId={match.params.id} />

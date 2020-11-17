@@ -49,7 +49,7 @@ const MainNavbar = ({ title }) => {
 
     return (
         //當路徑在筆記頁面的時候要隱藏Navbar
-        location.pathname.match('/notebook/') ? null :
+        location.pathname.match(/notebook\/[0-9\w]+/) ? null :
         <Navbar className="header" color="dark" dark expand="md">
             <NavbarBrand href="/">{title}</NavbarBrand>
             <NavbarToggler onClick={toggle} />

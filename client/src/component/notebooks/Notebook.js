@@ -26,7 +26,6 @@ const Notebook = props => {
         disableEditNotebook,
         enableDeleteNotebook,
         disableDeleteNotebook,
-        setCurrentNotebook,
         updateNotebook, 
         deleteNotebook,
         error } = notebookContext;
@@ -66,7 +65,6 @@ const Notebook = props => {
     const history = useHistory();
 
     const LoadNotebook = () => {
-        setCurrentNotebook(props.notebook);
         history.push(`/notebook/${_id}`);
     }
 

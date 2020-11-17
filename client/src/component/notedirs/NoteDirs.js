@@ -3,18 +3,15 @@ import Spinner from '../../component/layout/Spinner'
 import TextInput from '../../component/layout/TextInput'
 import Notedir from './NoteDir';
 
-import NotebookContext from '../../context/notebooks/notebookContext';
 import NotedirContext from '../../context/notedirs/notedirContext';
 
 // Import Resource
 import confirmImg from '../../assets/general/confirm_32x32.png';
 import cancelImg from '../../assets/general/close_32x32.png';
 
-const Notedirs = () => {
-    const notebookContext = useContext(NotebookContext);
+const Notedirs = ({notebookId}) => {
     const notedirContext = useContext(NotedirContext);
     
-    const notebookId = notebookContext.current._id;
     const { notedirs, getNotedirs, setNotedir, addNotedir, loading, error } = notedirContext;
 
     const text = {

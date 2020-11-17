@@ -5,6 +5,7 @@ import Footer from './component/layout/Footer'
 import Alerts from './component/layout/Alerts'
 import Login from './component/auth/Login'
 import Register from './component/auth/Register'
+import Index from './component/page/Index'
 import Notebook from './component/page/Notebook'
 import Note from './component/page/Note'
 import RecycleBin from './component/page/RecycleBin'
@@ -41,7 +42,7 @@ function App() {
                                             <Switch>
                                                 <PrivateRoute
                                                     exact
-                                                    path="/"
+                                                    path="/Notebook"
                                                     component={Notebook}
                                                 ></PrivateRoute>
                                                 <PrivateRoute
@@ -54,6 +55,16 @@ function App() {
                                                     path="/RecycleBin"
                                                     component={RecycleBin}
                                                 ></PrivateRoute>
+                                                <Route
+                                                    exact
+                                                    path="/"
+                                                    component={Index}
+                                                ></Route>
+                                                <Route
+                                                    exact
+                                                    path="/Index"
+                                                    component={Index}
+                                                ></Route>
                                                 <Route
                                                     exact
                                                     path="/Login"

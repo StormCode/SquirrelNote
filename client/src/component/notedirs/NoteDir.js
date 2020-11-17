@@ -25,7 +25,7 @@ const Notedir = (props) => {
     const notebookContext = useContext(NotebookContext);
     const notedirContext = useContext(NotedirContext);
 
-    const notebookId = notebookContext.current._id;
+    const notebookId = notebookContext.current;
     const { 
         currentEditNotedir,
         currentDeleteNotedir,
