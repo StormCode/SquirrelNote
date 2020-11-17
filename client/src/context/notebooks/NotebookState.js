@@ -45,7 +45,10 @@ const NotebookState = props => {
                 payload: notebook
             })
         } catch (err) {
-            dispatch({ type: NOTEBOOK_ERROR });
+            dispatch({ 
+                type: NOTEBOOK_ERROR,
+                payload: err.msg || 'Server Error'
+            });
         }
     };
 
@@ -54,7 +57,10 @@ const NotebookState = props => {
         try {
             dispatch({ type: CLEAR_NOTEBOOK })
         } catch (err) {
-            dispatch({ type: NOTEBOOK_ERROR });
+            dispatch({ 
+                type: NOTEBOOK_ERROR,
+                payload: err.msg || 'Server Error'
+            });
         }
     };
 
@@ -67,7 +73,10 @@ const NotebookState = props => {
                 payload: res.data
             });
         } catch (err) {
-            dispatch({ type: NOTEBOOK_ERROR });
+            dispatch({ 
+                type: NOTEBOOK_ERROR,
+                payload: err.msg || 'Server Error'
+            });
         }
     };
 
@@ -87,7 +96,10 @@ const NotebookState = props => {
             });
             dispatch({ type: DISABLE_ADDNOTEBOOK });
         } catch (err) {
-            dispatch({ type: NOTEBOOK_ERROR});
+            dispatch({ 
+                type: NOTEBOOK_ERROR,
+                payload: err.msg || 'Server Error'
+            });
         }
     }
 
@@ -107,7 +119,10 @@ const NotebookState = props => {
             });
             dispatch({ type: DISABLE_EDITNOTEBOOK });
         } catch (err) {
-            dispatch({ type: NOTEBOOK_ERROR});
+            dispatch({ 
+                type: NOTEBOOK_ERROR,
+                payload: err.msg || 'Server Error'
+            });
         }
     }
 
@@ -121,7 +136,10 @@ const NotebookState = props => {
             });
             dispatch({ type: DISABLE_DELETENOTEBOOK });
         } catch (err) {
-            dispatch({ type: NOTEBOOK_ERROR});
+            dispatch({ 
+                type: NOTEBOOK_ERROR,
+                payload: err.msg || 'Server Error'
+            });
         }
     }
 

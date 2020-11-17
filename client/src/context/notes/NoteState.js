@@ -10,27 +10,31 @@ import {
     ADD_NOTE,
     UPDATE_NOTE,
     DELETE_NOTE,
-    FILTER_NOTE,
-    SORT_NOTE,
     APPEND_CACHE_NOTE,
     MODIFY_CACHE_NOTE,
     REMOVE_CACHE_NOTE,
     ENABLE_EDITOR,
     DISABLE_EDITOR,
-    ENABLE_SAVE,
-    DISABLE_SAVE,
+    SET_SAVE,
     ENABLE_DELETE,
     DISABLE_DELETE,
     NOTE_ERROR
 } from '../types.js';
+import {
+    DISABLESAVE
+} from '../../saveState';
 
 const NoteState = props => {
     const initialState = {
         notes: null,
         current: null,
+        cacheCurrent: null,
+        save: {
+            state: DISABLESAVE,
+            showUpdateTime: false
+        },
         cacheNotes: [],
         editorEnable: false,
-        saveEnable: false,
         deleteEnable: false,
         filtered: null,
         orderBy: 'asc',
@@ -60,7 +64,7 @@ const NoteState = props => {
         } catch (err) {
             dispatch({
                 type: NOTE_ERROR,
-                payload: err.msg
+                payload: err.msg || 'Server Error'
             })
         }
     }
@@ -77,19 +81,31 @@ const NoteState = props => {
         }
     }
 
+    //清除目前的筆記內容
+    const clearCurrentNote = () => {
+        try {
+            dispatch({ type: CLEAR_CURRENT_NOTE })
+        } catch (err) {
+            dispatch({type: NOTE_ERROR})
+        }
+    }
+
     //查詢筆記內容
     const getNoteDetail = async id => {
         try {
             const res = await axios.get(`/api/notes/${id}`);
+            
             dispatch({
                 type: GET_NOTE_DETAIL,
                 payload: res.data
             });
         } catch (err) {
+            console.log('err: ' + err);
+            
             dispatch({
                 type: NOTE_ERROR,
-                payload: err.msg
-            })
+                payload: err.msg || 'Server Error'
+            });
         }
     }
 
@@ -105,16 +121,12 @@ const NoteState = props => {
             const res = await axios.post('/api/notes/', note, config);
             dispatch({
                 type: ADD_NOTE,
-                payload: res.data
-            });
-            dispatch({
-                type: SET_CURRENT_NOTE,
-                payload: res.data
+                payload: {...res.data, content: note.content}
             });
         } catch (err) {
             dispatch({
                 type: NOTE_ERROR,
-                payload: err.msg
+                payload: err.msg || 'Server Error'
             });
         }
     }
@@ -131,11 +143,7 @@ const NoteState = props => {
             const res = await axios.put(`/api/notes/${id}`, note, config);
             dispatch({
                 type: UPDATE_NOTE,
-                payload: res.data
-            });
-            dispatch({
-                type: SET_CURRENT_NOTE,
-                payload: res.data
+                payload: {...res.data, content: note.content}
             });
         } catch (err) {
             dispatch({ type: NOTE_ERROR});
@@ -156,23 +164,9 @@ const NoteState = props => {
                 type: DELETE_NOTE,
                 payload: noteId
             });
-            dispatch({
-                type: SET_CURRENT_NOTE,
-                payload: null
-            });
         } catch (err) {
             dispatch({ type: NOTE_ERROR});
         }
-    }
-
-    //篩選筆記
-    const filterNote = () => {
-
-    }
-
-    //排序筆記
-    const sortNote = () => {
-
     }
 
     //新增暫存的筆記
@@ -218,7 +212,6 @@ const NoteState = props => {
                 type: REMOVE_CACHE_NOTE,
                 payload: id
             });
-            dispatch({ type: CLEAR_CURRENT_NOTE });
         } catch (err) {
             dispatch({ type: NOTE_ERROR});
         }
@@ -242,19 +235,13 @@ const NoteState = props => {
         }
     };
 
-    //啟用儲存功能
-    const enableSave = () => {
+    //設定儲存狀態
+    const setSave = saveState => {
         try {
-            dispatch({ type: ENABLE_SAVE });
-        } catch (err) {
-            dispatch({type: NOTE_ERROR});
-        }
-    }
-
-    //停用儲存功能
-    const disableSave = () => {
-        try {
-            dispatch({ type: DISABLE_SAVE });
+            dispatch({ 
+                type: SET_SAVE,
+                payload: saveState
+            });
         } catch (err) {
             dispatch({type: NOTE_ERROR});
         }
@@ -284,9 +271,10 @@ const NoteState = props => {
             notes: state.notes,
             current: state.current,
             cacheNotes: state.cacheNotes,
+            cacheCurrent: state.cacheCurrent,
             editorEnable: state.editorEnable,
-            saveEnable: state.saveEnable,
             deleteEnable: state.deleteEnable,
+            save: state.save,
             filtered: state.filtered,
             orderBy: state.orderBy,
             sortBy: state.sortBy,
@@ -294,19 +282,17 @@ const NoteState = props => {
             getNotes,
             getNoteDetail,
             setCurrentNote,
+            clearCurrentNote,
             enableEditor,
             disableEditor,
             addNote,
             updateNote,
             deleteNote,
-            filterNote,
-            sortNote,
             appendCacheNote,
             modifyCacheNote,
             removeCacheNote,
             discardCacheNote,
-            enableSave,
-            disableSave,
+            setSave,
             enableDelete,
             disableDelete
         }}>

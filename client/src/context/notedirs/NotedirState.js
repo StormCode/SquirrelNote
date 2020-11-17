@@ -48,7 +48,7 @@ const NotedirState = props => {
         } catch (err) {
             dispatch({
                 type: NOTEDIR_ERROR,
-                payload: err.msg
+                payload: err.msg || 'Server Error'
             })
         }
     }
@@ -63,7 +63,7 @@ const NotedirState = props => {
         } catch (err) {
             dispatch({
                 type: NOTEDIR_ERROR,
-                payload: err.msg
+                payload: err.msg || 'Server Error'
             })
         }
     }

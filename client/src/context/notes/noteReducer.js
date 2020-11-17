@@ -6,19 +6,17 @@ import {
     ADD_NOTE,
     UPDATE_NOTE,
     DELETE_NOTE,
-    FILTER_NOTE,
-    SORT_NOTE,
     APPEND_CACHE_NOTE,
     MODIFY_CACHE_NOTE,
     REMOVE_CACHE_NOTE,
     ENABLE_EDITOR,
     DISABLE_EDITOR,
-    ENABLE_SAVE,
-    DISABLE_SAVE,
+    SET_SAVE,
     ENABLE_DELETE,
     DISABLE_DELETE,
     NOTE_ERROR
 } from '../types.js';
+
 
 export default (state, action) => {
     switch(action.type){
@@ -29,10 +27,20 @@ export default (state, action) => {
                 loading: false
             }
         case GET_NOTE_DETAIL:
+            return {
+                ...state,
+                editorEnable: true,
+                current: action.payload,
+                cacheCurrent: {
+                    title: action.payload.title,
+                    content: action.payload.content
+                }
+            }
         case SET_CURRENT_NOTE:
             return {
                 ...state,
-                current: action.payload
+                editorEnable: true,
+                current: Object.assign({}, state.current, action.payload)
             }
         case CLEAR_CURRENT_NOTE:
             return {
@@ -42,11 +50,30 @@ export default (state, action) => {
         case ADD_NOTE:
             return {
                 ...state,
+                current: Object.assign({}, state.current, 
+                    {
+                        _id: action.payload._id,
+                        content: action.payload.content, 
+                        date: action.payload.date
+                    }),
+                cacheCurrent: {
+                    title: state.current.title,
+                    content: action.payload.content
+                },
                 notes: [...state.notes, action.payload]
             }
         case UPDATE_NOTE:
             return {
                 ...state,
+                current: Object.assign({}, state.current, 
+                    {
+                        content: action.payload.content, 
+                        date: action.payload.date
+                    }),
+                cacheCurrent: {
+                    title: action.payload.title,
+                    content: action.payload.content
+                },
                 notes: state.notes.map(note => 
                     note._id === action.payload._id ? action.payload : note
                 )
@@ -54,6 +81,8 @@ export default (state, action) => {
         case DELETE_NOTE:
             return {
                 ...state,
+                current: null,
+                cacheCurrent: null,
                 notes: state.notes.filter(note => 
                     note._id !== action.payload)
             }
@@ -70,7 +99,14 @@ export default (state, action) => {
         case APPEND_CACHE_NOTE:
             return {
                 ...state,
-                cacheNotes: [...state.cacheNotes, action.payload]
+                cacheNotes: [...state.cacheNotes, action.payload],
+                current: action.payload,
+                cacheCurrent: state.notes.find(note => note._id === action.payload._id) !== null
+                                ? state.cacheCurrent : {
+                                    title: '',
+                                    content: ''
+                                },
+                editorEnable: true
             }
         case MODIFY_CACHE_NOTE:
             return {
@@ -86,15 +122,10 @@ export default (state, action) => {
                     return cacheNote._id !== action.payload;
                 })
             }
-        case ENABLE_SAVE:
+        case SET_SAVE:
             return {
                 ...state,
-                saveEnable: true
-            }
-        case DISABLE_SAVE:
-            return {
-                ...state,
-                saveEnable: false
+                save: action.payload
             }
         case ENABLE_DELETE:
             return {
