@@ -40,7 +40,7 @@ const NoteState = props => {
         orderBy: 'asc',
         sortBy: 'title',
         error: null,
-        loading: false
+        loading: true
     };
 
     const [state, dispatch] = useReducer(NoteReducer, initialState);

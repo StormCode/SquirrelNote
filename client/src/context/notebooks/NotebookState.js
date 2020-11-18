@@ -4,7 +4,7 @@ import NotebookContext from './notebookContext';
 import NotebookReducer from './notebookReducer';
 import {
     GET_NOTEBOOKS,
-    SET_NOTEBOOK,
+    SET_CURRENT_NOTEBOOK,
     CLEAR_NOTEBOOK,
     ADD_NOTEBOOK,
     UPDATE_NOTEBOOK,
@@ -40,7 +40,7 @@ const NotebookState = props => {
     const setCurrentNotebook = async id => {
         try {
             dispatch({
-                type: SET_NOTEBOOK,
+                type: SET_CURRENT_NOTEBOOK,
                 payload: id
             })
         } catch (err) {

@@ -1,10 +1,19 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, useContext } from 'react';
 import styled from 'styled-components';
 import { ReactComponent as UnsavedMark } from  '../../assets/general/unsaved_mark.svg';
+
+import NoteContext from '../../context/notes/noteContext';
+
+// Import Style
+import { lightGreen,lightGreenOnHover } from '../../style/colors';
 
 const NoteContainer = styled.li`
     position: relative;
     padding: 10px;
+    background-color: ${props => props.isCurrent ? lightGreen : '#ccc'};
+    &:hover {
+        background-color: ${props => props.isCurrent ? lightGreenOnHover: '#ccc'};
+    };
 
     > svg {
         display: ${props => props.isUnsaved ? 'inline-block' : 'none'};
@@ -15,6 +24,9 @@ const NoteContainer = styled.li`
 `;
 
 const Note = ({ note, setCurrentNote, isUnsaved }) => {
+    const noteContext = useContext(NoteContext);
+    const currentNoteId = noteContext.current ? noteContext.current._id : null;
+
     const onClick = e => {
         e.preventDefault();
         setCurrentNote(note);
@@ -24,6 +36,7 @@ const Note = ({ note, setCurrentNote, isUnsaved }) => {
         <Fragment>
             { note !== null ?
                 <NoteContainer 
+                    isCurrent={currentNoteId === note._id}
                     isUnsaved={isUnsaved} 
                     onClick={onClick}>
                     <p>{note.title}</p>

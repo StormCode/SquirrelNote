@@ -1,6 +1,6 @@
 import {
     GET_NOTEBOOKS,
-    SET_NOTEBOOK,
+    SET_CURRENT_NOTEBOOK,
     CLEAR_NOTEBOOK,
     ADD_NOTEBOOK,
     UPDATE_NOTEBOOK,
@@ -42,7 +42,7 @@ export default (state, action) => {
                 notebooks: action.payload.sort(sortNotebook),
                 loading: false
             };
-        case SET_NOTEBOOK:
+        case SET_CURRENT_NOTEBOOK:
             return {
                 ...state,
                 current: state.notebooks !== null 

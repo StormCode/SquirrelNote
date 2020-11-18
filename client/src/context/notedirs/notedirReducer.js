@@ -1,6 +1,7 @@
 import {
     GET_NOTEDIRS,
-    SET_NOTEDIR,
+    SET_CURRENT_NOTEDIR,
+    CLEAR_CURRENT_NOTEDIR,
     ADD_NOTEDIR,
     UPDATE_NOTEDIR,
     DELETE_NOTEDIR,
@@ -38,12 +39,16 @@ export default (state, action) => {
                 notedirs: action.payload.sort(sortNotedir),
                 loading: false
             }
-        case SET_NOTEDIR:
+        case SET_CURRENT_NOTEDIR:
             return {
                 ...state,
                 current: state.notedirs && state.notedirs.find(notedir => action.payload ? 
-                    notedir._id == action.payload : notedir.default == true),
-                loading: false
+                    notedir._id == action.payload : notedir.default == true)
+            }
+        case CLEAR_CURRENT_NOTEDIR:
+            return {
+                ...state,
+                current: null
             }
         case ADD_NOTEDIR:
             return {

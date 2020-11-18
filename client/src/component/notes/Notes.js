@@ -2,15 +2,20 @@ import React, { useContext, useEffect } from 'react';
 import Spinner from '../layout/Spinner';
 import Note from './Note';
 
+import NotedirContext from '../../context/notedirs/notedirContext';
 import NoteContext from '../../context/notes/noteContext';
 
-const Notes = ({ notedirId, addEvent, setCacheNoteContent, setNoteContent }) => {
+const Notes = ({ addEvent, setCacheNoteContent, setNoteContent }) => {
+    const notedirContext = useContext(NotedirContext);
     const noteContext = useContext(NoteContext);
+
+    const notedirId = notedirContext.current ? notedirContext.current._id : null;
 
     const { notes, 
         cacheNotes, 
         getNotes, 
-        loading } = noteContext;
+        loading 
+    } = noteContext;
 
     useEffect(() => {
         notedirId && getNotes(notedirId);

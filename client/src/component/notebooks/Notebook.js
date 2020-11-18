@@ -4,7 +4,7 @@ import {
     Card, CardImg, CardText, CardBody,
     CardTitle, CardSubtitle, Button, UncontrolledTooltip 
   } from 'reactstrap';
-import ToolPanel from '../../component/layout/ToolPanel';
+import EDToolPanel from '../layout/EDToolPanel';
 
 // Import Style
 import '../../style/components/Notebook.css';
@@ -131,7 +131,7 @@ const Notebook = props => {
             <Card
             onMouseEnter={hoverOn}
             onMouseLeave={hoverOff}>
-                <ToolPanel 
+                <EDToolPanel 
                     isEnter={props.toolPanel === _id}
                     visible={visible} 
                     editImgSrc={editImgSrc} 

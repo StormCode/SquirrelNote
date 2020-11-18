@@ -64,7 +64,7 @@ router.post('/', [auth, [
 
         await newNotebook.save();
 
-        res.json(notebook.notedirs);
+        res.json(notebook);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');

@@ -57,7 +57,7 @@ const Note = ({ match }) => {
     const [autoSave, setAutoSave] = useState(true);
     const [autoSaveIntervalToken, setAutoSaveIntervalToken] = useState({});
     const [saveTextUpdateInterval, setSaveTextUpdateInterval] = useState(10000);
-
+    
     const host = `${window.location.protocol}//${window.location.host}`;
 
     useEffect(() => {
@@ -267,7 +267,7 @@ const Note = ({ match }) => {
                 <NotedirSorter />
             </div>
             <Notedirs notebookId={match.params.id} />
-            <Notes notedirId={notedirContext.current ? notedirContext.current._id : null} 
+            <Notes
                 addEvent={onAdd} 
                 setCacheNoteContent={setCacheNoteContent} 
                 setNoteContent = {setNoteContent} />

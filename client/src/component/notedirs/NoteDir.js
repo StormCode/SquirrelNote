@@ -1,14 +1,27 @@
-import React, { useState, useContext, useEffect } from 'react'
-import ToolPanel from '../../component/layout/ToolPanel';
+import React, { useState, useContext, useEffect } from 'react';
+import styled from 'styled-components';
+
+import EDToolPanel from '../layout/EDToolPanel';
 
 import NotebookContext from '../../context/notebooks/notebookContext';
 import NotedirContext from '../../context/notedirs/notedirContext';
+
+// Import Style
+import { lightGreen,lightGreenOnHover } from '../../style/colors';
 
 // Import Resource
 import editImgSrc from '../../assets/general/edit_32x32.png';
 import deleteImgSrc from '../../assets/general/delete_32x32.png';
 import confirmImgSrc from '../../assets/general/confirm_32x32.png';
 import cancelImgSrc from '../../assets/general/close_32x32.png';
+
+const NoteDirContainer = styled.li`
+    background-color: ${props => props.isCurrent ? lightGreen : '#808080'};
+    height: auto;
+    &:hover {
+        background-color: ${props => props.isCurrent ? lightGreenOnHover : '#808080'};
+    };
+`;
 
 const Notedir = (props) => {
     const [notedir, setNotedir] = useState({
@@ -25,7 +38,8 @@ const Notedir = (props) => {
     const notebookContext = useContext(NotebookContext);
     const notedirContext = useContext(NotedirContext);
 
-    const notebookId = notebookContext.current;
+    const currentNotebookId = notebookContext.current;
+    const currentNotedirId = notedirContext.current ? notedirContext.current._id : null;
     const { 
         currentEditNotedir,
         currentDeleteNotedir,
@@ -35,7 +49,8 @@ const Notedir = (props) => {
         disableDeleteNotedir,
         updateNotedir,
         deleteNotedir,
-        error } = notedirContext;
+        error 
+    } = notedirContext;
 
     useEffect(() => {
         //依目前編輯的狀態切換是否顯示編輯
@@ -45,11 +60,16 @@ const Notedir = (props) => {
         currentDeleteNotedir === _id ? setDeleteNotedirVisible(true) : setDeleteNotedirVisible(false);
     },[currentEditNotedir, currentDeleteNotedir]);
 
+    const onClick = e => {
+        e.preventDefault();
+        props.setCurrent(_id);
+    }
+
     const onEdit = async e => {
         e.preventDefault();
         let notedirUpdateData = {
             title,
-            notebook: notebookId
+            notebook: currentNotebookId
         }; 
         //對點擊編輯的那一個筆記目錄執行update
         // currentEditNotedir === _id ? 
@@ -85,9 +105,9 @@ const Notedir = (props) => {
     const onDelete = async e => {
         e.preventDefault();
         //對點擊刪除的那一個筆記本執行delete
-        // currentDeleteNotedir === _id ? deleteNotedir(_id, notebookId) : enableDeleteNotedir(_id);
+        // currentDeleteNotedir === _id ? deleteNotedir(_id, currentNotebookId) : enableDeleteNotedir(_id);
         if(currentDeleteNotedir === _id){
-            await deleteNotedir(_id, notebookId);
+            await deleteNotedir(_id, currentNotebookId);
             if(error){
                 return false;
             }
@@ -131,12 +151,13 @@ const Notedir = (props) => {
     }
 
     return (
-        <li style={{height: 'auto'}}
+        <NoteDirContainer
+            isCurrent = {currentNotedirId === _id}
             onMouseOver={hoverOn}
             onMouseLeave={hoverOff}>
             { notedir !== null ?
-            <div style={{position: 'relative'}} onClick={props.setCurrent}>
-                <ToolPanel 
+            <div style={{position: 'relative'}} onClick={onClick}>
+                <EDToolPanel 
                     isEnter={props.toolPanel === _id} 
                     visible={visible} 
                     editImgSrc={editImgSrc} 
@@ -186,7 +207,7 @@ const Notedir = (props) => {
                     
                 // </div>)
             : null }
-        </li>
+        </NoteDirContainer>
     )
 }
 

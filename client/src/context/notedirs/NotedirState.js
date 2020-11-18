@@ -4,7 +4,8 @@ import NotedirContext from './notedirContext';
 import NotedirReducer from './notedirReducer';
 import {
     GET_NOTEDIRS,
-    SET_NOTEDIR,
+    SET_CURRENT_NOTEDIR,
+    CLEAR_CURRENT_NOTEDIR,
     ADD_NOTEDIR,
     UPDATE_NOTEDIR,
     DELETE_NOTEDIR,
@@ -54,11 +55,26 @@ const NotedirState = props => {
     }
 
     //設定目前的筆記目錄
-    const setNotedir = async notedirId => {
+    const setCurrentNotedir = notedirId => {
         try {
             dispatch({
-                type: SET_NOTEDIR,
+                type: SET_CURRENT_NOTEDIR,
                 payload: notedirId
+            });
+        } catch (err) {
+            dispatch({
+                type: NOTEDIR_ERROR,
+                payload: err.msg || 'Server Error'
+            })
+        }
+    }
+
+    //清除目前的筆記目錄
+    const clearCurrentNotedir = () => {
+        try {
+            dispatch({
+                type: CLEAR_CURRENT_NOTEDIR,
+                payload: null
             });
         } catch (err) {
             dispatch({
@@ -186,7 +202,8 @@ const NotedirState = props => {
             currentEditNotedir: state.currentEditNotedir,
             currentDeleteNotedir: state.currentDeleteNotedir,
             getNotedirs,
-            setNotedir,
+            setCurrentNotedir,
+            clearCurrentNotedir,
             addNotedir,
             updateNotedir,
             deleteNotedir,

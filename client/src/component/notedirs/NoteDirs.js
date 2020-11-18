@@ -3,6 +3,7 @@ import Spinner from '../../component/layout/Spinner'
 import TextInput from '../../component/layout/TextInput'
 import Notedir from './NoteDir';
 
+import NotebookContext from '../../context/notebooks/notebookContext';
 import NotedirContext from '../../context/notedirs/notedirContext';
 
 // Import Resource
@@ -10,9 +11,21 @@ import confirmImg from '../../assets/general/confirm_32x32.png';
 import cancelImg from '../../assets/general/close_32x32.png';
 
 const Notedirs = ({notebookId}) => {
+    const notebookContext = useContext(NotebookContext);
     const notedirContext = useContext(NotedirContext);
+    const {
+        notebooks,
+        getNotebooks
+     } = notebookContext;
     
-    const { notedirs, getNotedirs, setNotedir, addNotedir, loading, error } = notedirContext;
+    const { 
+        notedirs, 
+        getNotedirs, 
+        setCurrentNotedir, 
+        addNotedir, 
+        loading,
+        error 
+    } = notedirContext;
 
     const text = {
         addNewText: '新增筆記目錄',
@@ -24,16 +37,21 @@ const Notedirs = ({notebookId}) => {
     const { addNewText, placeholder, applyText, cancelText } = text;
 
     useEffect(() => {
-        const init = async () => {
-            await getNotedirs(notebookId);
-    
-            // 設定預設的筆記目錄
-            setNotedir(null);
-        }
-        init();
+        !notebooks && getNotebooks();
+        notebookId && getNotedirs(notebookId);
     
         // eslint-disable-next-line
     }, []);
+
+    useEffect(() => {
+        if(notebooks && notedirs) {
+            // 設定預設的筆記目錄
+            let currentNotebook = notebooks.find(notebook => notebook._id === notebookId);
+            let defaultNotedir = currentNotebook.notedirs.find(notedir => notedir.default === true);
+            
+            setCurrentNotedir(defaultNotedir._id);
+        }
+    }, [notebooks, notedirs]);
     
     //目前正在使用的ToolPanel
     const [currentToolPanel, setCurrentToolPanel] = useState(null);
@@ -43,7 +61,7 @@ const Notedirs = ({notebookId}) => {
     }
 
     const setCurrent = id => {
-        setNotedir(id);
+        setCurrentNotedir(id);
     }
 
     const handleAddNotedir = async title => {

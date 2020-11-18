@@ -51,7 +51,7 @@ const Index = () => {
     return (
         <Container>
             <Banner>
-                <HeaderText>輕量的筆記應用</HeaderText>
+                <HeaderText>輕量級筆記應用</HeaderText>
                 <StartButton>開始使用</StartButton>
             </Banner>
             <FeatureContainer>
