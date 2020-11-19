@@ -1,11 +1,18 @@
 import React, { Fragment, useContext, useState, useEffect } from 'react';
+import styled from 'styled-components';
 import Spinner from '../../component/layout/Spinner';
 import Notebook from './Notebook';
 import NewNotebook from './NewNotebook';
 
 import NotebookContext from '../../context/notebooks/notebookContext';
 
-import '../../style/components/Notebooks.css';
+const NotebookContainer = styled.div`
+    flex: 1 0 auto;
+    display: flex;
+    flex-flow: wrap row;
+    align-items: center;
+    margin-top: 5rem;
+`;
 
 const Notebooks = () => {
     const notebookContext = useContext(NotebookContext);
@@ -27,7 +34,7 @@ const Notebooks = () => {
 
     return <Fragment>
             { notebooks != null && !loading ?
-                <div className='notebook-container'>
+                <NotebookContainer className='notebook-container'>
                     <NewNotebook />
                     { filtered !== null ?
                     (filtered.map(notebook => 
@@ -42,7 +49,7 @@ const Notebooks = () => {
                             toolPanel={currentToolPanel} 
                             setToolPanel={setToolPanel} />
                     ))}
-                </div> : <Spinner />
+                </NotebookContainer> : <Spinner />
             }
             </Fragment>
 }

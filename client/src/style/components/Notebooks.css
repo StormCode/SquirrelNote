@@ -1,7 +1,0 @@
-.notebook-container {
-    flex: 1 0 auto;
-    display: flex;
-    flex-flow: wrap row;
-    align-items: center;
-    margin-top: 5rem;
-}

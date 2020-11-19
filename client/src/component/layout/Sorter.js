@@ -1,7 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { v4 as uuidv4 } from 'uuid';
+import { Check } from "phosphor-react";
+import styled from 'styled-components';
 import { UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+
+const SorterItem = styled.div`
+    padding: 5px 10px;
+    font-size: 1rem;
+    margin-left: 30px;
+
+    > svg {
+        position: absolute;
+        left: 10px;
+    }
+`;
 
 //
 // 此組件可依自訂欄位做升冪或降冪排序
@@ -27,7 +40,8 @@ const Sorter = props => {
         orderBy, 
         sortBy, 
         onSortBy, 
-        onToggleSort} = props;
+        onToggleSort
+    } = props;
     
     return (
         <SorterContext.Provider
@@ -45,31 +59,29 @@ const Sorter = props => {
 };
 
 Sorter.Title = ({ children}) => 
-    <DropdownToggle caret>
+    <DropdownToggle 
+        tag="span"
+        data-toggle="dropdown">
         {children}
     </DropdownToggle>;
 
-Sorter.Field = props => 
+Sorter.SortBy = props => 
     <SorterContext.Consumer>
         {contextValue =>
-            <DropdownItem key={uuidv4()} value={props.value} onClick={contextValue.onSortBy} active={contextValue.sortBy === props.value}>{props.children}</DropdownItem>
+            <SorterItem key={uuidv4()} onClick={() => {contextValue.onSortBy(props.value);}}>
+                {contextValue.sortBy === props.value && <Check size={24} />}
+                {props.children}
+            </SorterItem>
         }
     </SorterContext.Consumer>;
 
-Sorter.Asc = ({ children}) => 
+Sorter.OrderBy = props => 
     <SorterContext.Consumer>
         {contextValue => 
-            <DropdownItem value='asc' onClick={contextValue.onToggleSort} active={contextValue.orderBy === 'asc'}>
-                {children}
-            </DropdownItem>}
-    </SorterContext.Consumer>;
-
-Sorter.Desc = ({children}) => 
-    <SorterContext.Consumer>
-        {contextValue =>
-            <DropdownItem value='desc' onClick={contextValue.onToggleSort} active={contextValue.orderBy === 'desc'}>
-                {children}
-            </DropdownItem>}
+            <SorterItem key={uuidv4()} onClick={() => {contextValue.onToggleSort(props.value);}}>
+                {contextValue.orderBy === props.value && <Check size={24} />}
+                {props.children}
+            </SorterItem>}
     </SorterContext.Consumer>;
 
 Sorter.DropdownMenu = ({children}) => 

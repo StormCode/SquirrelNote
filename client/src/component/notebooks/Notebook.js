@@ -98,6 +98,7 @@ const Notebook = props => {
         }
 
         disableDeleteNotebook();
+        setVisible(true);
         props.setToolPanel(null);
         return true;
     }
@@ -108,7 +109,12 @@ const Notebook = props => {
     }
 
     const onEnter = operator => {
-        operator === 'edit' ? enableEditNotebook(_id) : enableDeleteNotebook(_id);
+        if(operator === 'edit') {
+            enableEditNotebook(_id);
+        } else {
+            enableDeleteNotebook(_id);
+            setVisible(false);
+        }
         //設定目前正在使用的ToolPanel
         props.setToolPanel(_id);
     }
@@ -116,7 +122,10 @@ const Notebook = props => {
     const onCancel = e => {
         e.preventDefault();
         currentEditNotebook === _id && disableEditNotebook();
-        currentDeleteNotebook === _id && disableDeleteNotebook();
+        if(currentDeleteNotebook === _id) {
+            disableDeleteNotebook();
+            setVisible(true);
+        }
         //設回原本筆記本內容
         setNotebook({
             title: props.notebook.title,

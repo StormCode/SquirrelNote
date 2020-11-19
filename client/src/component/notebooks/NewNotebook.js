@@ -6,9 +6,6 @@ import {
 
 import ToolPanel from '../layout/ToolPanel';
 
-// Import Style
-import '../../style/components/Notebook.css';
-
 // Import Resource
 import confirmImgSrc from '../../assets/general/confirm_32x32.png';
 import cancelImgSrc from '../../assets/general/close_32x32.png';
