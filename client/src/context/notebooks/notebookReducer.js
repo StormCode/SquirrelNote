@@ -57,21 +57,24 @@ export default (state, action) => {
         case ADD_NOTEBOOK:
             return {
                 ...state,
-                notebooks: [...state.notebooks, action.payload]
+                notebooks: [...state.notebooks, action.payload],
+                addNotebookVisible: false
             }
         case UPDATE_NOTEBOOK:
             return {
                 ...state,
                 notebooks: state.notebooks.map(notebook => 
                     notebook._id !== action.payload._id ? notebook : action.payload
-                )
+                ),
+                currentEditNotebook: null
             }
         case DELETE_NOTEBOOK:
             return {
                 ...state,
                 notebooks: state.notebooks.filter(notebook => {
                     return notebook._id !== action.payload
-                })
+                }),
+                currentDeleteNotebook: null
             }
         case FILTER_NOTEBOOK:
             return {

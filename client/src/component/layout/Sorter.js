@@ -10,6 +10,10 @@ const SorterItem = styled.div`
     font-size: 1rem;
     margin-left: 30px;
 
+    &:hover {
+        color: ${props => props.color};
+    }
+
     > svg {
         position: absolute;
         left: 10px;
@@ -26,6 +30,9 @@ const SorterItem = styled.div`
 // 子組件(children)：
 // 排序按鈕的顯示文字(也可以放任意Html)
 // 排序的欄位(任意數量)
+// 下拉選單主色(string)
+// 滑鼠移過時的callback(function)
+// 滑鼠移出時的callback(function)
 //
 const SorterContext = React.createContext({
     labelHtml: '排序',
@@ -40,8 +47,19 @@ const Sorter = props => {
         orderBy, 
         sortBy, 
         onSortBy, 
-        onToggleSort
+        onToggleSort, 
+        color,
+        hoverOn, 
+        hoverOff 
     } = props;
+
+    const inputHoverOn = () => {
+        hoverOn();
+    };
+
+    const inputHoverOff = () => {
+        hoverOff();
+    };
     
     return (
         <SorterContext.Provider
@@ -49,9 +67,12 @@ const Sorter = props => {
                 orderBy: orderBy,
                 sortBy: sortBy,
                 onSortBy: onSortBy,
-                onToggleSort: onToggleSort
+                onToggleSort: onToggleSort,
+                color: color
             }}>
-            <UncontrolledDropdown>
+            <UncontrolledDropdown
+                onMouseEnter={inputHoverOn}
+                onMouseLeave={inputHoverOff}>
                 {props.children}
             </UncontrolledDropdown>
         </SorterContext.Provider>
@@ -68,7 +89,10 @@ Sorter.Title = ({ children}) =>
 Sorter.SortBy = props => 
     <SorterContext.Consumer>
         {contextValue =>
-            <SorterItem key={uuidv4()} onClick={() => {contextValue.onSortBy(props.value);}}>
+            <SorterItem 
+                key={uuidv4()} 
+                color={contextValue.color}
+                onClick={() => {contextValue.onSortBy(props.value);}}>
                 {contextValue.sortBy === props.value && <Check size={24} />}
                 {props.children}
             </SorterItem>
@@ -78,7 +102,10 @@ Sorter.SortBy = props =>
 Sorter.OrderBy = props => 
     <SorterContext.Consumer>
         {contextValue => 
-            <SorterItem key={uuidv4()} onClick={() => {contextValue.onToggleSort(props.value);}}>
+            <SorterItem 
+                key={uuidv4()} 
+                color={contextValue.color}
+                onClick={() => {contextValue.onToggleSort(props.value);}}>
                 {contextValue.orderBy === props.value && <Check size={24} />}
                 {props.children}
             </SorterItem>}
@@ -96,14 +123,18 @@ Sorter.defaultProps = {
     orderBy:'asc',
     sortBy:'',
     onSortBy: () => {},
-    onToggleSort: () => {}
+    onToggleSort: () => {},
+    hoverOn: () => {},
+    hoverOff: () => {}
 };
 
 Sorter.propTypes = {
     orderBy: PropTypes.string,
     sortBy: PropTypes.string.isRequired,
     onSortBy: PropTypes.func.isRequired,
-    onToggleSort: PropTypes.func.isRequired
+    onToggleSort: PropTypes.func.isRequired,
+    hoverOn: PropTypes.func,
+    hoverOff: PropTypes.func
 };
 
 export default Sorter;

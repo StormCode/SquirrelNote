@@ -35,6 +35,11 @@ const NewNotebook = () => {
     const onAddNotebook = e => {
         e.preventDefault();
         addNotebook(notebook);
+        //清除筆記本內容
+        setNotebook({
+            title: '',
+            desc: ''
+        });
     };
 
     const onDisableAddNotebook = e => {

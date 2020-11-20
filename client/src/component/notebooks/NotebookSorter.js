@@ -1,7 +1,10 @@
-import React, { useContext } from 'react';
+import React, { useState, useContext } from 'react';
 import { FunnelSimple } from "phosphor-react";
 import styled from 'styled-components';
 import Sorter from '../layout/Sorter';
+
+// Import Style
+import { defaultColor, orange } from '../../style/colors';
 
 import NotebookContext from '../../context/notebooks/notebookContext'
 
@@ -23,6 +26,16 @@ const NotebookSorter = () => {
         sortNotebook(orderByParam, sortBy);
     };
 
+    const [color, setColor] = useState(defaultColor);
+
+    const hoverOn = () => {
+        setColor(orange);
+    }
+
+    const hoverOff = () => {
+        setColor(defaultColor);
+    }
+
     return (
         <SorterContainer>
             <Sorter 
@@ -30,9 +43,12 @@ const NotebookSorter = () => {
                 sortBy={sortBy}
                 onSortBy={onSortBy}
                 onToggleSort={onToggleSort}
+                color={color}
+                hoverOn={hoverOn}
+                hoverOff={hoverOff}
             >
                 <Sorter.Title>
-                    <FunnelSimple size={24} />
+                    <FunnelSimple size={24} color={color} />
                 </Sorter.Title>
                 <Sorter.DropdownMenu>
                     <Sorter.SortBy value='title'>名稱</Sorter.SortBy>

@@ -1,12 +1,11 @@
 .note-container {
     display: grid;
-    grid-template-columns: 1fr 1fr 4fr;
-    grid-template-rows: .1fr .12fr auto .1fr;
+    grid-template-columns: 1.2fr 1.5fr 3.5fr;
+    grid-template-rows: .1fr auto .1fr;
     grid-template-areas: 
         "header header header"
-        "notedir-list note-list note-header"
-        "notedir-list note-list editor"
-        "recycle-bin note-list editor";
+        "notedir-list note-list editor-area"
+        "recycle-bin note-list editor-area";
     width: 100%;
     height: 100vh;
 }
@@ -45,16 +44,6 @@
                 border: 1px solid #00ffee;
             }
 
-    .note-container .note-header {
-        grid-area: note-header;
-        padding: 0 10px;
-        background-color: #77ff00;
-    }
-
-        .note-container .note-header button {
-            margin-left: 10px;
-        }
-
     .note-container .note-title-container {
         display: flex;
         flex-flow: row nowrap;
@@ -70,16 +59,33 @@
             padding: 10px;
         }
 
+            .note-container .note-title-container .note-title:disabled {
+                color: #000;
+                font-size: 1.2rem;
+                background: none;
+            }
+
         .note-container .note-title-container .note-save-btn {
             flex: 0 1 15%;
         }
 
-    .note-container .editor {
-        grid-area: editor;
+    .note-container .editor-area {
+        grid-area: editor-area;
+        display: flex;
+        flex-flow: column nowrap;
         background-color: #99ff99;
         height: 100%;
         overflow-y: auto;
     }
+
+        .note-container .editor-area .note-header {
+            flex: 0 1 50px;
+        }
+
+        .note-container .editor-area .editor {
+            flex: 1 1 auto;
+            overflow-x: hidden;
+        }
 
     .note-container .recycle-bin {
         grid-area: recycle-bin;

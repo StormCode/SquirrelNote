@@ -10,7 +10,7 @@ import NotebookContext from '../../context/notebooks/notebookContext';
 
 const HeadIconStyled = styled.span`
     float: left;
-    transform: translate(120%,15%);
+    transform: translate(120%,10%);
 `;
 
 const ClearIconStyled = styled.span`
@@ -47,7 +47,11 @@ const NotebookFilter = () => {
                 width: '40%',
                 maxWidth: '200px'
             }}
-            inputStyle={{textIndent: '24px'}}
+            inputStyle={{
+                textIndent: '24px',
+                border: '1px solid ' + color,
+                outline: 'none'
+            }}
             placeholder='搜尋...' 
             onChange={onChange}
             hoverOn={hoverOn}

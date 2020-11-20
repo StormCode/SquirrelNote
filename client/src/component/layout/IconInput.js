@@ -22,7 +22,14 @@ const IconInputContext = React.createContext({
 // 清除圖示
 //
 const IconInput = props => {
-    const { containerStyle, inputStyle, placeholder, onChange, hoverOn, hoverOff } = props;
+    const { 
+        containerStyle, 
+        inputStyle, 
+        placeholder, 
+        onChange, 
+        hoverOn, 
+        hoverOff 
+    } = props;
     const text = useRef('');
 
     const clearText = () => {
@@ -46,17 +53,15 @@ const IconInput = props => {
         <IconInputContext.Provider
             value={{
                 text,
-                clearText,
-                inputHoverOn,
-                inputHoverOff
+                clearText
             }}>
-            <div style={containerStyle}>
+            <div style={containerStyle}
+                onMouseEnter={inputHoverOn}
+                onMouseLeave={inputHoverOff}>
                 <input type='text' 
                     ref={text} 
                     placeholder={placeholder} 
                     onChange={inputChange}
-                    onMouseEnter={inputHoverOn}
-                    onMouseLeave={inputHoverOff}
                     style={inputStyle} />
                 {props.children}
             </div>
@@ -65,15 +70,9 @@ const IconInput = props => {
 }
 
 IconInput.HeadIcon = ({children}) =>
-    <IconInputContext.Consumer>
-        {contextValue =>
-            <span
-                onMouseEnter={contextValue.inputHoverOn()}
-                onMouseLeave={contextValue.inputHoverOff()}>
-                {children}
-            </span>
-        }
-    </IconInputContext.Consumer>
+    <Fragment>
+        {children}
+    </Fragment>
 
 IconInput.ClearIcon = ({children}) =>
     <IconInputContext.Consumer>
@@ -101,8 +100,8 @@ IconInput.propTypes = {
     inputStyle: PropTypes.object,
     placeholder: PropTypes.string,
     onChange: PropTypes.func.isRequired,
-    hoverOn: PropTypes.func.isRequired,
-    hoverOff: PropTypes.func.isRequired
+    hoverOn: PropTypes.func,
+    hoverOff: PropTypes.func
 };
 
 export default IconInput;

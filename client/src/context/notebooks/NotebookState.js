@@ -93,7 +93,6 @@ const NotebookState = props => {
                 type: ADD_NOTEBOOK,
                 payload: res.data
             });
-            dispatch({ type: DISABLE_ADDNOTEBOOK });
         } catch (err) {
             dispatch({ 
                 type: NOTEBOOK_ERROR,
@@ -116,7 +115,6 @@ const NotebookState = props => {
                 type: UPDATE_NOTEBOOK,
                 payload: res.data
             });
-            dispatch({ type: DISABLE_EDITNOTEBOOK });
         } catch (err) {
             dispatch({ 
                 type: NOTEBOOK_ERROR,
@@ -133,7 +131,6 @@ const NotebookState = props => {
                 type: DELETE_NOTEBOOK,
                 payload: id
             });
-            dispatch({ type: DISABLE_DELETENOTEBOOK });
         } catch (err) {
             dispatch({ 
                 type: NOTEBOOK_ERROR,

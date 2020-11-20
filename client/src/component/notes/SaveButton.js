@@ -10,6 +10,7 @@ import {
 
 const Button = styled.button`
     text-align: center;
+    display: ${props => props.visible ? 'block' : 'none'};
 
     p {
         display: ${props => props.state !== SAVED ? 'none' : 'inherit'};
@@ -21,13 +22,14 @@ const Button = styled.button`
 // 此組件是儲存按鈕，依據儲存狀態控制按鈕文字、啟用/停用
 // 共有四種狀態：未儲存、已儲存、儲存中、禁用
 // 傳入的屬性：
+// 可見性(boolean)
 // 儲存狀態(string)
 // 儲存事件(function)
 // 是否顯示上次儲存時間(boolean)
 // 上次儲存時間(string)
 // 儲存時間更新頻率(單位: 毫秒)(number)
 //
-const SaveButton = ({state, onSave, showUpdateTime, updateTime, updateInterval}) => {
+const SaveButton = ({visible, state, onSave, showUpdateTime, updateTime, updateInterval}) => {
     let btnText;
     let btnEnable;
 
@@ -91,11 +93,12 @@ const SaveButton = ({state, onSave, showUpdateTime, updateTime, updateInterval})
     }
 
     return (
-        <Button onClick={() => {onSave();}} disabled={!btnEnable} state={state}>{btnText}<p>{updateText}</p></Button>
+        <Button visible={visible} onClick={() => {onSave();}} disabled={!btnEnable} state={state}>{btnText}<p>{updateText}</p></Button>
     )
 }
 
 SaveButton.defaultProps = {
+    visible: true,
     state: DISABLESAVE,
     onSave: () => { },
     showUpdateTime: false,
@@ -103,6 +106,7 @@ SaveButton.defaultProps = {
 }
 
 SaveButton.propTypes = {
+    visible: PropTypes.bool,
     state: PropTypes.string.isRequired,
     onSave: PropTypes.oneOfType([PropTypes.func,PropTypes.object]),
     showUpdateTime: PropTypes.bool,

@@ -9,8 +9,6 @@ import {
     APPEND_CACHE_NOTE,
     MODIFY_CACHE_NOTE,
     REMOVE_CACHE_NOTE,
-    ENABLE_EDITOR,
-    DISABLE_EDITOR,
     SET_SAVE,
     ENABLE_DELETE,
     DISABLE_DELETE,
@@ -29,7 +27,6 @@ export default (state, action) => {
         case GET_NOTE_DETAIL:
             return {
                 ...state,
-                editorEnable: true,
                 current: action.payload,
                 cacheCurrent: {
                     title: action.payload.title,
@@ -39,7 +36,6 @@ export default (state, action) => {
         case SET_CURRENT_NOTE:
             return {
                 ...state,
-                editorEnable: true,
                 current: Object.assign({}, state.current, action.payload)
             }
         case CLEAR_CURRENT_NOTE:
@@ -86,27 +82,16 @@ export default (state, action) => {
                 notes: state.notes.filter(note => 
                     note._id !== action.payload)
             }
-        case ENABLE_EDITOR:
-            return {
-                ...state,
-                editorEnable: true
-            }
-        case DISABLE_EDITOR:
-            return {
-                ...state,
-                editorEnable: false
-            }
         case APPEND_CACHE_NOTE:
             return {
                 ...state,
                 cacheNotes: [...state.cacheNotes, action.payload],
                 current: action.payload,
-                cacheCurrent: state.notes.find(note => note._id === action.payload._id) !== null
+                cacheCurrent: state.notes.find(note => note._id === action.payload._id)
                                 ? state.cacheCurrent : {
                                     title: '',
                                     content: ''
-                                },
-                editorEnable: true
+                                }
             }
         case MODIFY_CACHE_NOTE:
             return {
@@ -120,7 +105,9 @@ export default (state, action) => {
                 ...state,
                 cacheNotes: state.cacheNotes.filter(cacheNote => {
                     return cacheNote._id !== action.payload;
-                })
+                }),
+                current: null,
+                cacheCurrent: null
             }
         case SET_SAVE:
             return {

@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
+import styled from 'styled-components';
 import ImgSrcParser from '../../utils/imgSrcParser';
 import Notedirs from '../notedirs/NoteDirs';
 import Notes from '../notes/Notes';
@@ -23,6 +24,12 @@ import {
 // Import Style
 import '../../style/page/Note.css';
 
+const EditorArea = styled.div`
+    .ck-sticky-panel {
+        display: ${props => props.showToolPanel ? 'block' : 'none'};
+    }
+`;
+
 const Note = ({ match }) => {
     const history = useHistory();
     const notebookContext = useContext(NotebookContext);
@@ -39,9 +46,6 @@ const Note = ({ match }) => {
         discardCacheNote,
         setCurrentNote, 
         getNoteDetail,
-        editorEnable, 
-        enableEditor, 
-        disableEditor, 
         save, 
         setSave,
         deleteEnable,
@@ -57,6 +61,14 @@ const Note = ({ match }) => {
     const [autoSave, setAutoSave] = useState(true);
     const [autoSaveIntervalToken, setAutoSaveIntervalToken] = useState({});
     const [saveTextUpdateInterval, setSaveTextUpdateInterval] = useState(10000);
+
+    //目前筆記的狀態：編輯/閱讀模式
+    const NOTEMODE = {
+        EDIT: 'EDIT',
+        READ: 'READ'
+    };
+
+    const [noteMode, setNoteMode] = useState(NOTEMODE.READ);
     
     const host = `${window.location.protocol}//${window.location.host}`;
 
@@ -67,23 +79,25 @@ const Note = ({ match }) => {
     }, []);
 
     useEffect(() => {
-        if(current && current._id && cacheCurrent) {
-            //控制儲存狀態(筆記載入時顯示已儲存)
-            setSave({state: SAVED, showUpdateTime: true});
-
-            if(cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) {
-                modifyCacheNote(current);
-            } else {
-                let currentNote = notes.find(note => note._id === current._id);
-                currentNote && (cacheCurrent.title !== current.title || cacheCurrent.content !== current.content) 
-                            && appendCacheNote(current);
+        if(current && current._id) {
+            if(cacheCurrent) {
+                //控制儲存狀態(筆記載入時顯示已儲存)
+                setSave({state: SAVED, showUpdateTime: true});
+    
+                if(cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) {
+                    modifyCacheNote(current);
+                } else {
+                    let currentNote = notes.find(note => note._id === current._id);
+                    currentNote && (cacheCurrent.title !== current.title || cacheCurrent.content !== current.content) 
+                                && appendCacheNote(current);
+                }
             }
         } else {
-            //控制儲存、編輯器狀態
-            disableEditor();
+            //控制儲存、筆記狀態
+            setNoteMode(NOTEMODE.READ);
             setSave({state: DISABLESAVE, showUpdateTime: false});
         }
-    },[current]);
+    },[current, cacheCurrent]);
 
     useEffect(() => {
         //控制儲存狀態
@@ -121,9 +135,11 @@ const Note = ({ match }) => {
             }).content
         };
         setCurrentNote(currentNote);
+        setNoteMode(NOTEMODE.EDIT);
     }
 
     const setNoteContent = note => {
+        //取得筆記內容
         getNoteDetail(note._id);
     };
 
@@ -136,16 +152,22 @@ const Note = ({ match }) => {
             date: null
         };
         appendCacheNote(newNote);
+        setNoteMode(NOTEMODE.EDIT);
     };
 
     const onEdit = e => {
         e.preventDefault();
-        current && enableEditor();
+        setNoteMode(NOTEMODE.EDIT);
     }
 
     const onDelete = e => {
         e.preventDefault();
         current && deleteNote(notedirContext.current._id, current._id);
+    }
+
+    const onView = e => {
+        e.preventDefault();
+        setNoteMode(NOTEMODE.READ);
     }
 
     const onDiscard = e => {
@@ -156,12 +178,20 @@ const Note = ({ match }) => {
     const onSave = async () => {
         //設定儲存狀態為正在儲存
         if(current && (current.title !== '' || current.content !== '')
-            && (cacheCurrent.title !== current.title || cacheCurrent.content !== current.content)
             && (cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1)) {
             console.log('save editor');
-            setSave({state: SAVING, showUpdateTime: false});
 
             try {
+                //如果內容有被改過但又被改回來，儲存狀態直接設已儲存、移除快取筆記
+                //儲存按鈕上的儲存時間從資料庫抓，因為實際上沒有執行儲存，所以時間應該顯示上次儲存的時間
+                if(cacheCurrent.title === current.title && cacheCurrent.content === current.content) {
+                    removeCacheNote(current._id);
+                    setSave({state: SAVED, showUpdateTime: true});
+                    return;
+                }
+    
+                setSave({state: SAVING, showUpdateTime: false});
+
                 let newContent = await ReplaceImage(current.content);
 
                 // 儲存筆記
@@ -242,7 +272,7 @@ const Note = ({ match }) => {
         autoSaveIntervalToken && clearInterval(autoSaveIntervalToken);
     
         // 當自動儲存開啟/關閉改變時執行(清除setinterval或設定setinterval)
-        if(autoSave){
+        if(autoSave && noteMode === NOTEMODE.EDIT){
             console.log('autosave launch');
             
             cacheNotes.length > 0 && setAutoSaveIntervalToken(setInterval(onSave, autoSaveInterval));
@@ -254,7 +284,7 @@ const Note = ({ match }) => {
             setAutoSaveIntervalToken(null);
         }
     
-    }, [autoSave, current, cacheCurrent, cacheNotes , autoSaveInterval]);
+    }, [autoSave, current, cacheCurrent, cacheNotes , autoSaveInterval, noteMode]);
 
     const LoadRecycleBin = () => {
         history.push(`/recyclebin`);
@@ -271,20 +301,35 @@ const Note = ({ match }) => {
                 addEvent={onAdd} 
                 setCacheNoteContent={setCacheNoteContent} 
                 setNoteContent = {setNoteContent} />
-            <div className='note-header'>
-                {deleteEnable ? (<button className='note-delete-btn right-align' onClick={onDelete}>刪除</button>)
-                : (<button className='note-discard-btn right-align' onClick={onDiscard} disabled={!cacheCurrent}>捨棄</button>)}
-                <button className='note-edit-btn right-align' onClick={onEdit} disabled={!editorEnable}>編輯</button>
-                <div className='note-title-container'>
-                    <input type='text' placeholder='新筆記' className='note-title' value={current ? current.title || '' : ''} onChange={titleChange} disabled={!editorEnable}/>
-                    <SaveButton state={save.state} onSave={onSave} showUpdateTime={save.showUpdateTime} updateTime={current && current._id ? current.date : null} updateInterval={saveTextUpdateInterval} />
+            <EditorArea className='editor-area' showToolPanel={noteMode === NOTEMODE.EDIT}>
+                <div className='note-header'>
+                    {deleteEnable ? (<button className='note-delete-btn right-align' onClick={onDelete}>刪除</button>)
+                    : (<button className='note-discard-btn right-align' onClick={onDiscard} disabled={!cacheCurrent}>捨棄</button>)}
+                    {noteMode === NOTEMODE.EDIT ? 
+                    (<button 
+                        className='note-view-btn right-align' 
+                        onClick={onView} 
+                        disabled={!(cacheCurrent && current && cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) === -1)}>
+                            檢視
+                        </button>)
+                    : (<button className='note-edit-btn right-align' onClick={onEdit} disabled={!(current && cacheCurrent)}>編輯</button>)}
+                    <div className='note-title-container'>
+                        <input type='text' placeholder='新筆記' className='note-title' value={current ? current.title || '' : ''} onChange={titleChange} disabled={noteMode !== NOTEMODE.EDIT}/>
+                        <SaveButton 
+                            visible={noteMode === NOTEMODE.EDIT}
+                            state={save.state} 
+                            onSave={onSave} 
+                            showUpdateTime={save.showUpdateTime} 
+                            updateTime={current && current._id ? current.date : null} 
+                            updateInterval={saveTextUpdateInterval} />
+                    </div>
                 </div>
-            </div>
-            <Editor 
-                enable={editorEnable}
-                content={current && current.content ? current.content : ''} 
-                loading={loading} 
-                contentChange={contentChange} />
+                <Editor 
+                    enable={noteMode === NOTEMODE.EDIT}
+                    content={current && current.content ? current.content : ''} 
+                    loading={loading} 
+                    contentChange={contentChange} />
+            </EditorArea>
             <div className='recycle-bin'>
                 <button className='recycle-bin-btn' onClick={LoadRecycleBin}>回收站</button>
             </div>

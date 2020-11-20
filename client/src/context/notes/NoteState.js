@@ -13,8 +13,6 @@ import {
     APPEND_CACHE_NOTE,
     MODIFY_CACHE_NOTE,
     REMOVE_CACHE_NOTE,
-    ENABLE_EDITOR,
-    DISABLE_EDITOR,
     SET_SAVE,
     ENABLE_DELETE,
     DISABLE_DELETE,
@@ -34,7 +32,6 @@ const NoteState = props => {
             showUpdateTime: false
         },
         cacheNotes: [],
-        editorEnable: false,
         deleteEnable: false,
         filtered: null,
         orderBy: 'asc',
@@ -217,24 +214,6 @@ const NoteState = props => {
         }
     }
 
-    //啟用編輯器
-    const enableEditor = () => {
-        try {
-            dispatch({ type: ENABLE_EDITOR });
-        } catch (err) {
-            dispatch({type: NOTE_ERROR});
-        }
-    };
-
-    //停用編輯器
-    const disableEditor = () => {
-        try {
-            dispatch({ type: DISABLE_EDITOR });
-        } catch (err) {
-            dispatch({type: NOTE_ERROR});
-        }
-    };
-
     //設定儲存狀態
     const setSave = saveState => {
         try {
@@ -272,7 +251,6 @@ const NoteState = props => {
             current: state.current,
             cacheNotes: state.cacheNotes,
             cacheCurrent: state.cacheCurrent,
-            editorEnable: state.editorEnable,
             deleteEnable: state.deleteEnable,
             save: state.save,
             filtered: state.filtered,
@@ -283,8 +261,6 @@ const NoteState = props => {
             getNoteDetail,
             setCurrentNote,
             clearCurrentNote,
-            enableEditor,
-            disableEditor,
             addNote,
             updateNote,
             deleteNote,

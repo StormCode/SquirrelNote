@@ -23,7 +23,7 @@ const Login = props => {
 
     useEffect(() => {
         if(isAuthenticated) {
-            props.history.push('/Notebook');
+            props.history.push('/notebook');
         }
 
         if(error === INVALID_CREDENTIALS) {
