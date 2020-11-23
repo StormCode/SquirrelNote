@@ -4,8 +4,10 @@ const jwt = require('jsonwebtoken');
 const config = require('config');
 const router = express.Router();
 const { check, validationResult } = require('express-validator');
+require('dotenv').config();
 const {
-    DUPLICATED_USER
+    DUPLICATED_USER,
+    NOTEXIST_USER
 } = require('../status');
 
 const User = require('../models/User');
@@ -60,6 +62,49 @@ router.post('/', [
             if(err) throw err;
             res.json({token});
         });
+    }
+    catch(err){
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route           POST /api/users
+// @desc            忘記密碼，寄重設密碼信
+// @access          Public
+router.post('/', [
+    check('email', '請輸入有效的email')
+        .isEmail()
+], async (req, res) => {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { email } = req.body;
+
+    try{
+        let user = await User.findOne({email});
+
+        if(!user) {
+            return res.status(400).json({msg: '您輸入的email不存在', status: NOTEXIST_USER});
+        }
+
+        // 寄發重設密碼信至mail
+        let title = '松鼠筆記-重設密碼信件';
+
+        //產生重設密碼連結
+
+
+        let content = '';
+        let mailSender = require('/utils/email.js')({
+            auth: {
+                username: process.env.GMAIL.USERNAME,
+                password: process.env.GMAIL.PASSWORD
+            }
+        });
+
+        mailSender.send(email,title,content);
     }
     catch(err){
         console.error(err.message);

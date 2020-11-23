@@ -1,12 +1,18 @@
 import React, { useState, useContext, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import { Form, FormGroup, Label, Input } from 'reactstrap';
 import AlertContext from '../../context/alert/alertContext';
 import AuthContext from '../../context/auth/authContext';
 import {
     DUPLICATED_USER
 } from '../../status';
+import { LOGIN } from '../../modelTypes';
+
+//Import Style
+import AuthPanel from '../../style/components/AuthPanel';
 
 const Register = props => {
+    const history = useHistory();
     const alertContext = useContext(AlertContext);
     const authContext = useContext(AuthContext);
 
@@ -16,7 +22,7 @@ const Register = props => {
 
     useEffect(() => {
         if(isAuthenticated) {
-            props.history.push('/');
+            history.push('/');
         }
 
         if(error === DUPLICATED_USER) {
@@ -25,7 +31,7 @@ const Register = props => {
         }
 
         // eslint-disable-next-line
-    }, [error, isAuthenticated, props.history]);
+    }, [error, isAuthenticated]);
 
     const [user, setUser] = useState({
         name: '',
@@ -35,6 +41,12 @@ const Register = props => {
     });
 
     const { name, email, password, confirmPassword } = user;
+
+    const { toggleModel } = props;
+
+    const toggleLogin = () => {
+        toggleModel(LOGIN);
+    }
 
     const onChange = e => setUser({
         ...user,
@@ -59,10 +71,8 @@ const Register = props => {
     };
 
     return (
-        <div className='form-container auth-container'>
-            <h1>
-                <span className='text-primary'>註冊</span>
-            </h1>
+        <AuthPanel className='form-container'>
+            <h2>{props.title}</h2>
             <Form onSubmit={onSubmit}>
                 <FormGroup>
                     <Label htmlFor='name'>姓名</Label>
@@ -80,9 +90,12 @@ const Register = props => {
                     <Label htmlFor='confirmPassword'>確認密碼</Label>
                     <Input type='password' name='confirmPassword' value={confirmPassword} onChange={onChange} required/>
                 </FormGroup>
-                <Input type='submit' value='註冊' className='btn btn-primary btn-block' />
+                <Input type='submit' value='註冊' className='btn btn-block' />
             </Form>
-        </div>
+            <p>
+                <a href='#' onClick={toggleLogin}>已有帳號？</a>
+            </p>
+        </AuthPanel>
     )
 }
 

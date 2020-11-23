@@ -1,10 +1,16 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { Form, FormGroup, Label, Input } from 'reactstrap';
+import React, { useState, useContext } from 'react';
+import { 
+    Form, 
+    FormGroup, 
+    Label, 
+    Input
+} from 'reactstrap';
 import AlertContext from '../../context/alert/alertContext';
 import AuthContext from '../../context/auth/authContext';
-import {
-    INVALID_CREDENTIALS
-} from '../../status';
+import { REGISTER } from '../../modelTypes';
+
+//Import Style
+import AuthPanel from '../../style/components/AuthPanel';
 
 const Login = props => {
     const authContext = useContext(AuthContext);
@@ -12,7 +18,7 @@ const Login = props => {
 
     const { setAlert } = alertContext;
 
-    const { login, error, clearErrors, isAuthenticated } = authContext;
+    const { login } = authContext;
 
     const [user, setUser] = useState({
         email: '',
@@ -21,18 +27,11 @@ const Login = props => {
 
     const { email, password } = user;
 
-    useEffect(() => {
-        if(isAuthenticated) {
-            props.history.push('/notebook');
-        }
+    const { toggleModel, toggleOpen } = props;
 
-        if(error === INVALID_CREDENTIALS) {
-            setAlert(error, 'danger');
-            clearErrors();
-        }
-
-        // eslint-disable-next-line
-    }, [error, isAuthenticated, props.history]);
+    const toggleRegister = () => {
+        toggleModel(REGISTER);
+    }
 
     const onChange = e => setUser({
         ...user,
@@ -49,14 +48,13 @@ const Login = props => {
                 email,
                 password
             });
+            toggleOpen();
         }
     };
 
     return (
-        <div className='form-container auth-container'>
-            <h1>
-                <span className='text-primary'>登入</span>
-            </h1>
+        <AuthPanel className='form-container'>
+            <h2 className='title'>{props.title}</h2>
             <Form onSubmit={onSubmit}>
                 <FormGroup>
                     <Label htmlFor='email'>Email</Label>
@@ -66,9 +64,13 @@ const Login = props => {
                     <Label htmlFor='password'>密碼</Label>
                     <Input type='password' name='password' value={password} onChange={onChange} required />
                 </FormGroup>
-                <input type='submit' value='登入' className='btn btn-primary btn-block' />
+                <input type='submit' value='登入' className='btn btn-block' />
             </Form>
-        </div>
+            <p>
+                <a href='#' onClick={toggleRegister}>建立帳號</a>
+                <a href='#' onClick={}>忘記密碼</a>
+            </p>
+        </AuthPanel>
     )
 }
 

@@ -23,27 +23,3 @@
     flex: 1 0 auto;
     background-color: black;
 }
-
-.auth-container {
-    padding: 0 5rem;
-    width: 100%;
-    /* todo: RWD */
-    max-width: 50%;
-}
-
-    .auth-container:before,
-    .auth-container:after {
-        content: '';
-        display: block;
-        border: 1px solid #007BFF;
-        margin: 20px 0;
-    }
-
-    .auth-container h1 {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-
-    .auth-container input[type='submit'] {
-        margin-top: 30px;
-    }

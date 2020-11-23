@@ -10,39 +10,72 @@ import {
   NavItem,
   NavLink
 } from 'reactstrap';
+import styled from 'styled-components';
+
+import AuthModels from '../auth/AuthModels';
 
 import AuthContext from '../../context/auth/authContext';
+
+import { LOGIN, REGISTER } from '../../modelTypes';
+
+const NavText = styled.li`
+    font-size: 1.2rem;
+    font-weight: 400;
+    color: #9e9e9e;
+
+    &:before {
+        content: '';
+        display: inline-block;
+        height: 100%;
+        vertical-align: middle;
+    }
+`;
 
 const MainNavbar = ({ title }) => {
     const location = useLocation();
 
     const authContext = useContext(AuthContext)
 
-    const [isOpen, setIsOpen] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
+    const [modelOpen, setModelOpen] = useState(false);
+    const [model, setModel] = useState(null);
 
-    const toggle = () => setIsOpen(!isOpen);
+    const toggleMenu = () => setMenuOpen(!menuOpen);
+    const toggleOpen = () => setModelOpen(!modelOpen);
+    const toggleModel = model => setModel(model);
+    const openRegister = () => {
+        toggleOpen();
+        toggleModel(REGISTER);
+    }
+    const openLogin = () => {
+        toggleOpen();
+        toggleModel(LOGIN);
+    }
 
     const { isAuthenticated, logout, user } = authContext;
 
     const onLogout = () => {
-        logout()
+        logout();
     }
 
     const guestLinks = (
         <Fragment>
             <NavItem>
-                <NavLink href="/login">登入</NavLink>
+                <NavLink href='#!' onClick={openLogin}>登入</NavLink>
             </NavItem>
             <NavItem>
-                <NavLink href="/register">註冊</NavLink>
+                <NavLink href='#!' onClick={openRegister}>註冊</NavLink>
             </NavItem>
         </Fragment>
     );
 
     const userLinks = (
         <Fragment>
+            <NavText>
+                {user && user.name}
+            </NavText>
             <NavItem>
-                <NavLink href="#!" onClick={onLogout}>登出</NavLink>
+                <NavLink href='#!' onClick={onLogout}>登出</NavLink>
             </NavItem>
         </Fragment>
     );
@@ -50,15 +83,26 @@ const MainNavbar = ({ title }) => {
     return (
         //當路徑在筆記頁面的時候要隱藏Navbar
         location.pathname.match(/notebook\/[0-9\w]+/) ? null :
-        <Navbar className="header" color="dark" dark expand="md">
-            <NavbarBrand href="/">{title}</NavbarBrand>
-            <NavbarToggler onClick={toggle} />
-            <Collapse isOpen={isOpen} navbar>
-                <Nav className="ml-auto" navbar>
-                    {isAuthenticated ? userLinks : guestLinks}
-                </Nav>
-            </Collapse>
-        </Navbar>
+        <div className="header">
+            <Navbar color="dark" dark expand="md">
+                <NavbarBrand href="/">{title}</NavbarBrand>
+                <NavbarToggler onClick={toggleMenu} />
+                <Collapse isOpen={menuOpen} navbar>
+                    <Nav className="ml-auto" navbar>
+                        {isAuthenticated ? userLinks : guestLinks}
+                    </Nav>
+                </Collapse>
+            </Navbar>
+            <AuthModels
+                model={model}
+                isOpen={modelOpen}
+                toggleModel={toggleModel}
+                toggleOpen={toggleOpen}>
+                <AuthModels.Login>登入</AuthModels.Login>
+                <AuthModels.Register>註冊</AuthModels.Register>
+                <AuthModels.ForgotPassword>忘記密碼</AuthModels.ForgotPassword>
+            </AuthModels>
+        </div>
     )
 }
 

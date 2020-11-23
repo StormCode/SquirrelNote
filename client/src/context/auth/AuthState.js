@@ -93,6 +93,29 @@ const AuthState = props => {
         }
     }
 
+    // 忘記密碼
+    const forgotPassword = async formData => {
+        const config = {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+
+        try {
+            const res = await axios.post('/api/users', formData, config);
+
+            dispatch({
+                type: ,
+                payload: res.data
+            });
+        } catch (err) {
+            dispatch({
+                type: ,
+                payload: err.response.data.status
+            });
+        }
+    }
+
     // 登出
     const logout = () => dispatch({type: LOGOUT});
 
@@ -110,6 +133,7 @@ const AuthState = props => {
             loadUser,
             login,
             logout,
+            forgotPassword,
             clearErrors
         }}>
         {props.children}

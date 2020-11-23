@@ -3,7 +3,12 @@ import PropTypes from 'prop-types';
 import { v4 as uuidv4 } from 'uuid';
 import { Check } from "phosphor-react";
 import styled from 'styled-components';
-import { UncontrolledDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
+import { 
+    UncontrolledDropdown, 
+    DropdownToggle, 
+    DropdownMenu, 
+    DropdownItem 
+} from 'reactstrap';
 
 const SorterItem = styled.div`
     padding: 5px 10px;
