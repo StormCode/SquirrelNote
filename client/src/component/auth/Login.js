@@ -7,7 +7,7 @@ import {
 } from 'reactstrap';
 import AlertContext from '../../context/alert/alertContext';
 import AuthContext from '../../context/auth/authContext';
-import { REGISTER } from '../../modelTypes';
+import { REGISTER, FORGOT_PWD } from '../../modelTypes';
 
 //Import Style
 import AuthPanel from '../../style/components/AuthPanel';
@@ -31,6 +31,10 @@ const Login = props => {
 
     const toggleRegister = () => {
         toggleModel(REGISTER);
+    }
+
+    const toggleForgotPassword = () => {
+        toggleModel(FORGOT_PWD);
     }
 
     const onChange = e => setUser({
@@ -66,9 +70,9 @@ const Login = props => {
                 </FormGroup>
                 <input type='submit' value='登入' className='btn btn-block' />
             </Form>
-            <p>
+            <p className='column'>
                 <a href='#' onClick={toggleRegister}>建立帳號</a>
-                <a href='#' onClick={}>忘記密碼</a>
+                <a href='#' onClick={toggleForgotPassword}>忘記密碼</a>
             </p>
         </AuthPanel>
     )

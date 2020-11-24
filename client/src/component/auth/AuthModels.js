@@ -16,7 +16,7 @@ import AuthContext from '../../context/auth/authContext';
 import {
     INVALID_CREDENTIALS
 } from '../../status';
-import { LOGIN, REGISTER } from '../../modelTypes';
+import { LOGIN, REGISTER, FORGOT_PWD } from '../../modelTypes';
 
 const ModelStyle = styled.div`
     .modal-content {
@@ -107,8 +107,13 @@ Models.Register = ({children}) =>
     </ModelsContext.Consumer>;
 
 Models.ForgotPassword = ({children}) =>
-    <ForgotPassword title={children} />;
-
+    <ModelsContext.Consumer>
+        {contextValue =>
+            contextValue.model === FORGOT_PWD ?
+                <ForgotPassword title={children} />
+            : null
+        }
+    </ModelsContext.Consumer>;
 
 Models.defaultProps = {
     model: null,

@@ -3,8 +3,7 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import Navbar from './component/layout/Navbar'
 import Footer from './component/layout/Footer'
 import Alerts from './component/layout/Alerts'
-import Login from './component/auth/Login'
-import Register from './component/auth/Register'
+import ResetPassword from './component/page/ResetPassword'
 import Index from './component/page/Index'
 import Notebook from './component/page/Notebook'
 import Note from './component/page/Note'
@@ -67,13 +66,8 @@ function App() {
                                                 ></Route>
                                                 <Route
                                                     exact
-                                                    path="/Login"
-                                                    component={Login}
-                                                ></Route>
-                                                <Route
-                                                    exact
-                                                    path="/Register"
-                                                    component={Register}
+                                                    path="/ResetPassword/:token"
+                                                    component={ResetPassword}
                                                 ></Route>
                                             </Switch>
                                         </div>

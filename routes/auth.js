@@ -71,4 +71,23 @@ router.post('/', [
     }
 });
 
+// @route           GET /api/auth/resetPassword
+// @desc            驗證重設密碼連結
+// @access          Public
+router.get('/resetPassword/:token', async (req, res) => {
+    try{
+        let user = await User.findOne({resetPasswordToken: req.params.token, resetPasswordExpires: {$gt: Date.now()}});
+
+        if(!user) {
+            return res.status(400).json({msg: '您的重設密碼連結無效或已過期', status: INVALID_CREDENTIALS});
+        }
+
+        return res.status(200).send();
+    }
+    catch(err){
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 module.exports = router;

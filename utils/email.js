@@ -1,12 +1,18 @@
 var nodemailer = require('nodemailer');
+var xoauth2 = require('xoauth2');
 
 module.exports = function(credentials) {
-  var mailTransport = nodemailer.createTransport('SMTP', {
-    service: 'Gmail',
+  var mailTransport = nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
+      type: 'OAuth2',
       user: credentials.username,
-      pass: credentials.password,
-    },
+      clientId: credentials.clientId,
+      clientSecret: credentials.clientSecret,
+      refreshToken: credentials.refreshToken
+    }
   });
   var from = credentials.username;
   var errorRecipient = credentials.username;

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import {orange} from '../colors';
+import {orange, gray} from '../colors';
 
 const AuthPanel = styled.div`
     padding: 0 5rem;
@@ -15,9 +15,21 @@ const AuthPanel = styled.div`
         background: ${orange};
     }
 
-    > p > a {
-        text-decoration: none;
-        color: ${orange};
+    > .column {
+        column-count: 2;
+        text-align: center;
+    }
+    
+        > .column > a {
+            display: block;
+            text-decoration: none;
+            color: ${orange};
+        }
+
+    > .tip {
+        margin-bottom: 10px;
+        font-size: .75rem;
+        color: ${gray};
     }
 `;
 

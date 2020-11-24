@@ -39,7 +39,10 @@ const AuthState = props => {
                 payload: res.data
             });
         } catch (err) {
-            dispatch({ type: AUTH_ERROR });
+            dispatch({ 
+                type: AUTH_ERROR,
+                payload: err.response.data.status || 'Server Error'
+             });
         }
     }
 
@@ -63,7 +66,7 @@ const AuthState = props => {
         } catch (err) {
             dispatch({
                 type: LOGIN_FAIL,
-                payload: err.response.data.status
+                payload: err.response.data.status || 'Server Error'
             });
         }
     }
@@ -88,30 +91,7 @@ const AuthState = props => {
         } catch (err) {
             dispatch({
                 type: REGISTER_FAIL,
-                payload: err.response.data.status
-            });
-        }
-    }
-
-    // 忘記密碼
-    const forgotPassword = async formData => {
-        const config = {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
-
-        try {
-            const res = await axios.post('/api/users', formData, config);
-
-            dispatch({
-                type: ,
-                payload: res.data
-            });
-        } catch (err) {
-            dispatch({
-                type: ,
-                payload: err.response.data.status
+                payload: err.response.data.status || 'Server Error'
             });
         }
     }
@@ -133,7 +113,6 @@ const AuthState = props => {
             loadUser,
             login,
             logout,
-            forgotPassword,
             clearErrors
         }}>
         {props.children}
