@@ -36,7 +36,7 @@ router.post('/', [
         let user = await User.findOne({email});
 
         if(user) {
-            return res.status(400).json({msg: '您的email已經被註冊過', status: DUPLICATED_USER});
+            return res.status(400).json({status: DUPLICATED_USER});
         }
 
         user = new User({
@@ -49,8 +49,35 @@ router.post('/', [
 
         user.password = await bcrypt.hash(password, salt);
 
+        
+        // 產生驗證帳號連結
+        let token = await bcrypt.hash(email, salt);
+        token = token.replace(/\//g,'');    //把斜線去掉
+        let authUserLink = `${req.protocol}://${url.parse(req.get('origin'), false, true).hostname}:${process.env.PROXY_PORT}/AuthUser/${token}`;
+        
+        // 將token存到該名使用者document
+        user.activeToken = token;
+        user.activeExpires = Date.now() + 3600000;
+
         await user.save();
 
+        //
+        // 寄發帳號啟用信至mail
+        //
+        
+        let title = '松鼠筆記-帳號啟用信件';
+        let content = `<h2>${user.name} 您好,</h2><br />感謝您使用松鼠筆記，請點擊以下連結啟用您的帳號：<br /><a href='${authUserLink}'></a><br /><br />希望您使用愉快~<br />松鼠筆記 敬上`;
+        
+        let mailSender = require('../utils/email.js')({
+            username: process.env.GMAIL_USERNAME,
+            clientId: process.env.GMAIL_CLIENT_ID,
+            clientSecret: process.env.GMAIL_CLIENT_SECRET,
+            refreshToken: process.env.GMAIL_REFRESH_TOKEN
+        });
+
+        mailSender.send(email,title,content);
+
+        // 產生驗證身份的token
         const payload = {
             user: {
                 id: user.id
@@ -88,13 +115,13 @@ router.post('/forgotPassword', [
         let user = await User.findOne({email});
 
         if(!user) {
-            return res.status(400).json({msg: '您輸入的email不存在', status: NOTEXIST_USER});
+            return res.status(400).json({status: NOTEXIST_USER});
         }
 
         // 產生重設密碼連結
         const salt = await bcrypt.genSalt(10);
         let token = await bcrypt.hash(email, salt);
-        token = token.replace(/\//,'');    //把斜線去掉
+        token = token.replace(/\//g,'');    //把斜線去掉
         let resetPwdLink = `${req.protocol}://${url.parse(req.get('origin'), false, true).hostname}:${process.env.PROXY_PORT}/ResetPassword/${token}`;
         
         // 將token存到該名使用者document
@@ -107,7 +134,7 @@ router.post('/forgotPassword', [
         //
         
         let title = '松鼠筆記-重設密碼信件';
-        let content = `<h2>${user.name} 您好,</h2><br />您收到這封信件是因為您(或他人)對您的帳號做了重設密碼的操作，若非您本人的意願，請忽略這封信件；若您想重設密碼請點擊以下連結：<br />${resetPwdLink}`;
+        let content = `<h2>${user.name} 您好,</h2><br />您收到這封信件是因為您(或他人)對您的帳號做了重設密碼的操作，若非您本人的意願，請忽略這封信件；若您想重設密碼請點擊以下連結：<br /><a href='${resetPwdLink}'></a>`;
         
         let mailSender = require('../utils/email.js')({
             username: process.env.GMAIL_USERNAME,
@@ -130,18 +157,16 @@ router.post('/forgotPassword', [
 // @desc            重設密碼
 // @access          Public
 router.post('/resetPassword', [
-        check('email', '請輸入有效的email')
-            .isEmail(),
         check('password', '請輸入6位以上的字元、數字或符號')
             .isLength({ min: 6 })
     ], async (req, res) => {
     try{
-        const {email, password} = req.body;
+        const {token, password} = req.body;
 
-        let user = await User.findOne({email: email, resetPasswordExpires: {$gt: Date.now()}});
+        let user = await User.findOne({resetPasswordToken: token, resetPasswordExpires: {$gt: Date.now()}});
 
         if(!user) {
-            return res.status(400).json({msg: '您的重設密碼連結無效或已過期', status: INVALID_CREDENTIALS});
+            return res.status(400).json({status: INVALID_CREDENTIALS});
         }
         
         const salt = await bcrypt.genSalt(10);
@@ -150,7 +175,7 @@ router.post('/resetPassword', [
 
         await user.save();
 
-        await User.findOneAndUpdate({},
+        await User.findByIdAndUpdate(user._id,
             { $unset: {
                     'resetPasswordToken': 1,
                     'resetPasswordExpires': 1

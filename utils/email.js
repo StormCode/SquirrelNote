@@ -1,5 +1,4 @@
 var nodemailer = require('nodemailer');
-var xoauth2 = require('xoauth2');
 
 module.exports = function(credentials) {
   var mailTransport = nodemailer.createTransport({

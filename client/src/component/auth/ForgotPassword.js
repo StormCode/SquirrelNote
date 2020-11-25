@@ -1,5 +1,4 @@
-import React, { useState, useContext } from 'react';
-import axios from 'axios';
+import React, { useState, useContext, useEffect } from 'react';
 import { 
     Alert, 
     Form, 
@@ -7,45 +6,45 @@ import {
     Label, 
     Input
 } from 'reactstrap';
-import AlertContext from '../../context/alert/alertContext';
+
+import AuthContext from '../../context/auth/authContext';
 
 //Import Style
 import AuthPanel from '../../style/components/AuthPanel';
 
 const ForgotPassword = props => {
-    const alertContext = useContext(AlertContext);
-
-    const { setAlert } = alertContext;
-
+    const authContext = useContext(AuthContext);
+    const { forgotPassword, emailSended, clearEmailSended } = authContext;
     const [email, setEmail] = useState('');
-    const [emailSended, setEmailSended] = useState(null);
+    const [formAuthError, setFormAuthError] = useState(null);
+
+    useEffect(() => {
+        return () => {
+            clearEmailSended();
+        }
+
+        // eslint-disable-next-line
+    }, []);
 
     const onChange = e => setEmail(e.target.value);
 
     const onSubmit = async e => {
         e.preventDefault();
         if(email === '') {
-            setAlert('請填寫E-mail', 'danger');
+            setFormAuthError('請填寫E-mail');
         }
         else{
-            const config = {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            };
-    
-            try {
-                await axios.post('/api/users/forgotPassword', {email}, config);
-                setEmailSended(true);
-            } catch (err) {
-                setEmailSended(false);
-            }
+            forgotPassword({email});
         }
     };
 
     return (
         <AuthPanel className='form-container'>
             <h2 className='title'>{props.title}</h2>
+            {(formAuthError !== null && formAuthError !== '') &&
+                <Alert color="danger">
+                    {formAuthError}
+                </Alert>}
             {emailSended !== null ?
                 (emailSended === true ?
                     <Alert color="success">

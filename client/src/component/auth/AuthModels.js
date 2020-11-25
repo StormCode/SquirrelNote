@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { 
@@ -11,11 +11,8 @@ import Login from './Login';
 import Register from './Register';
 import ForgotPassword from './ForgotPassword';
 
-import AlertContext from '../../context/alert/alertContext';
 import AuthContext from '../../context/auth/authContext';
-import {
-    INVALID_CREDENTIALS
-} from '../../status';
+
 import { LOGIN, REGISTER, FORGOT_PWD } from '../../modelTypes';
 
 const ModelStyle = styled.div`
@@ -40,30 +37,18 @@ const ModelsContext = React.createContext({
 const Models = props => {
     const history = useHistory();
     const authContext = useContext(AuthContext);
-    const alertContext = useContext(AlertContext);
-
-    const { error, clearErrors, isAuthenticated } = authContext;
-    const { setAlert } = alertContext;
-
-    useEffect(() => {
-        if(isAuthenticated) {
-            history.push('/notebook');
-        }
-
-        if(error === INVALID_CREDENTIALS) {
-            setAlert(error, 'danger');
-            clearErrors();
-        }
-
-        // eslint-disable-next-line
-    }, [error, isAuthenticated]);
-
+    const { isAuthenticated } = authContext;
     const { 
         model, 
         isOpen, 
         toggleModel, 
         toggleOpen 
     } = props;
+    
+    useEffect(() => {
+        //todo
+        isAuthenticated && history.push('/notebook');
+    }, [isAuthenticated]);
 
     return (
         <ModelsContext.Provider
@@ -72,13 +57,13 @@ const Models = props => {
                 toggleOpen: toggleOpen,
                 toggleModel: toggleModel
             }}>
-                <Modal isOpen={isOpen} toggle={toggleOpen}>
+                {isOpen ? <Modal isOpen={isOpen} toggle={toggleOpen}>
                     <ModelStyle>
                         <ModalBody>
                             {props.children}
                         </ModalBody>
                     </ModelStyle>
-                </Modal>
+                </Modal> : null}
         </ModelsContext.Provider>
     )
 }

@@ -18,25 +18,28 @@ const ResetPassword = ({ match }) => {
     const { setAlert } = alertContext;
     const [auth, setAuth] = useState(null);
     
-    useEffect(async() => {
-        try {
-            let token = match.params.token;
-            await axios.get(`/api/auth/resetPassword/${token}`);
-            setAuth(true);
-        } catch (err) {
-            setAuth(false);
+    useEffect(() => {
+        async function Auth() {
+            try {
+                let token = match.params.token;
+                await axios.get(`/api/auth/resetPassword/${token}`);
+                setAuth(true);
+            } catch (err) {
+                setAuth(false);
+            }
         }
+        Auth();
 
         // eslint-disable-next-line
     },[]);
 
     const [user, setUser] = useState({
-        email: '',
+        token: match.params.token,
         password: '',
         confirmPassword: ''
     });
 
-    const { email, password, confirmPassword } = user;
+    const { password, confirmPassword } = user;
 
     const onChange = e => setUser({
         ...user,
@@ -45,7 +48,7 @@ const ResetPassword = ({ match }) => {
 
     const onSubmit = async e => {
         e.preventDefault();
-        if(email === '' || password === '' || confirmPassword === '') {
+        if(password === '' || confirmPassword === '') {
             setAlert('請填寫所有欄位', 'danger');
         }
         else if(password !== confirmPassword){
@@ -60,7 +63,7 @@ const ResetPassword = ({ match }) => {
                 };
 
                 await axios.post('/api/users/resetPassword/', user, config);
-                setAlert('您的密碼已重設，可以重新登入', 'success');
+                setAlert('您的密碼已重設，可以重新登入囉！', 'success');
             } catch (err) {
                 setAlert('重設密碼發生異常', 'danger');
             }
@@ -73,10 +76,6 @@ const ResetPassword = ({ match }) => {
             {auth !== null ?
                 (auth === true ?
                     <Form onSubmit={onSubmit}>
-                        <FormGroup>
-                            <Label htmlFor='email'>Email</Label>
-                            <Input type='email' name='email' value={email} onChange={onChange} required />
-                        </FormGroup>
                         <FormGroup>
                             <Label htmlFor='password'>密碼</Label>
                             <Input type='password' name='password' value={password} onChange={onChange} minLength='6' required/>

@@ -15,15 +15,21 @@ const AuthPanel = styled.div`
         background: ${orange};
     }
 
+    p {
+        text-align: center;
+    }
+
+        p > a {
+            text-decoration: none;
+            color: ${orange};
+        }
+
     > .column {
         column-count: 2;
-        text-align: center;
     }
     
         > .column > a {
             display: block;
-            text-decoration: none;
-            color: ${orange};
         }
 
     > .tip {

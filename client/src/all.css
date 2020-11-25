@@ -25,3 +25,8 @@ button > img:not(.inline-img) {
 .right-align {
   float: right;
 }
+
+.modal-content {
+  border: none;
+  background: none;
+}

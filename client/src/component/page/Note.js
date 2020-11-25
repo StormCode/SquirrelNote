@@ -97,7 +97,7 @@ const Note = ({ match }) => {
             setNoteMode(NOTEMODE.READ);
             setSave({state: DISABLESAVE, showUpdateTime: false});
         }
-    },[current, cacheCurrent]);
+    },[current]);
 
     useEffect(() => {
         //控制儲存狀態
@@ -287,7 +287,7 @@ const Note = ({ match }) => {
     }, [autoSave, current, cacheCurrent, cacheNotes , autoSaveInterval, noteMode]);
 
     const LoadRecycleBin = () => {
-        history.push(`/recyclebin`);
+        history.push('/recyclebin');
     };
 
     return (

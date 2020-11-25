@@ -4,7 +4,7 @@ import AuthContext from '../../context/auth/authContext';
 import NotebookContext from '../../context/notebooks/notebookContext';
 
 import RecycleFilter from '../recyclebin/RecycleFilter'
-import RecycleSorter from '../recyclebin/RecycleSorter'
+// import RecycleSorter from '../recyclebin/RecycleSorter'
 import RecycleList from '../recyclebin/RecycleList'
 
 import '../../style/layout/SingleContent.css';
@@ -13,7 +13,7 @@ import '../../style/page/RecycleBin.css';
 const RecycleBin = () => {
     const authContext = useContext(AuthContext);
     const notebookContext = useContext(NotebookContext);
-    const notebookId = notebookContext.current._id;
+    const notebookId = notebookContext.current ? notebookContext.current._id : null;
 
     useEffect(() => {
         authContext.loadUser();
@@ -24,14 +24,15 @@ const RecycleBin = () => {
     return (
         <div className='single-content-container'>
             <div className='recycle-content'>
-                { notebookId ? 
-                    <Link to={`/notebook/${notebookId}`}>回到筆記</Link> 
-                    : <Link to='../Notebook'>回到筆記本</Link>}
+                { notebookId !== null ? 
+                    <Link to={`/Notebook/${notebookId}`}>回到筆記</Link> 
+                : <Link to='../Notebook'>回到筆記本</Link>
+                }
                 <h2>回收站</h2>
                 <RecycleList />
             </div>
             <div className='right-panel'>
-                <RecycleSorter />
+                {/* <RecycleSorter /> */}
                 <RecycleFilter />
             </div>
         </div>

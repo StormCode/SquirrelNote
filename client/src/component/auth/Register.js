@@ -1,7 +1,12 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
-import { Form, FormGroup, Label, Input } from 'reactstrap';
-import AlertContext from '../../context/alert/alertContext';
+import { 
+    Alert, 
+    Form,
+    FormGroup, 
+    Label, 
+    Input 
+} from 'reactstrap';
+
 import AuthContext from '../../context/auth/authContext';
 import {
     DUPLICATED_USER
@@ -12,26 +17,24 @@ import { LOGIN } from '../../modelTypes';
 import AuthPanel from '../../style/components/AuthPanel';
 
 const Register = props => {
-    const history = useHistory();
-    const alertContext = useContext(AlertContext);
     const authContext = useContext(AuthContext);
 
-    const { setAlert } = alertContext;
+    const [formAuthError, setFormAuthError] = useState(null);
 
-    const { register, error, clearErrors, isAuthenticated } = authContext;
+    const { register, error, clearErrors, emailSended, clearEmailSended } = authContext;
 
     useEffect(() => {
-        if(isAuthenticated) {
-            history.push('/');
-        }
-
         if(error === DUPLICATED_USER) {
-            setAlert(error, 'danger');
+            setFormAuthError('帳號已經被註冊過了！');
             clearErrors();
         }
 
+        return () => {
+            clearEmailSended();
+        }
+
         // eslint-disable-next-line
-    }, [error, isAuthenticated]);
+    }, [error]);
 
     const [user, setUser] = useState({
         name: '',
@@ -56,12 +59,13 @@ const Register = props => {
     const onSubmit = e => {
         e.preventDefault();
         if(name === '' || email === '' || password === '' || confirmPassword === '') {
-            setAlert('請填寫所有欄位', 'danger');
+            setFormAuthError('請填寫所有欄位');
         }
         else if(password !== confirmPassword){
-            setAlert('您所輸入的密碼不一致', 'danger');
+            setFormAuthError('您所輸入的密碼不一致');
         }
         else{
+            setFormAuthError(null);
             register({
                 name,
                 email,
@@ -72,7 +76,21 @@ const Register = props => {
 
     return (
         <AuthPanel className='form-container'>
-            <h2>{props.title}</h2>
+            <h2 className='title'>{props.title}</h2>
+            {(formAuthError !== null && formAuthError !== '') &&
+                    <Alert color="danger">
+                        {formAuthError}
+                    </Alert>}
+            {emailSended !== null ?
+                (emailSended === true ?
+                    <Alert color="success">
+                        已寄送帳號啟用信至您的信箱，請點擊信件中的連結啟用
+                    </Alert> 
+                : <Alert color="danger">
+                    帳號啟用信發送發生異常，請檢查您的email是否正確
+                  </Alert>)
+                :null
+            }
             <Form onSubmit={onSubmit}>
                 <FormGroup>
                     <Label htmlFor='name'>姓名</Label>
@@ -84,7 +102,7 @@ const Register = props => {
                 </FormGroup>
                 <FormGroup>
                     <Label htmlFor='password'>密碼</Label>
-                    <Input type='password' name='password' value={password} onChange={onChange} minLength='6' required/>
+                    <Input type='password' name='password' value={password} onChange={onChange} placeholder='請輸入6位以上的字元、數字或符號' minLength='6' required/>
                 </FormGroup>
                 <FormGroup>
                     <Label htmlFor='confirmPassword'>確認密碼</Label>
@@ -93,7 +111,7 @@ const Register = props => {
                 <Input type='submit' value='註冊' className='btn btn-block' />
             </Form>
             <p>
-                <a href='#' onClick={toggleLogin}>已有帳號？</a>
+                <a href='#!' onClick={toggleLogin}>已有帳號？</a>
             </p>
         </AuthPanel>
     )

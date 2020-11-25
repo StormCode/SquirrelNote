@@ -5,7 +5,8 @@ const bcrypt = require('bcryptjs');
 const router = express.Router();
 const { check, validationResult } = require('express-validator');
 const { 
-    INVALID_CREDENTIALS
+    INVALID_CREDENTIALS,
+    NOT_AUTHORIZED
 } = require('../status');
 
 const User = require('../models/User');
@@ -43,13 +44,16 @@ router.post('/', [
         let user = await User.findOne({email});
 
         if(!user){
-            return res.status(400).json({msg: '憑證無效', status: INVALID_CREDENTIALS});
+            return res.status(400).json({status: INVALID_CREDENTIALS});
+        }
+        else if(user.status !== 1) {
+            return res.status(400).json({status: NOT_AUTHORIZED});
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
 
         if(!isMatch){
-            return res.status(400).json({msg: '憑證無效', status: INVALID_CREDENTIALS});
+            return res.status(400).json({status: INVALID_CREDENTIALS});
         }
 
         const payload = {
@@ -71,7 +75,35 @@ router.post('/', [
     }
 });
 
-// @route           GET /api/auth/resetPassword
+// @route           GET /api/auth/authUser/:token
+// @desc            啟用帳號
+// @access          Public
+router.get('/authUser/:token', async (req, res) => {
+    try{
+        let user = await User.findOne({activeToken: req.params.token, activeExpires: {$gt: Date.now()}});
+
+        if(!user) {
+            return res.status(400).json({status: INVALID_CREDENTIALS});
+        }
+
+        // 更改使用者的狀態為啟用
+        await User.findByIdAndUpdate(user._id,
+            { $set: {'status': 1 }, $unset: {
+                    'activeToken': 1,
+                    'activeExpires': 1
+                }
+            },
+            { new: true });
+
+        return res.status(200).send();
+    }
+    catch(err){
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route           GET /api/auth/resetPassword/:token
 // @desc            驗證重設密碼連結
 // @access          Public
 router.get('/resetPassword/:token', async (req, res) => {
@@ -79,7 +111,7 @@ router.get('/resetPassword/:token', async (req, res) => {
         let user = await User.findOne({resetPasswordToken: req.params.token, resetPasswordExpires: {$gt: Date.now()}});
 
         if(!user) {
-            return res.status(400).json({msg: '您的重設密碼連結無效或已過期', status: INVALID_CREDENTIALS});
+            return res.status(400).json({status: INVALID_CREDENTIALS});
         }
 
         return res.status(200).send();

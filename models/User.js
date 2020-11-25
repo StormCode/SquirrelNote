@@ -18,6 +18,16 @@ const UserSchema = mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    status: {
+        type: Number,
+        default: 2
+    },
+    activeToken: {
+        type: String
+    },
+    activeExpires: {
+        type: Number
+    },
     resetPasswordToken: {
         type: String
     },

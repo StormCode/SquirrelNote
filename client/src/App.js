@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
 import Navbar from './component/layout/Navbar'
 import Footer from './component/layout/Footer'
 import Alerts from './component/layout/Alerts'
+import AuthUser from './component/page/AuthUser'
 import ResetPassword from './component/page/ResetPassword'
 import Index from './component/page/Index'
 import Notebook from './component/page/Notebook'
@@ -63,6 +64,11 @@ function App() {
                                                     exact
                                                     path="/Index"
                                                     component={Index}
+                                                ></Route>
+                                                <Route
+                                                    exact
+                                                    path="/AuthUser/:token"
+                                                    component={AuthUser}
                                                 ></Route>
                                                 <Route
                                                     exact

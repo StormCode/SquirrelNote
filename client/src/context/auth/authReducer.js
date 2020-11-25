@@ -6,6 +6,9 @@ import {
     LOGIN_SUCCESS,
     LOGIN_FAIL,
     LOGOUT,
+    FORGOTPASSWORD_SUCCESS,
+    FORGOTPASSWORD_FAIL,
+    CLEAR_EMAIL_SENDED,
     CLEAR_ERRORS
 } from '../types';
 
@@ -19,6 +22,12 @@ export default (state, action) => {
                 user: action.payload
             };
         case REGISTER_SUCCESS:
+            return {
+                ...state,
+                ...action.payload,
+                emailSended: true,
+                loading: false
+            };
         case LOGIN_SUCCESS:
             localStorage.setItem('token', action.payload.token);
             return {
@@ -28,6 +37,12 @@ export default (state, action) => {
                 loading: false
             };
         case REGISTER_FAIL:
+            return {
+                ...state,
+                emailSended: false,
+                loading: false,
+                error: action.payload
+            };
         case LOGIN_FAIL:
         case AUTH_ERROR:
         case LOGOUT:
@@ -40,6 +55,21 @@ export default (state, action) => {
                 user: null,
                 error: action.payload
             };
+        case FORGOTPASSWORD_SUCCESS:
+            return {
+                ...state,
+                emailSended: true
+            }
+        case FORGOTPASSWORD_FAIL:
+            return {
+                ...state,
+                emailSended: false
+            }
+        case CLEAR_EMAIL_SENDED:
+            return {
+                ...state,
+                emailSended: null
+            }
         case CLEAR_ERRORS:
             return {
                 ...state,

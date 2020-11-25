@@ -11,6 +11,9 @@ import {
     LOGIN_SUCCESS,
     LOGIN_FAIL,
     LOGOUT,
+    FORGOTPASSWORD_SUCCESS,
+    FORGOTPASSWORD_FAIL,
+    CLEAR_EMAIL_SENDED,
     CLEAR_ERRORS
 } from '../types';
 
@@ -20,6 +23,7 @@ const AuthState = props => {
         isAuthenticated: null,
         loading: true,
         user: null,
+        emailSended: null,
         error: null
     };
 
@@ -86,8 +90,6 @@ const AuthState = props => {
                 type: REGISTER_SUCCESS,
                 payload: res.data
             });
-
-            loadUser();
         } catch (err) {
             dispatch({
                 type: REGISTER_FAIL,
@@ -99,6 +101,29 @@ const AuthState = props => {
     // 登出
     const logout = () => dispatch({type: LOGOUT});
 
+    // 忘記密碼
+    const forgotPassword = async formData => {
+        const config = {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+
+        try {
+            await axios.post('/api/users/forgotPassword', formData, config);
+
+            dispatch({ type: FORGOTPASSWORD_SUCCESS });
+        } catch (err) {
+            dispatch({
+                type: FORGOTPASSWORD_FAIL,
+                payload: err.response.data.status || 'Server Error'
+            });
+        }
+    }
+
+    // 清除Email寄送狀態
+    const clearEmailSended = () => dispatch({type: CLEAR_EMAIL_SENDED});
+
     // 清除錯誤
     const clearErrors = () => dispatch({type: CLEAR_ERRORS});
 
@@ -108,11 +133,14 @@ const AuthState = props => {
             isAuthenticated: state.isAuthenticated,
             loading: state.loading,
             user: state.user,
+            emailSended: state.emailSended,
             error: state.error,
             register,
             loadUser,
             login,
             logout,
+            forgotPassword,
+            clearEmailSended,
             clearErrors
         }}>
         {props.children}
