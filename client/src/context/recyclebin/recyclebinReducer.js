@@ -1,12 +1,20 @@
 import {
-    RESTORE_RECYCLEBIN,
+    GET_DELETED_ITEMS,
     FILTER_RECYCLELIST,
     SORT_RECYCLELIST,
+    RESTORE_RECYCLEBIN,
+    PERMANENTLY_DELETE,
     RECYCLEBIN_ERROR
 } from '../types';
 
 export default (state,action) => {
     switch(action.type){
+        case GET_DELETED_ITEMS:
+            return {
+                ...state,
+                deletedItems: action.payload,
+                loading: false
+            }
         case SORT_RECYCLELIST:
             return {
                 ...state,

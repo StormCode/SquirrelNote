@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
+import { Redirect } from 'react-router-dom';
 import { 
     Alert, 
     Form, 
@@ -33,9 +34,9 @@ const Login = props => {
     const { toggleModel, toggleOpen } = props;
     
     useEffect(() => {
-        if(isAuthenticated) {
-            toggleOpen();
-        }
+        // if(isAuthenticated) {
+        //     toggleOpen();
+        // }
 
         if(error === INVALID_CREDENTIALS) {
             setFormAuthError('帳號密碼不正確');
@@ -77,6 +78,8 @@ const Login = props => {
 
     return (
         <AuthPanel className='form-container'>
+            {/* 頁面跳轉至notebook */}
+            {isAuthenticated && window.location.replace('/notebook')}
             <h2 className='title'>{props.title}</h2>
                 {(formAuthError !== null && formAuthError !== '') &&
                     <Alert color="danger">

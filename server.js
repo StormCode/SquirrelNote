@@ -26,6 +26,7 @@ app.use('/api/notebooks', require('./routes/notebooks'));
 app.use('/api/notedirs', require('./routes/notedirs'));
 app.use('/api/notes', require('./routes/notes'));
 app.use('/api/images', require('./routes/images'));
+app.use('/api/recyclebin', require('./routes/recyclebin'));
 
 // Serve static assets in production
 if(process.env.NODE_ENV === 'production'){

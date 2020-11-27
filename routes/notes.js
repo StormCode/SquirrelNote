@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
-const config = require('config');
-const DomParser = require('dom-parser');
+const config = require('config')
+const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const router = express.Router();
 const {
@@ -13,6 +13,7 @@ const {
 const Notebook = require('../models/Notebook');
 const Notedir = require('../models/Notedir');
 const Note = require('../models/Note');
+const Recyclebin = require('../models/Recyclebin');
 const auth = require('../middleware/auth');
 
 // route            Get /api/notes
@@ -110,7 +111,7 @@ router.post('/', auth, async(req, res) => {
         const newNotedirNote = {
             _id: note._id,
             title,
-            summary: getSummary(content),
+            summary: require('../common/summary')(content),
             date: note.date
         };
 
@@ -161,7 +162,7 @@ router.put('/:id', auth, async(req, res) => {
         // 確認使用者是否真的擁有這個筆記本
         if(notebook.author.toString() !== req.user.id) return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
 
-        let deleteImgs = FilterDeleteImgs(note.content, content);
+        let deleteImgs = require('../common/filterDeleteImgs')(note.content, content);
 
         //確認新的筆記內容是否有刪掉圖片，有則刪除Server上的檔案
         if(deleteImgs.length > 0) {
@@ -180,7 +181,7 @@ router.put('/:id', auth, async(req, res) => {
             { new: true });
 
         // 連帶修改筆記目錄的筆記資訊
-        let summary = getSummary(content);
+        let summary = require('../common/summary')(content);
         await Notedir.findOneAndUpdate({_id: req.body.notedir, 'notes._id': id},
             { $set: {'notes.$.title': title, 'notes.$.summary': summary, 'notes.$.date': updateDateTime}}
         );
@@ -202,6 +203,12 @@ router.put('/:id', auth, async(req, res) => {
 router.delete('/:id', auth, async(req, res) => {
     try {
         const id = req.params.id;
+        const userId = req.user.id;
+        let deleteItems = {
+            id: uuidv4(),
+            type: 'note',
+            date: new Date()
+        };
 
         //從header取得notebook
         const notedirId = req.header('x-notedir');
@@ -223,17 +230,24 @@ router.delete('/:id', auth, async(req, res) => {
         // 確認使用者是否真的擁有這個筆記本
         if(notebook.author.toString() !== req.user.id) return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
 
-        let deleteImgs = FilterDeleteImgs(note.content);
+        //
+        // 移動至回收站
+        //
+        deleteItems.title = note.title;
+        deleteItems.notes = note;
 
-        //刪除此筆記在Server上的所有檔案
-        if(deleteImgs.length > 0) {
-            deleteImgs.forEach((imgName) => {
-                let deletedImgPath = path.join(__dirname, '..', config.get('imageDirectory'), imgName);
-                
-                fs.unlink(deletedImgPath, (err) => {
-                      return
-                    });
-            })
+        // 取得刪除的項目
+        const deletedGroup = await Recyclebin.findById(userId);
+
+        if(!deletedGroup) {
+            const newDeletedGroup = new Recyclebin({
+                userId: userId,
+                items: [deleteItems]
+            });
+            await newDeletedGroup.save(); 
+        } else {
+            deletedGroup.items.push(deleteItems);
+            await deletedGroup.save();
         }
 
         // 刪除筆記
@@ -255,49 +269,5 @@ router.delete('/:id', auth, async(req, res) => {
         res.status(500).send('Server Error');
     }
 });
-
-function getSummary(data){
-    let dom = new DomParser().parseFromString( data, 'text/html' );
-    let elements = dom.getElementsByTagName( 'p' )
-        || dom.getElementsByTagName( 'h1' )
-        || dom.getElementsByTagName( 'h2' )
-        || dom.getElementsByTagName( 'h3' )
-        || dom.getElementsByTagName( 'blockquote' )
-        || dom.getElementsByTagName( 'q' )
-        || dom.getElementsByTagName( 'cite' )
-        || dom.getElementsByTagName( 'code' );
-    return elements[0] ? elements[0].textContent
-    .replace(/&nbsp;/g, '')
-    .substring(0,10) : '';
-}
-
-function ImgSrcParser(content) {
-    return Array.from( new DomParser().parseFromString( content, 'text/html' )
-    .getElementsByTagName( 'img' ) )
-    .map(img => img.getAttribute('src'));
-}
-
-//比對originalContent及currentContent，回傳不存在於currentContent的圖片檔名
-//若不傳入currentContent，則回傳originalContent全部的圖片檔名
-function FilterDeleteImgs(originalContent, currentContent) {
-    let res;
-    //抓出原始(未修改)筆記內容所有的img src
-    let originalImgSrcArr = ImgSrcParser(originalContent);
-
-    if(typeof currentContent !== 'undefined'){
-        
-        //抓出目前筆記內容所有的img src
-        let currentImgSrcArr = ImgSrcParser(currentContent);
-        
-        //兩兩比對抓出被刪掉的圖片檔名
-        res = originalImgSrcArr.filter(src => currentImgSrcArr.indexOf(src) === -1)
-            .map(src => src.split('/').slice(-1)[0]);
-    } else {
-        //抓出檔名
-        res = originalImgSrcArr.map(src => src.split('/').slice(-1)[0]);
-    }
-
-    return res;
-}
 
 module.exports = router;

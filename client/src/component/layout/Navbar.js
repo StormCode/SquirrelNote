@@ -93,7 +93,6 @@ const MainNavbar = ({ title }) => {
                     </Nav>
                 </Collapse>
             </Navbar>
-            {!isAuthenticated && 
             <AuthModels
                 model={model}
                 isOpen={modelOpen}
@@ -102,7 +101,7 @@ const MainNavbar = ({ title }) => {
                 <AuthModels.Login>登入</AuthModels.Login>
                 <AuthModels.Register>註冊</AuthModels.Register>
                 <AuthModels.ForgotPassword>忘記密碼</AuthModels.ForgotPassword>
-            </AuthModels>}
+            </AuthModels>
         </div>
     )
 }

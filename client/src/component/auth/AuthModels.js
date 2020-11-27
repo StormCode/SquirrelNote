@@ -1,5 +1,4 @@
 import React, { useContext, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { 
     Modal, 
@@ -35,7 +34,6 @@ const ModelsContext = React.createContext({
 });
 
 const Models = props => {
-    const history = useHistory();
     const authContext = useContext(AuthContext);
     const { isAuthenticated } = authContext;
     const { 
@@ -44,11 +42,6 @@ const Models = props => {
         toggleModel, 
         toggleOpen 
     } = props;
-    
-    useEffect(() => {
-        //todo
-        isAuthenticated && history.push('/notebook');
-    }, [isAuthenticated]);
 
     return (
         <ModelsContext.Provider

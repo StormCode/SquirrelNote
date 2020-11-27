@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { v4: uuidv4 } = require('uuid');
 const { check, validationResult } = require('express-validator');
 const {
     NOT_AUTHORIZED,
@@ -8,6 +9,8 @@ const {
 
 const Notebook = require('../models/Notebook');
 const Notedir = require('../models/Notedir');
+const Note = require('../models/Note');
+const Recyclebin = require('../models/Recyclebin');
 const auth = require('../middleware/auth');
 
 // route            Get /api/notebooks
@@ -120,16 +123,47 @@ router.put('/:id', [auth, [
 router.delete('/:id', auth, async(req, res) => {
     try {
         const id = req.params.id;
-
+        const userId = req.user.id;
+        let deleteItems = {
+            id: uuidv4(),
+            type: 'notebook',
+            date: new Date()
+        };
         const notebook = await Notebook.findById(id);
+        const notedirs = await Notedir.find({ notebook: notebook._id });
 
         if(!notebook) return res.status(404).json({msg: '找不到此筆記本', status: NOT_FOUND});
 
         // 確認使用者是否真的擁有這個筆記本
-        if(notebook.author.toString() !== req.user.id) return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
+        if(notebook.author.toString() !== userId) return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
+
+        //
+        // 移動至回收站
+        //
+        deleteItems.title = notebook.title;
+        deleteItems.notebook = notebook;
+        deleteItems.notedirs = notedirs;
+        deleteItems.notes = await require('../common/getNotes')(notedirs);
+
+        // 取得刪除的項目
+        const deletedGroup = await Recyclebin.findById(userId);
+
+        if(!deletedGroup) {
+            const newDeletedGroup = new Recyclebin({
+                userId: userId,
+                items: [deleteItems]
+            });
+            await newDeletedGroup.save(); 
+        } else {
+            deletedGroup.items.push(deleteItems);
+            await deletedGroup.save();
+        }
 
         // 刪除筆記本裡的筆記目錄
         await Notedir.deleteMany({ notebook: id });
+
+        // 刪除筆記目錄裡的筆記
+        await Note.deleteMany({ notedir: notedirs._id });
 
         // 刪除筆記本
         await Notebook.findByIdAndRemove(id);
