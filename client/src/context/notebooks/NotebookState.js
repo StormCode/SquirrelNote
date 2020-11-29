@@ -1,5 +1,6 @@
 import React, { useReducer } from 'react';
 import axios from 'axios';
+import { encrypt, decrypt } from '../../utils/crypto';
 import NotebookContext from './notebookContext';
 import NotebookReducer from './notebookReducer';
 import {
@@ -88,12 +89,15 @@ const NotebookState = props => {
         };
 
         try {
-            const res = await axios.post('/api/notebooks', notebook, config);
+            const encryptedData = {data: encrypt(notebook, process.env.REACT_APP_SECRET_KEY)};
+            const res = await axios.post('/api/notebooks', encryptedData, config);
             dispatch({
                 type: ADD_NOTEBOOK,
                 payload: res.data
             });
         } catch (err) {
+            console.log('err: ' + err);
+            
             dispatch({ 
                 type: NOTEBOOK_ERROR,
                 payload: err.msg || 'Server Error'

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
+require('dotenv').config();
 const { check, validationResult } = require('express-validator');
 const {
     NOT_AUTHORIZED,
@@ -11,6 +12,7 @@ const Notebook = require('../models/Notebook');
 const Notedir = require('../models/Notedir');
 const Note = require('../models/Note');
 const Recyclebin = require('../models/Recyclebin');
+const crypto = require('../utils/crypto');
 const auth = require('../middleware/auth');
 
 // route            Get /api/notebooks
@@ -30,17 +32,9 @@ router.get('/', auth, async(req, res) => {
 // route            Post /api/notebooks
 // desc             新增筆記本
 // access           Private
-router.post('/', [auth, [
-    check('title', '請輸入筆記本名稱')
-        .not()
-        .isEmpty()
-]], async(req, res) => {
-    const errors = validationResult(req);
-    if(!errors.isEmpty()){
-        return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { title, desc } = req.body;
+router.post('/', auth, async(req, res) => {
+    const data = crypto(process.env.SECRET_KEY).decrypt(req.body.data);
+    const { title, desc } = data;
     
     try {
         // 新增筆記本
@@ -67,6 +61,12 @@ router.post('/', [auth, [
 
         await newNotebook.save();
 
+        // 加密新增的notebook資料
+        const encryptedNotebook = crypto(process.env.SECRET_KEY).encrypt(notebook);
+
+        console.log('encryptedNotebook: ' + encryptedNotebook);
+        
+        // res.json(encryptedNotebook);
         res.json(notebook);
     } catch (err) {
         console.error(err.message);
