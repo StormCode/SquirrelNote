@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect, useCallback } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
+import { decrypt } from '../../utils/crypto';
 import styled from 'styled-components';
 import ImgSrcParser from '../../utils/imgSrcParser';
 import Notedirs from '../notedirs/NoteDirs';
@@ -36,7 +37,8 @@ const Note = ({ match }) => {
     const notedirContext = useContext(NotedirContext);
     const noteContext = useContext(NoteContext);
 
-    const { notes, 
+    const { 
+        notes, 
         current, 
         cacheCurrent,
         cacheNotes, 
@@ -55,7 +57,8 @@ const Note = ({ match }) => {
         updateNote,
         deleteNote,
         error,
-        loading } = noteContext;
+        loading 
+    } = noteContext;
 
     const autoSaveInterval = 10000;
     const [autoSave, setAutoSave] = useState(true);
@@ -72,11 +75,13 @@ const Note = ({ match }) => {
     
     const host = `${window.location.protocol}//${window.location.host}`;
 
+    const notebooks = notebookContext.notebooks;
+
     useEffect(() => {
-        notebookContext.setCurrentNotebook(match.params.id);
+        notebooks && notebooks.length > 0 && notebookContext.setCurrentNotebook(match.params.id);
 
         // eslint-disable-next-line
-    }, []);
+    }, [notebooks]);
 
     useEffect(() => {
         if(current && current._id) {
@@ -256,7 +261,8 @@ const Note = ({ match }) => {
                     window.URL.revokeObjectURL(imgSrc);
 
                     // 把圖片的src重新設定為server上的檔案位置
-                    _content = _content.replace(imgSrc, `${host}/api/images/${res.data.filename}`);
+                    const decryptedData = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
+                    _content = _content.replace(imgSrc, `${host}/api/images/${decryptedData.filename}`);
                 }
                 catch(err){
                     //todo

@@ -5,6 +5,7 @@ const path = require('path');
 const upload = multer({dest: path.join(__dirname, '..', config.get('imageDirectory'))});
 const router = express.Router();
 
+const crypto = require('../utils/crypto');
 const auth = require('../middleware/auth');
 
 // @route           GET /api/images/:filename
@@ -28,7 +29,9 @@ router.get('/:filename', async (req, res) => {
 router.post('/upload', auth, upload.single('image'), async (req, res) => {
     try {
         if(req.file) {
-            res.json(req.file);
+            // 加密檔案資訊
+            const cryptedFileInfo = crypto(process.env.SECRET_KEY).encrypt(req.file);
+            res.send(cryptedFileInfo);
         }
     }
     catch(err) {

@@ -4,12 +4,16 @@ module.exports = function(key) {
     const SECRET_KEY = key;
 
     return {
-        encrypt: function(data) {
-            return CryptoJS.TripleDES.encrypt(JSON.stringify(data), SECRET_KEY).toString();
+        encrypt: function(data, isObj = true) {
+            if(data === '') return data;
+            let plain = isObj ? JSON.stringify(data) : data;
+            return CryptoJS.TripleDES.encrypt(plain, SECRET_KEY).toString();
         },
-        decrypt: function(data) {
-            let bytes  = CryptoJS.TripleDES.decrypt(data, SECRET_KEY);
-            return JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+        decrypt: function(data, isObj = true) {
+            if(data === '') return data;
+            let plainBytes  = CryptoJS.TripleDES.decrypt(data, SECRET_KEY);
+            let plainStr = plainBytes.toString(CryptoJS.enc.Utf8);
+            return isObj ? JSON.parse(plainStr) : plainStr;
         }
     }
 }

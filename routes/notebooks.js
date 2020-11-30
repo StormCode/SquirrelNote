@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 require('dotenv').config();
-const { check, validationResult } = require('express-validator');
 const {
     NOT_AUTHORIZED,
     NOT_FOUND
@@ -22,7 +21,9 @@ router.get('/', auth, async(req, res) => {
     try {
         // 取得筆記本資料
         const notebook = await Notebook.find({ author: req.user.id });
-        res.json(notebook);
+        // 加密notebook資料
+        const encryptedNotebook = crypto(process.env.SECRET_KEY).encrypt(notebook);
+        res.json(encryptedNotebook);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -33,14 +34,16 @@ router.get('/', auth, async(req, res) => {
 // desc             新增筆記本
 // access           Private
 router.post('/', auth, async(req, res) => {
-    const data = crypto(process.env.SECRET_KEY).decrypt(req.body.data);
-    const { title, desc } = data;
-    
     try {
+        const newCrypto = crypto(process.env.SECRET_KEY);
+        // 解密notebook資料
+        const data = newCrypto.decrypt(req.body.data);
+        const { title, desc } = data;
+        
         // 新增筆記本
         const newNotebook = new Notebook({
-            title,
-            desc,
+            title: newCrypto.encrypt(title, false),
+            desc: newCrypto.encrypt(desc, false),
             author: req.user.id
         });
 
@@ -48,7 +51,7 @@ router.post('/', auth, async(req, res) => {
 
         // 新增預設筆記目錄
         const newNotedir = new Notedir({
-            title: '_default',
+            title: newCrypto.encrypt('_default', false),
             notebook: notebook._id
         });
 
@@ -62,12 +65,9 @@ router.post('/', auth, async(req, res) => {
         await newNotebook.save();
 
         // 加密新增的notebook資料
-        const encryptedNotebook = crypto(process.env.SECRET_KEY).encrypt(notebook);
+        const encryptedNotebook = newCrypto.encrypt(notebook);
 
-        console.log('encryptedNotebook: ' + encryptedNotebook);
-        
-        // res.json(encryptedNotebook);
-        res.json(notebook);
+        res.json(encryptedNotebook);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -77,25 +77,19 @@ router.post('/', auth, async(req, res) => {
 // route            Put /api/notebooks
 // desc             修改筆記本
 // access           Private
-router.put('/:id', [auth, [
-    check('title', '請輸入筆記本名稱')
-        .not()
-        .isEmpty()
-]], async(req, res) => {
-    const errors = validationResult(req);
-    if(!errors.isEmpty()){
-        return res.status(400).json({ errors: errors.array() });
-    }
-
-    const { title, desc } = req.body;
-
-    //建立筆記本物件
-    const notebookField = {
-        title,
-        desc
-    };
-
+router.put('/:id', auth, async(req, res) => {
     try {
+        const newCrypto = crypto(process.env.SECRET_KEY);
+        // 解密notebook資料
+        const data = newCrypto.decrypt(req.body.data);
+        const { title, desc } = data;
+    
+        //建立筆記本物件
+        const notebookField = {
+            title: newCrypto.encrypt(title, false),
+            desc: newCrypto.encrypt(desc, false)
+        };
+    
         const id = req.params.id;
 
         let notebook = await Notebook.findById(id);
@@ -110,7 +104,10 @@ router.put('/:id', [auth, [
             { $set: notebookField },
             { new: true });
 
-        res.json(notebook);
+        // 加密修改的notebook資料
+        const encryptedNotebook = crypto(process.env.SECRET_KEY).encrypt(notebook);
+
+        res.json(encryptedNotebook);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -146,7 +143,7 @@ router.delete('/:id', auth, async(req, res) => {
         deleteItems.notes = await require('../common/getNotes')(notedirs);
 
         // 取得刪除的項目
-        const deletedGroup = await Recyclebin.findById(userId);
+        const deletedGroup = await Recyclebin.findOne({userId});
 
         if(!deletedGroup) {
             const newDeletedGroup = new Recyclebin({

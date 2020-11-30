@@ -1,5 +1,6 @@
 import React, { useReducer } from 'react';
 import axios from 'axios';
+import { encrypt, decrypt } from '../../utils/crypto';
 import NotedirContext from './notedirContext';
 import NotedirReducer from './notedirReducer';
 import {
@@ -36,15 +37,22 @@ const NotedirState = props => {
     const getNotedirs = async notebookId => {
         const config = {
             headers: {
-                'x-notebook': notebookId
+                'x-notebook': encrypt(notebookId, process.env.REACT_APP_SECRET_KEY, false)
             }
         };
 
         try {
             const res = await axios.get('/api/notedirs',config);
+            // 解密Server回傳的notedir資料
+            const decryptedDatas = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
+            decryptedDatas.map(decryptedData => {
+                if(decryptedData.title) {
+                    decryptedData.title = decrypt(decryptedData.title, process.env.REACT_APP_SECRET_KEY, false);
+                }
+            });
             dispatch({
                 type: GET_NOTEDIRS,
-                payload: res.data
+                payload: decryptedDatas
             });
         } catch (err) {
             dispatch({
@@ -93,10 +101,15 @@ const NotedirState = props => {
         };
 
         try {
-            const res = await axios.post('/api/notedirs', notedir, config);
+            // 加密傳至Server的notedir資料
+            const encryptedData = {data: encrypt(notedir, process.env.REACT_APP_SECRET_KEY)};
+            const res = await axios.post('/api/notedirs', encryptedData, config);
+            // 解密Server回傳的notedir資料
+            const decryptedData = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
+            decryptedData.title = decrypt(decryptedData.title, process.env.REACT_APP_SECRET_KEY, false);
             dispatch({
                 type: ADD_NOTEDIR,
-                payload: res.data
+                payload: decryptedData
             });
         } catch (err) {
             dispatch({ type: NOTEDIR_ERROR});
@@ -112,10 +125,15 @@ const NotedirState = props => {
         };
 
         try {
-            const res = await axios.put(`/api/notedirs/${id}`, notedir, config);
+            // 加密傳至Server的notedir資料
+            const encryptedData = {data: encrypt(notedir, process.env.REACT_APP_SECRET_KEY)};
+            const res = await axios.put(`/api/notedirs/${id}`, encryptedData, config);
+            // 解密Server回傳的notedir資料
+            const decryptedData = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
+            decryptedData.title = decrypt(decryptedData.title, process.env.REACT_APP_SECRET_KEY, false);
             dispatch({
                 type: UPDATE_NOTEDIR,
-                payload: res.data
+                payload: decryptedData
             });
         } catch (err) {
             dispatch({ type: NOTEDIR_ERROR});
@@ -126,7 +144,7 @@ const NotedirState = props => {
     const deleteNotedir = async (notedirId, notebookId) => {
         const config = {
             headers: {
-                'x-notebook': notebookId
+                'x-notebook': encrypt(notebookId, process.env.REACT_APP_SECRET_KEY, false)
             }
         };
 

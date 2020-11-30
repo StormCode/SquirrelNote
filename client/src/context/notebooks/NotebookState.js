@@ -68,9 +68,15 @@ const NotebookState = props => {
     const getNotebooks = async () => {
         try {
             const res = await axios.get('/api/notebooks');
+            // 解密Server回傳的notebook資料
+            const decryptedDatas = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
+            decryptedDatas.map(decryptedData => {
+                decryptedData.title = decrypt(decryptedData.title, process.env.REACT_APP_SECRET_KEY, false);
+                decryptedData.desc = decrypt(decryptedData.desc, process.env.REACT_APP_SECRET_KEY, false);
+            });
             dispatch({
                 type: GET_NOTEBOOKS,
-                payload: res.data
+                payload: decryptedDatas
             });
         } catch (err) {
             dispatch({ 
@@ -89,11 +95,16 @@ const NotebookState = props => {
         };
 
         try {
+            // 加密傳至Server的notebook資料
             const encryptedData = {data: encrypt(notebook, process.env.REACT_APP_SECRET_KEY)};
             const res = await axios.post('/api/notebooks', encryptedData, config);
+            // 解密Server回傳的notebook資料
+            const decryptedData = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
+            decryptedData.title = decrypt(decryptedData.title, process.env.REACT_APP_SECRET_KEY, false);
+            decryptedData.desc = decrypt(decryptedData.desc, process.env.REACT_APP_SECRET_KEY, false);
             dispatch({
                 type: ADD_NOTEBOOK,
-                payload: res.data
+                payload: decryptedData
             });
         } catch (err) {
             console.log('err: ' + err);
@@ -114,10 +125,16 @@ const NotebookState = props => {
         };
 
         try {
-            const res = await axios.put(`/api/notebooks/${id}`, notebook, config);
+            // 加密傳至Server的資料
+            const encryptedData = {data: encrypt(notebook, process.env.REACT_APP_SECRET_KEY)};
+            const res = await axios.put(`/api/notebooks/${id}`, encryptedData, config);
+            // 解密Server回傳的資料
+            const decryptedData = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
+            decryptedData.title = decrypt(decryptedData.title, process.env.REACT_APP_SECRET_KEY, false);
+            decryptedData.desc = decrypt(decryptedData.desc, process.env.REACT_APP_SECRET_KEY, false);
             dispatch({
                 type: UPDATE_NOTEBOOK,
-                payload: res.data
+                payload: decryptedData
             });
         } catch (err) {
             dispatch({ 

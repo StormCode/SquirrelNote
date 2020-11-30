@@ -38,7 +38,7 @@ const Notedir = (props) => {
     const notebookContext = useContext(NotebookContext);
     const notedirContext = useContext(NotedirContext);
 
-    const currentNotebookId = notebookContext.current;
+    const currentNotebookId = notebookContext.current ? notebookContext.current._id : null;
     const currentNotedirId = notedirContext.current ? notedirContext.current._id : null;
     const { 
         currentEditNotedir,
@@ -90,6 +90,7 @@ const Notedir = (props) => {
         //     enableEditNotedir(_id);
         //     return false;
         // }
+        
         if(currentEditNotedir === _id && title !== props.notedir.title) {
             await updateNotedir(_id, notedirUpdateData);
             if(error){
@@ -105,7 +106,6 @@ const Notedir = (props) => {
     const onDelete = async e => {
         e.preventDefault();
         //對點擊刪除的那一個筆記本執行delete
-        // currentDeleteNotedir === _id ? deleteNotedir(_id, currentNotebookId) : enableDeleteNotedir(_id);
         if(currentDeleteNotedir === _id){
             await deleteNotedir(_id, currentNotebookId);
             if(error){

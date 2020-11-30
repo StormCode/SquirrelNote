@@ -1,5 +1,6 @@
 import React, { useReducer } from 'react';
 import axios from 'axios';
+import { encrypt, decrypt } from '../../utils/crypto';
 import NoteContext from './noteContext';
 import NoteReducer from './noteReducer';
 import {
@@ -46,17 +47,22 @@ const NoteState = props => {
     const getNotes = async notedirId => {
         const config = {
             headers: {
-                'x-notedir': notedirId
+                'x-notedir': encrypt(notedirId, process.env.REACT_APP_SECRET_KEY, false)
             }
         };
 
         try {
             //todo: 動態load N筆資料
             const res = await axios.get('/api/notes',config);
-            
+            // 解密Server回傳的note資料
+            const decryptedDatas = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
+            decryptedDatas.map(decryptedData => {
+                decryptedData.title = decrypt(decryptedData.title, process.env.REACT_APP_SECRET_KEY, false);
+                decryptedData.summary = decrypt(decryptedData.summary, process.env.REACT_APP_SECRET_KEY, false);
+            });
             dispatch({
                 type: GET_NOTES,
-                payload: res.data
+                payload: decryptedDatas
             });
         } catch (err) {
             dispatch({
@@ -91,10 +97,13 @@ const NoteState = props => {
     const getNoteDetail = async id => {
         try {
             const res = await axios.get(`/api/notes/${id}`);
-            
+            // 解密Server回傳的note資料
+            const decryptedData = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
+            decryptedData.title = decrypt(decryptedData.title, process.env.REACT_APP_SECRET_KEY, false);
+            decryptedData.content = decrypt(decryptedData.content, process.env.REACT_APP_SECRET_KEY, false);
             dispatch({
                 type: GET_NOTE_DETAIL,
-                payload: res.data
+                payload: decryptedData
             });
         } catch (err) {
             console.log('err: ' + err);
@@ -115,10 +124,16 @@ const NoteState = props => {
         };
 
         try {
-            const res = await axios.post('/api/notes/', note, config);
+            // 加密傳至Server的note資料
+            const encryptedData = {data: encrypt(note, process.env.REACT_APP_SECRET_KEY)};
+            const res = await axios.post('/api/notes/', encryptedData, config);
+            // 解密Server回傳的note資料
+            const decryptedData = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
+            decryptedData.title = decrypt(decryptedData.title, process.env.REACT_APP_SECRET_KEY, false);
+            decryptedData.summary = decrypt(decryptedData.summary, process.env.REACT_APP_SECRET_KEY, false);
             dispatch({
                 type: ADD_NOTE,
-                payload: {...res.data, content: note.content}
+                payload: {...decryptedData, content: note.content}
             });
         } catch (err) {
             dispatch({
@@ -137,10 +152,16 @@ const NoteState = props => {
         };
 
         try {
-            const res = await axios.put(`/api/notes/${id}`, note, config);
+            // 加密傳至Server的note資料
+            const encryptedData = {data: encrypt(note, process.env.REACT_APP_SECRET_KEY)};
+            const res = await axios.put(`/api/notes/${id}`, encryptedData, config);
+            // 解密Server回傳的note資料
+            const decryptedData = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
+            decryptedData.title = decrypt(decryptedData.title, process.env.REACT_APP_SECRET_KEY, false);
+            decryptedData.summary = decrypt(decryptedData.summary, process.env.REACT_APP_SECRET_KEY, false);
             dispatch({
                 type: UPDATE_NOTE,
-                payload: {...res.data, content: note.content}
+                payload: {...decryptedData, content: note.content}
             });
         } catch (err) {
             dispatch({ type: NOTE_ERROR});
@@ -151,7 +172,7 @@ const NoteState = props => {
     const deleteNote = async (notedirId, noteId) => {
         const config = {
             headers: {
-                'x-notedir': notedirId
+                'x-notedir': encrypt(notedirId, process.env.REACT_APP_SECRET_KEY, false)
             }
         };
 
