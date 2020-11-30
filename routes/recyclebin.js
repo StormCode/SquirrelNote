@@ -11,6 +11,7 @@ const User = require('../models/User');
 const Notebook = require('../models/Notebook');
 const Notedir = require('../models/Notedir');
 const Note = require('../models/Note');
+const crypto = require('../utils/crypto');
 const auth = require('../middleware/auth');
 
 // route            Get /api/recyclebin
@@ -23,7 +24,7 @@ router.get('/', auth, async(req, res) => {
         if(!userId) return res.status(400).json({msg: '缺少參數', status: MISSING_PARAM});
 
         // 確認是否存在此user
-        let user = await User.findById(userId);
+        const user = await User.findById(userId);
 
         if(!user) return res.status(400).json({status: NOT_FOUND});
         
@@ -32,8 +33,28 @@ router.get('/', auth, async(req, res) => {
 
         if(!deletedGroup) 
             res.status(200).send();
-        else
-            res.json(deletedGroup.items);
+        else {
+            // 判斷每個項目是否可以還原
+            deletedGroup.items.forEach(deletedItem => {
+                switch(deletedItem.type) {
+                    case 'notebook':
+                        deletedItem.isRestoreable = true;
+                        break;
+                    case 'notedir':
+                        const notebook = Notebook.findById(deletedItem.notedirs.notebook);
+                        deletedItem.isRestoreable = notebook ? true : false;
+                        break;
+                    case 'note':
+                        const notedir = Notedir.findById(deletedItem.notes.notedir);
+                        deletedItem.isRestoreable = notedir ? true : false;
+                        break;
+                }
+            });
+
+            const encryptedDeletedItems = crypto(process.env.SECRET_KEY).encrypt(deletedGroup.items);
+    
+            res.json(encryptedDeletedItems);
+        }
 
     } catch (err) {
         console.error(err.message);
@@ -81,7 +102,7 @@ router.post('/', auth, async(req, res) => {
         }
 
         // 取得刪除的項目
-        const deletedGroup = await Recyclebin.findById(userId);
+        const deletedGroup = await Recyclebin.findOne({userId});
 
         if(!deletedGroup) {
             const newDeletedGroup = new Recyclebin({
@@ -114,7 +135,7 @@ router.put('/:id', auth, async(req, res) => {
         if(!(id && userId)) return res.status(400).json({msg: '缺少參數', status: MISSING_PARAM});
 
         // 取得刪除的項目
-        const deletedGroup = await Recyclebin.findById(userId);
+        const deletedGroup = await Recyclebin.findOne({userId});
         const deletedItem = deletedGroup.items.find(item => item.id === id);
         
         if(!deletedItem) return res.status(400).json({status: NOT_FOUND});
@@ -122,14 +143,14 @@ router.put('/:id', auth, async(req, res) => {
         // 復原筆記資料，並補上關聯collection的欄位
         switch(deletedItem.type) {
             case 'notebook':
-                notebook = await Notebook.findById(deletedItem.notebook._id);
+                notebook = new Notebook(deletedItem.notebook);
                 await notebook.save();
                 await Notedir.insertMany(deletedItem.notedirs);
                 await Note.insertMany(deletedItem.notes);
                 break;
             case 'notedir':
-                let notedirItem = await Notedir.findById(deletedItem.notedirs._id);
-                await notedirItem.save();
+                notedirs = new Notedir(deletedItem.notedirs);
+                await notedirs.save();
                 await Note.insertMany(deletedItem.notes);
 
                 //
@@ -138,19 +159,19 @@ router.put('/:id', auth, async(req, res) => {
 
                 // 取得此筆記目錄的筆記本
                 notebook = await Notebook.findById(deletedItem.notedirs.notebook);
-                const defaultNoteDir = notebook.notedirs.find(notedir => notedir.default === true);
 
                 const newNotebookDir = {
                     _id: deletedItem.notedirs._id,
                     title: deletedItem.notedirs.title,
                     date: deletedItem.notedirs.date,
-                    default: defaultNoteDir._id === deletedItem.notedirs._id
+                    default: false
                 };
                 notebook.notedirs.push(newNotebookDir);
                 await notebook.save();
                 break;
             case 'note':
-                notes = await Note.findById(deletedItem.notes._id);
+                notes = new Note(deletedItem.notes);
+                
                 await notes.save();
 
                 //
@@ -158,30 +179,35 @@ router.put('/:id', auth, async(req, res) => {
                 //
 
                 // 取得此筆記的筆記目錄
-                notedir = await Notedir.findById(deletedItem.notes.notedir);
+                notedirs = await Notedir.findById(deletedItem.notes.notedir);
+
+                const newCrypto = crypto(process.env.SECRET_KEY);
+                const decryptedContent = newCrypto.decrypt(deletedItem.notes.content, false);
+                const encryptedSummary = newCrypto.encrypt(require('../common/summary')(decryptedContent), false);
 
                 const newNotedirNote = {
                     _id: deletedItem.notes._id,
                     title: deletedItem.notes.title,
-                    summary: require('../common/summary')(content),
+                    summary: encryptedSummary,
                     date: deletedItem.notes.date
                 };
 
                 // 新增筆記的標題、摘要到Notedir裡
-                notedir.notes.push(newNotedirNote);
-                await notedir.save();
+                notedirs.notes.push(newNotedirNote);
+
+                await notedirs.save();
                 break;
         }
 
         // 刪除此項目
-        let deleteIdx = deletedGroup.items.findIndex((el) => el.id == id);
+        const deleteIdx = deletedGroup.items.findIndex((el) => el.id == id);
         deletedGroup.items.splice(deleteIdx,1);
         await deletedGroup.save();
 
         //追加刪除：如果此使用者已經沒有刪除的項目，則把使用者整個Group刪掉
         if(deletedGroup.items.length === 0) await Recyclebin.findByIdAndRemove(deletedGroup._id);
 
-        res.json({msg: deletedItem.title + '已復原'});
+        res.status(200).send();
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -204,7 +230,7 @@ router.delete('/:id', auth, async(req, res) => {
         if(!user) return res.status(400).json({status: NOT_FOUND});
 
         // 取得刪除的項目
-        const deletedGroup = await Recyclebin.findById(userId);
+        const deletedGroup = await Recyclebin.findOne({userId});
         const deletedItem = deletedGroup.items.find(item => item.id === id);
         
         if(!deletedItem) return res.status(400).json({status: NOT_FOUND});
@@ -241,7 +267,7 @@ router.delete('/:id', auth, async(req, res) => {
         // 追加刪除：如果此使用者已經沒有刪除的項目，則把使用者整個Group刪掉
         if(deletedGroup.items.length === 0) await Recyclebin.findByIdAndRemove(deletedGroup._id);
 
-        res.json({msg: deletedItem.title + '已刪除'});
+        res.status(200).send();
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');

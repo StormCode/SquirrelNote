@@ -1,8 +1,7 @@
 import React, { Fragment, useContext, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Table } from 'reactstrap';
-import { Notebook, FolderOpen, Note } from "phosphor-react";
-import { CustomShortDate } from '../../utils/date';
+import RecycleItem from './RecycleItem';
 
 import RecyclebinContext from '../../context/recyclebin/recyclebinContext';
 
@@ -20,17 +19,6 @@ const RecycleList = () => {
         // eslint-disable-next-line
     },[]);
 
-    const iconHelper = type => {
-        switch(type) {
-            case 'notebook':
-                return <Notebook size={24} />
-            case 'notedir':
-                return <FolderOpen size={24} />
-            case 'note':
-                return <Note size={24} />
-        }
-    };
-
     return (
         <Fragment>
             {deletedItems != null && !loading ?
@@ -45,13 +33,7 @@ const RecycleList = () => {
                         </thead>
                         <tbody>
                             {deletedItems.map(deletedItem =>
-                                <tr key={uuidv4()}>
-                                    <th scope="row">{iconHelper(deletedItem.type)}</th>
-                                    <td>{deletedItem.title}</td>
-                                    <td>{CustomShortDate(new Date(deletedItem.date))}</td>
-                                    <td><button>復原</button></td>
-                                    <td><button>永久刪除</button></td>
-                                </tr>
+                                <RecycleItem key={uuidv4()} item ={deletedItem} />
                             )}
                         </tbody>
                     </Table>

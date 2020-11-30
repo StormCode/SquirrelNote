@@ -26,6 +26,13 @@ export default (state,action) => {
                 ...state,
                 error: action.payload
             }
+        case RESTORE_RECYCLEBIN:
+        case PERMANENTLY_DELETE:
+            return {
+                ...state,
+                deletedItems: state.deletedItems.filter(deletedItem => 
+                    deletedItem.id !== action.payload)
+            }
         default: return state;
     }
 }

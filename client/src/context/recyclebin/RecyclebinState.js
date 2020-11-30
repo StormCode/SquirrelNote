@@ -1,5 +1,7 @@
 import React, { useReducer } from 'react'
 import axios from 'axios';
+import { decrypt } from '../../utils/crypto';
+
 import recyclebinContext from './recyclebinContext';
 import recyclebinReducer from './recyclebinReducer';
 import {
@@ -26,9 +28,14 @@ const RecycleBinState = props => {
     const getDeletedItems = async () => {
         try {
             const res = await axios.get('/api/recyclebin');
+            // 解密Server回傳的recyclebin資料
+            const decryptedDatas = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
+            decryptedDatas.map(decryptedData => {
+                decryptedData.title = decrypt(decryptedData.title, process.env.REACT_APP_SECRET_KEY, false);
+            });
             dispatch({
                 type: GET_DELETED_ITEMS,
-                payload: res.data
+                payload: decryptedDatas
             });
         } catch (err) {
             dispatch({ 
@@ -38,12 +45,34 @@ const RecycleBinState = props => {
         }
     }
 
-    const restoreRecycleBin = () => {
-
+    const restore = async id => {
+        try {
+            await axios.put(`/api/recyclebin/${id}`);
+            dispatch({ 
+                type: RESTORE_RECYCLEBIN,
+                payload: id
+            });
+        } catch (err) {
+            dispatch({ 
+                type: RECYCLEBIN_ERROR,
+                payload: err.msg || 'Server Error'
+            });
+        }
     }
 
-    const permanentlyDelete = () => {
-
+    const permanentlyDelete = async id => {
+        try {
+            await axios.delete(`/api/recyclebin/${id}`);
+            dispatch({ 
+                type: PERMANENTLY_DELETE,
+                payload: id 
+            });
+        } catch (err) {
+            dispatch({ 
+                type: RECYCLEBIN_ERROR,
+                payload: err.msg || 'Server Error'
+            });
+        }
     }
 
     const sortRecycleList = (orderBy, sortBy) => {
@@ -69,7 +98,7 @@ const RecycleBinState = props => {
                 getDeletedItems,
                 sortRecycleList,
                 filterRecycleList,
-                restoreRecycleBin,
+                restore,
                 permanentlyDelete
             }}>
                 {props.children}
