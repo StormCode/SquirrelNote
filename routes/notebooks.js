@@ -160,7 +160,9 @@ router.delete('/:id', auth, async(req, res) => {
         await Notedir.deleteMany({ notebook: id });
 
         // 刪除筆記目錄裡的筆記
-        await Note.deleteMany({ notedir: notedirs._id });
+        for(let idx = 0; idx < notedirs.length; idx++) {
+            await Note.deleteMany({ notedir: notedirs[idx]._id });
+        }
 
         // 刪除筆記本
         await Notebook.findByIdAndRemove(id);

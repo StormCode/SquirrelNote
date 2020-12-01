@@ -10,6 +10,7 @@ import {
     DISABLE_EDITNOTEDIR,
     ENABLE_DELETENOTEDIR,
     DISABLE_DELETENOTEDIR,
+    CLEAR_NOTEDIR,
     NOTEDIR_ERROR
 } from '../types.js';
 
@@ -94,6 +95,16 @@ export default (state, action) => {
         case DISABLE_DELETENOTEDIR:
             return {
                 ...state,
+                currentDeleteNotedir: null
+            }
+        case CLEAR_NOTEDIR:
+            return {
+                ...state,
+                currentToolPanel: null,
+                notedirs: null,
+                current: null,
+                error: null,
+                currentEditNotedir: null,
                 currentDeleteNotedir: null
             }
         case NOTEDIR_ERROR:

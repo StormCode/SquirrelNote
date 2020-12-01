@@ -12,9 +12,12 @@ import {
     SET_SAVE,
     ENABLE_DELETE,
     DISABLE_DELETE,
+    CLEAR_NOTE,
     NOTE_ERROR
 } from '../types.js';
-
+import {
+    DISABLESAVE
+} from '../../saveState';
 
 export default (state, action) => {
     switch(action.type){
@@ -123,6 +126,21 @@ export default (state, action) => {
             return {
                 ...state,
                 deleteEnable: false
+            }
+        case CLEAR_NOTE:
+            return {
+                ...state,
+                notes: null,
+                current: null,
+                cacheCurrent: null,
+                save: {
+                    state: DISABLESAVE,
+                    showUpdateTime: false
+                },
+                cacheNotes: [],
+                deleteEnable: false,
+                filtered: null,
+                error: null
             }
         case NOTE_ERROR:
             return {

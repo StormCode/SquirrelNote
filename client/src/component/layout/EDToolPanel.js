@@ -63,25 +63,28 @@ const EDToolPanel = props => {
 
     const onClick = {
         edit: async e => {
+            e.preventDefault();
             setOperatorType(operator.edit);
             onEnter(operator.edit);
         },
         delete: async e => {
+            e.preventDefault();
             setOperatorType(operator.delete);
             onEnter(operator.delete);
         },
         confirm: async e => {
-            let status = false;
+            e.preventDefault();
             if(operatorType === operator.edit){
-                status = onEdit(e);
+                onEdit();
             } else {
-                status = onDelete(e);
+                onDelete();
             }
-            status && setOperatorType(null);
+            setOperatorType(null);
         },
         cancel: async e => {
+            e.preventDefault();
             setOperatorType(null);
-            onCancel(e);
+            onCancel();
         }
     };
 

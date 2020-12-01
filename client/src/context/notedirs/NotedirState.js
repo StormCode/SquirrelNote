@@ -15,6 +15,7 @@ import {
     DISABLE_EDITNOTEDIR,
     ENABLE_DELETENOTEDIR,
     DISABLE_DELETENOTEDIR,
+    CLEAR_NOTEDIR,
     NOTEDIR_ERROR
 } from '../types.js';
 
@@ -209,6 +210,15 @@ const NotedirState = props => {
         }
     }
 
+    //清除筆記目錄資料
+    const clearNotedir = () => {
+        try {
+            dispatch({ type: CLEAR_NOTEDIR });
+        } catch (err) {
+            dispatch({ type: NOTEDIR_ERROR });
+        }
+    }
+
     return (
         <NotedirContext.Provider
         value={{
@@ -229,7 +239,8 @@ const NotedirState = props => {
             enableEditNotedir,
             disableEditNotedir,
             enableDeleteNotedir,
-            disableDeleteNotedir
+            disableDeleteNotedir,
+            clearNotedir
         }}>
             {props.children}
         </NotedirContext.Provider>

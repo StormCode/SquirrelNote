@@ -1,11 +1,11 @@
 import {
     GET_NOTEBOOKS,
     SET_CURRENT_NOTEBOOK,
-    CLEAR_NOTEBOOK,
     ADD_NOTEBOOK,
     UPDATE_NOTEBOOK,
     DELETE_NOTEBOOK,
     FILTER_NOTEBOOK,
+    SORT_NOTEBOOK,
     CLEAR_FILTER_NOTEBOOK,
     ENABLE_ADDNOTEBOOK,
     DISABLE_ADDNOTEBOOK,
@@ -13,7 +13,8 @@ import {
     DISABLE_EDITNOTEBOOK,
     ENABLE_DELETENOTEBOOK,
     DISABLE_DELETENOTEBOOK,
-    NOTEBOOK_ERROR, SORT_NOTEBOOK
+    CLEAR_NOTEBOOK,
+    NOTEBOOK_ERROR
 } from '../types';
 
 export default (state, action) => {
@@ -132,6 +133,17 @@ export default (state, action) => {
             return {
                 ...state,
                 filtered: null
+            }
+        case CLEAR_NOTEBOOK:
+            return {
+                ...state,
+                notebooks: null,
+                current: null,
+                filtered: null,
+                addNotebookVisible: false,
+                currentEditNotebook: null,
+                currentDeleteNotebook: null,
+                error: null
             }
         case NOTEBOOK_ERROR:
             return {

@@ -12,7 +12,7 @@ const app = express();
 //     next();
 // });
 
-// Conect DataBase
+// Connect DataBase
 connectDB();
 
 // Init Middleware

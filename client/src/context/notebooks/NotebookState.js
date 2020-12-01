@@ -6,7 +6,6 @@ import NotebookReducer from './notebookReducer';
 import {
     GET_NOTEBOOKS,
     SET_CURRENT_NOTEBOOK,
-    CLEAR_NOTEBOOK,
     ADD_NOTEBOOK,
     UPDATE_NOTEBOOK,
     DELETE_NOTEBOOK,
@@ -19,6 +18,7 @@ import {
     ENABLE_DELETENOTEBOOK,
     DISABLE_DELETENOTEBOOK,
     CLEAR_FILTER_NOTEBOOK,
+    CLEAR_NOTEBOOK,
     NOTEBOOK_ERROR
 } from '../types';
 
@@ -44,18 +44,6 @@ const NotebookState = props => {
                 type: SET_CURRENT_NOTEBOOK,
                 payload: id
             })
-        } catch (err) {
-            dispatch({ 
-                type: NOTEBOOK_ERROR,
-                payload: err.msg || 'Server Error'
-            });
-        }
-    };
-
-    //清除目前正在使用的筆記本
-    const clearNotebook = async () => {
-        try {
-            dispatch({ type: CLEAR_NOTEBOOK })
         } catch (err) {
             dispatch({ 
                 type: NOTEBOOK_ERROR,
@@ -216,6 +204,18 @@ const NotebookState = props => {
     const disableDeleteNotebook = () => {
         dispatch({ type: DISABLE_DELETENOTEBOOK });
     }
+
+    //清除筆記本資料
+    const clearNotebook = () => {
+        try {
+            dispatch({ type: CLEAR_NOTEBOOK });
+        } catch (err) {
+            dispatch({ 
+                type: NOTEBOOK_ERROR,
+                payload: err.msg || 'Server Error'
+            });
+        }
+    };
 
     return (
         <NotebookContext.Provider

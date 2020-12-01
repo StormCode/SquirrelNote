@@ -13,14 +13,21 @@ const Notes = ({ addEvent, setCacheNoteContent, setNoteContent }) => {
 
     const { notes, 
         cacheNotes, 
-        getNotes, 
+        getNotes,
+        clearNote, 
         loading 
     } = noteContext;
 
     useEffect(() => {
-        notedirId && getNotes(notedirId);
+        return () => {
+            clearNote();
+        }
     
         // eslint-disable-next-line
+    }, []);
+
+    useEffect(() => {
+        notedirId && getNotes(notedirId);
     }, [notedirId]);
 
     const enableAddNoteStyle = {

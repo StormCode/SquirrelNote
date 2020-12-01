@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const path = require('path');
+const config = require('config');
 const { v4: uuidv4 } = require('uuid');
 const {
     NOT_FOUND,
@@ -221,6 +223,7 @@ router.delete('/:id', auth, async(req, res) => {
     try {
         const id = req.params.id;
         const userId = req.user.id;
+        const newCrypto = crypto(process.env.SECRET_KEY);
 
         if(!(id && userId)) return res.status(400).json({msg: '缺少參數', status: MISSING_PARAM});
 
@@ -243,17 +246,19 @@ router.delete('/:id', auth, async(req, res) => {
         //
         // server上的照片也一併刪除
         //
-        let deleteImgs;
+        let deleteImgs = [];
         if(deletedGroup.type === 'note') {
-            deleteImgs = require('../common/filterDeleteImgs')(deletedItem.notes.content);
+            let decryptedContent = newCrypto.decrypt(deletedItem.notes.content, false); 
+            deleteImgs = require('../common/filterDeleteImgs')(decryptedContent);
         } else {
             deletedItem.notes.forEach(deletedNotes => {
-                let deleteImgItems = require('../common/filterDeleteImgs')(deletedNotes.content);
+                let decryptedContent = newCrypto.decrypt(deletedNotes.content, false); 
+                let deleteImgItems = require('../common/filterDeleteImgs')(decryptedContent);
                 deleteImgs = [].concat(deleteImgs, deleteImgItems);
             })
         }
 
-        // 刪除在Server上的所有檔案
+        // 刪除在Server上的所有檔案 
         if(deleteImgs.length > 0) {
             deleteImgs.forEach((imgName) => {
                 let deletedImgPath = path.join(__dirname, '..', config.get('imageDirectory'), imgName);

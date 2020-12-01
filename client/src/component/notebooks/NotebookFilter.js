@@ -12,12 +12,12 @@ const { defaultColor, orange, gray } = theme;
 
 const HeadIconStyled = styled.span`
     float: left;
-    transform: translate(120%,10%);
+    transform: translate(3px,-125%);
 `;
 
 const ClearIconStyled = styled.span`
     float: right;
-    transform: translate(-75%, -125%);
+    transform: translate(-150%, -125%);
 `;
 
 const NotebookFilter = () => {

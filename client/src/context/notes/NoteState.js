@@ -17,6 +17,7 @@ import {
     SET_SAVE,
     ENABLE_DELETE,
     DISABLE_DELETE,
+    CLEAR_NOTE,
     NOTE_ERROR
 } from '../types.js';
 import {
@@ -72,27 +73,6 @@ const NoteState = props => {
         }
     }
 
-    //設定目前的筆記內容
-    const setCurrentNote = note => {
-        try {
-            dispatch({
-                type: SET_CURRENT_NOTE,
-                payload: note
-            })
-        } catch (err) {
-            dispatch({type: NOTE_ERROR})
-        }
-    }
-
-    //清除目前的筆記內容
-    const clearCurrentNote = () => {
-        try {
-            dispatch({ type: CLEAR_CURRENT_NOTE })
-        } catch (err) {
-            dispatch({type: NOTE_ERROR})
-        }
-    }
-
     //查詢筆記內容
     const getNoteDetail = async id => {
         try {
@@ -112,6 +92,27 @@ const NoteState = props => {
                 type: NOTE_ERROR,
                 payload: err.msg || 'Server Error'
             });
+        }
+    }
+
+    //設定目前的筆記內容
+    const setCurrentNote = note => {
+        try {
+            dispatch({
+                type: SET_CURRENT_NOTE,
+                payload: note
+            })
+        } catch (err) {
+            dispatch({type: NOTE_ERROR})
+        }
+    }
+
+    //清除目前的筆記內容
+    const clearCurrentNote = () => {
+        try {
+            dispatch({ type: CLEAR_CURRENT_NOTE })
+        } catch (err) {
+            dispatch({type: NOTE_ERROR})
         }
     }
 
@@ -265,6 +266,15 @@ const NoteState = props => {
         }
     }
 
+    //清除筆記資料
+    const clearNote = () => {
+        try {
+            dispatch({ type: CLEAR_NOTE });
+        } catch (err) {
+            dispatch({type: NOTE_ERROR});
+        }
+    }
+
     return (
         <NoteContext.Provider
         value={{
@@ -291,7 +301,8 @@ const NoteState = props => {
             discardCacheNote,
             setSave,
             enableDelete,
-            disableDelete
+            disableDelete,
+            clearNote
         }}>
             {props.children}
         </NoteContext.Provider>

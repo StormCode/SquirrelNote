@@ -17,10 +17,20 @@ const NotebookContainer = styled.div`
 const Notebooks = () => {
     const notebookContext = useContext(NotebookContext);
     
-    const { notebooks, getNotebooks, filtered, loading } = notebookContext;
+    const { 
+        notebooks, 
+        getNotebooks, 
+        clearNotebook, 
+        filtered, 
+        loading 
+    } = notebookContext;
     
     useEffect(() => {
         getNotebooks();
+
+        return () => {
+            clearNotebook();
+        }
     
         // eslint-disable-next-line
     }, []);

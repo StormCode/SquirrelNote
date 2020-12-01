@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import styled from 'styled-components';
+
+import AuthContext from '../../context/auth/authContext';
 
 const Container = styled.div`
     width: 100%;
@@ -48,6 +50,14 @@ const Feature = styled.div`
 `;
 
 const Index = () => {
+    const authContext = useContext(AuthContext);
+
+    useEffect(() => {
+        authContext.loadUser();
+
+        // eslint-disable-next-line
+    }, []);
+
     return (
         <Container>
             <Banner>

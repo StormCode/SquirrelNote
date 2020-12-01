@@ -62,8 +62,7 @@ const Notedir = (props) => {
         props.setCurrent(_id);
     }
 
-    const onEdit = async e => {
-        e.preventDefault();
+    const onEdit = () => {
         let notedirUpdateData = {
             title,
             notebook: currentNotebookId
@@ -89,30 +88,21 @@ const Notedir = (props) => {
         // }
         
         if(currentEditNotedir === _id && title !== props.notedir.title) {
-            await updateNotedir(_id, notedirUpdateData);
-            if(error){
-                return false;
-            }
+            updateNotedir(_id, notedirUpdateData);
         }
 
         disableEditNotedir();
         props.setToolPanel(null);
-        return true;
     };
 
-    const onDelete = async e => {
-        e.preventDefault();
+    const onDelete = () => {
         //對點擊刪除的那一個筆記本執行delete
         if(currentDeleteNotedir === _id){
-            await deleteNotedir(_id, currentNotebookId);
-            if(error){
-                return false;
-            }
+            deleteNotedir(_id, currentNotebookId);
         }
 
         disableDeleteNotedir();
         props.setToolPanel(null);
-        return true;
     };
     
     const hoverOn = e => {

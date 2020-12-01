@@ -86,38 +86,28 @@ const Notebook = props => {
     }
 
     //對已選編輯的筆記本執行編輯
-    const onEdit = async e => {
-        e.preventDefault();
+    const onEdit = () => {
         //對點擊編輯的那一個筆記本執行update
         if(currentEditNotebook === _id 
             && (title !== props.notebook.title 
-                || desc !== props.notebook.desc)) {
-                await updateNotebook(_id, notebook);
-                if(error){
-                    return false;
-                }
+            || desc !== props.notebook.desc)) {
+                updateNotebook(_id, notebook);
         }
 
         disableEditNotebook();
         props.setToolPanel(null);
-        return true;
     }
 
     //對已選刪除的筆記本執行刪除
-    const onDelete = async e => {
-        e.preventDefault();
+    const onDelete = () => {
         //對點擊刪除的那一個筆記本執行delete
         if(currentDeleteNotebook === _id){
-            await deleteNotebook(_id);
-            if(error){
-                return false;
-            }
+            deleteNotebook(_id);
         }
 
         disableDeleteNotebook();
         setVisible(true);
         props.setToolPanel(null);
-        return true;
     }
 
     const onChange = e => {
@@ -136,8 +126,7 @@ const Notebook = props => {
         props.setToolPanel(_id);
     }
 
-    const onCancel = e => {
-        e.preventDefault();
+    const onCancel = () => {
         currentEditNotebook === _id && disableEditNotebook();
         if(currentDeleteNotebook === _id) {
             disableDeleteNotebook();

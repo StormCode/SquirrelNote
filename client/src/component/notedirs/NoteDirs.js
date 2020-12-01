@@ -21,6 +21,7 @@ const Notedirs = ({notebookId}) => {
     const { 
         notedirs, 
         getNotedirs, 
+        clearNotedir,
         setCurrentNotedir, 
         addNotedir, 
         loading,
@@ -39,6 +40,10 @@ const Notedirs = ({notebookId}) => {
     useEffect(() => {
         !notebooks && getNotebooks();
         notebookId && getNotedirs(notebookId);
+
+        return () => {
+            clearNotedir();
+        }
     
         // eslint-disable-next-line
     }, []);
