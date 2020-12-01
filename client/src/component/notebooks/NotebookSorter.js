@@ -1,13 +1,14 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { FunnelSimple } from "phosphor-react";
 import styled from 'styled-components';
 import Sorter from '../layout/Sorter';
 
 // Import Style
-import { defaultColor, orange } from '../../style/colors';
+import { theme } from '../../style/themes';
 
 import NotebookContext from '../../context/notebooks/notebookContext'
 
+const { defaultColor, orange, gray } = theme;
 const SorterContainer = styled.span`
     float: right;
     margin: 0 10px;
@@ -22,19 +23,31 @@ const NotebookSorter = () => {
         sortNotebook(orderBy, sortByParam);
     };
 
+    // 下拉選單狀態
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    const [color, setColor] = useState(gray);
+
+    useEffect(() => {
+        setColor(dropdownOpen ? orange : color);
+    }, [dropdownOpen]);
+
+    const toggleDropdownOpen = () => {
+        setDropdownOpen(!dropdownOpen);
+    };
+
     const onToggleSort = orderByParam => {
         sortNotebook(orderByParam, sortBy);
     };
 
-    const [color, setColor] = useState(defaultColor);
-
     const hoverOn = () => {
-        setColor(orange);
-    }
+        setColor(defaultColor);
+    };
 
     const hoverOff = () => {
-        setColor(defaultColor);
-    }
+        setColor(gray);
+        setDropdownOpen(false);
+    };
 
     return (
         <SorterContainer>
@@ -43,6 +56,8 @@ const NotebookSorter = () => {
                 sortBy={sortBy}
                 onSortBy={onSortBy}
                 onToggleSort={onToggleSort}
+                dropdownOpen={dropdownOpen}
+                toggleDropdown={toggleDropdownOpen}
                 color={color}
                 hoverOn={hoverOn}
                 hoverOff={hoverOff}

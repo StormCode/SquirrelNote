@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { Check } from "phosphor-react";
 import styled from 'styled-components';
 import { 
-    UncontrolledDropdown, 
+    Dropdown, 
     DropdownToggle, 
     DropdownMenu, 
     DropdownItem 
@@ -32,12 +32,14 @@ const SorterItem = styled.div`
 // 預設排序的欄位：依某個欄位做排序(string)
 // 排序欄位的callback
 // 排序方式的callback
-// 子組件(children)：
-// 排序按鈕的顯示文字(也可以放任意Html)
+// 下拉選單的開啟狀態(boolean)
+// 下拉選單切換開啟狀態的callback(function)
 // 排序的欄位(任意數量)
 // 下拉選單主色(string)
 // 滑鼠移過時的callback(function)
 // 滑鼠移出時的callback(function)
+// 子組件(children)：
+// 排序按鈕的顯示文字(也可以放任意Html)
 //
 const SorterContext = React.createContext({
     labelHtml: '排序',
@@ -53,18 +55,12 @@ const Sorter = props => {
         sortBy, 
         onSortBy, 
         onToggleSort, 
+        dropdownOpen,
+        toggleDropdown,
         color,
         hoverOn, 
-        hoverOff 
+        hoverOff
     } = props;
-
-    const inputHoverOn = () => {
-        hoverOn();
-    };
-
-    const inputHoverOff = () => {
-        hoverOff();
-    };
     
     return (
         <SorterContext.Provider
@@ -75,11 +71,13 @@ const Sorter = props => {
                 onToggleSort: onToggleSort,
                 color: color
             }}>
-            <UncontrolledDropdown
-                onMouseEnter={inputHoverOn}
-                onMouseLeave={inputHoverOff}>
+            <Dropdown 
+                isOpen={dropdownOpen} 
+                toggle={toggleDropdown}
+                onMouseEnter={hoverOn}
+                onMouseLeave={hoverOff}>
                 {props.children}
-            </UncontrolledDropdown>
+            </Dropdown>
         </SorterContext.Provider>
     )
 };

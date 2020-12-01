@@ -1,10 +1,15 @@
 import React, { Fragment, useRef } from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 
 const IconInputContext = React.createContext({
     placeholder: '',
     onChange: () => {}
 });
+
+const InputContainer = styled.div`${props => props.containerStyle}`;
+
+const Input = styled.input`${props => props.inputStyle}`;
 
 //
 // 此組件是一個文字輸入框，使用者輸入文字即呼叫onChange反應輸入的內容
@@ -17,6 +22,7 @@ const IconInputContext = React.createContext({
 // 文字改變時的callback(function)
 // 滑鼠移過時的callback(function)
 // 滑鼠移出時的callback(function)
+// 輸入框焦點callback(function)
 // 子組件(children)：
 // 文字輸入框前面的圖示
 // 清除圖示
@@ -28,7 +34,8 @@ const IconInput = props => {
         placeholder, 
         onChange, 
         hoverOn, 
-        hoverOff 
+        hoverOff,
+        focusOn 
     } = props;
     const text = useRef('');
 
@@ -41,13 +48,13 @@ const IconInput = props => {
         onChange(text.current.value);
     };
 
-    const inputHoverOn = () => {
-        hoverOn();
+    const inputFocus = () => {
+        focusOn(true);
     };
 
-    const inputHoverOff = () => {
-        hoverOff();
-    };
+    const inputBlur = () => {
+        focusOn(false);
+    }
 
     return (
         <IconInputContext.Provider
@@ -55,16 +62,18 @@ const IconInput = props => {
                 text,
                 clearText
             }}>
-            <div style={containerStyle}
-                onMouseEnter={inputHoverOn}
-                onMouseLeave={inputHoverOff}>
-                <input type='text' 
+            <InputContainer containerStyle={containerStyle}>
+                <Input inputStyle={inputStyle}
+                    type='text' 
                     ref={text} 
                     placeholder={placeholder} 
                     onChange={inputChange}
-                    style={inputStyle} />
+                    onMouseEnter={hoverOn}
+                    onMouseLeave={hoverOff}
+                    onFocus={inputFocus}
+                    onBlur={inputBlur} />
                 {props.children}
-            </div>
+            </InputContainer>
         </IconInputContext.Provider>
     )
 }
@@ -87,21 +96,23 @@ IconInput.ClearIcon = ({children}) =>
 
 
 IconInput.defaultProps = {
-    containerStyle: {},
-    inputStyle: {},
+    containerStyle: '',
+    inputStyle: '',
     placeholder: '',
     onChange: () => {},
     hoverOn: () => {},
-    hoverOff: () => {}
+    hoverOff: () => {},
+    focusOn: () => {}
 };
 
 IconInput.propTypes = {
-    containerStyle: PropTypes.object,
-    inputStyle: PropTypes.object,
+    containerStyle: PropTypes.string,
+    inputStyle: PropTypes.string,
     placeholder: PropTypes.string,
     onChange: PropTypes.func.isRequired,
     hoverOn: PropTypes.func,
-    hoverOff: PropTypes.func
+    hoverOff: PropTypes.func,
+    focusOn: PropTypes.func
 };
 
 export default IconInput;

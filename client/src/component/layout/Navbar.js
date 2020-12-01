@@ -18,6 +18,11 @@ import AuthContext from '../../context/auth/authContext';
 
 import { LOGIN, REGISTER } from '../../modelTypes';
 
+const NavContainer = styled.div`
+    background: linear-gradient(180deg, rgba(255,140,40,1) 0%, rgba(255,149,56,1) 20%, rgba(255,119,0,1) 75%);
+    box-shadow: 3px 3px 18px 0px rgba(0,0,0,0.75);
+`;
+
 const NavText = styled.li`
     font-size: 1.2rem;
     font-weight: 400;
@@ -84,15 +89,17 @@ const MainNavbar = ({ title }) => {
         //當路徑在筆記頁面的時候要隱藏Navbar
         location.pathname.match(/notebook\/[0-9\w]+/) ? null :
         <div className="header">
-            <Navbar color="dark" dark expand="md">
-                <NavbarBrand href="/">{title}</NavbarBrand>
-                <NavbarToggler onClick={toggleMenu} />
-                <Collapse isOpen={menuOpen} navbar>
-                    <Nav className="ml-auto" navbar>
-                        {isAuthenticated ? userLinks : guestLinks}
-                    </Nav>
-                </Collapse>
-            </Navbar>
+            <NavContainer>
+                <Navbar expand="md">
+                    <NavbarBrand href="/">{title}</NavbarBrand>
+                    <NavbarToggler onClick={toggleMenu} />
+                    <Collapse isOpen={menuOpen} navbar>
+                        <Nav className="ml-auto" navbar>
+                            {isAuthenticated ? userLinks : guestLinks}
+                        </Nav>
+                    </Collapse>
+                </Navbar>
+            </NavContainer>
             <AuthModels
                 model={model}
                 isOpen={modelOpen}

@@ -6,9 +6,6 @@ import EDToolPanel from '../layout/EDToolPanel';
 import NotebookContext from '../../context/notebooks/notebookContext';
 import NotedirContext from '../../context/notedirs/notedirContext';
 
-// Import Style
-import { lightGreen,lightGreenOnHover } from '../../style/colors';
-
 // Import Resource
 import editImgSrc from '../../assets/general/edit_32x32.png';
 import deleteImgSrc from '../../assets/general/delete_32x32.png';
@@ -16,10 +13,10 @@ import confirmImgSrc from '../../assets/general/confirm_32x32.png';
 import cancelImgSrc from '../../assets/general/close_32x32.png';
 
 const NoteDirContainer = styled.li`
-    background-color: ${props => props.isCurrent ? lightGreen : '#808080'};
+    background-color: ${props => props.isCurrent ? props.theme.lightGreen : props.theme.gray};
     height: auto;
     &:hover {
-        background-color: ${props => props.isCurrent ? lightGreenOnHover : '#808080'};
+        background-color: ${props => props.isCurrent ? props.theme.lightGreenOnHover : props.theme.gray};
     };
 `;
 

@@ -1,46 +1,100 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
+import styled from 'styled-components';
 import ToolPanelStyled from '../../style/components/ToolPanel';
+
+const Button = styled.button`
+    ${props => props.btnStyle}
+`;
 
 //
 // 此組件設定有兩個按鈕：完成、取消
 // 傳入的屬性：
-// 判斷目前是否正在使用此ToolPanel內部的功能(boolean)
-// 可見性(boolean)
-// 編輯按鈕圖片位置
-// 刪除按鈕圖片位置
-// 完成按鈕圖片位置
-// 取消按鈕圖片位置
-// 編輯事件(function)
-// 刪除事件(function)
-// 取消事件(function)
+// 完成事件的callback(function)
+// 取消事件的callback(function)
+// 滑鼠移過時的callback(function)
+// 滑鼠移出時的callback(function)
+// 按鈕的樣式(string)
+// 子組件(children)：
+// 完成按鈕內容(string or object)
+// 取消按鈕內容(string or object)
 //
-const ToolPanel = ({confirmImg, cancelImg, onConfirm, onCancel}) => {
+const ToolPanelContext = React.createContext({
+    onConfirm: () => {},
+    onCancel: () => {}
+});
+
+const ToolPanel = props => {
+    const {
+        onConfirm,
+        onCancel,
+        hoverOn, 
+        hoverOff,
+        btnStyle
+    } = props;
+
     return (
-        <ToolPanelStyled>
-            <button id='add-confirm-btn' onClick={onConfirm}>
-                <img src={confirmImg} alt='完成' />
-            </button>
-            <button id='cancel-btn' onClick={onCancel}>
-                <img src={cancelImg} alt='取消' />
-            </button>
-        </ToolPanelStyled>
+        <ToolPanelContext.Provider
+            value={{
+                onConfirm: onConfirm,
+                onCancel: onCancel,
+                hoverOn: hoverOn,
+                hoverOff: hoverOff,
+                btnStyle: btnStyle
+            }}>
+            <ToolPanelStyled>
+                {props.children}
+            </ToolPanelStyled>
+        </ToolPanelContext.Provider>
     )
-}
+};
+
+ToolPanel.ConfirmBtn = ({children}) =>
+    <ToolPanelContext.Consumer>
+        {contextValue =>
+            <Button id='confirm-btn' 
+                name='confirm'
+                onMouseEnter={contextValue.hoverOn}
+                onMouseLeave={contextValue.hoverOff}
+                onClick={contextValue.onConfirm} btnStyle={contextValue.btnStyle}>
+                {children}
+            </Button>
+        }
+    </ToolPanelContext.Consumer>;
+
+ToolPanel.CancelBtn = ({children}) =>
+    <ToolPanelContext.Consumer>
+        {contextValue =>
+            <Button id='cancel-btn' 
+                name='cancel'
+                onMouseEnter={contextValue.hoverOn}
+                onMouseLeave={contextValue.hoverOff}
+                onClick={contextValue.onCancel} btnStyle={contextValue.btnStyle}>
+                {children}
+            </Button>
+        }
+    </ToolPanelContext.Consumer>;
 
 ToolPanel.defaultProps = {
-    confirmImgSrc: '',
-    cancelImgSrc: '',
-    onConfirm: e => { e.preventDefault(); return true;},
-    onCancel: e => { e.preventDefault();}
+    onConfirm: () => {},
+    onCancel: () => {},
+    hoverOn: () => {},
+    hoverOff: () => {},
+    btnStyle: `
+        border: none;
+        background: none;
+        padding: 0;
+        &:focus {
+            outline: none;
+        }`
 };
 
 ToolPanel.propTypes = {
-    confirmImgSrc: PropTypes.string,
-    cancelImgSrc: PropTypes.string,
     onConfirm: PropTypes.func.isRequired,
-    onCancel: PropTypes.func
+    onCancel: PropTypes.func,
+    hoverOn: PropTypes.func,
+    hoverOff: PropTypes.func,
+    btnStyle: PropTypes.string
 };
 
 export default ToolPanel;

@@ -4,15 +4,12 @@ import { ReactComponent as UnsavedMark } from  '../../assets/general/unsaved_mar
 
 import NoteContext from '../../context/notes/noteContext';
 
-// Import Style
-import { lightGreen,lightGreenOnHover } from '../../style/colors';
-
 const NoteContainer = styled.li`
     position: relative;
     padding: 10px;
-    background-color: ${props => props.isCurrent ? lightGreen : '#ccc'};
+    background-color: ${props => props.isCurrent ? props.theme.lightGreen : props.theme.gray};
     &:hover {
-        background-color: ${props => props.isCurrent ? lightGreenOnHover: '#ccc'};
+        background-color: ${props => props.isCurrent ? props.theme.lightGreenOnHover: props.theme.gray};
     };
 
     > svg {

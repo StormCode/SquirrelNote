@@ -4,18 +4,16 @@ import {
     Card, CardImg, CardText, CardBody,
     CardTitle, CardSubtitle, Button, UncontrolledTooltip 
   } from 'reactstrap';
+import { Pencil, Trash, Check, X } from "phosphor-react";
 import EDToolPanel from '../layout/EDToolPanel';
 
 // Import Style
-import '../../style/components/Notebook.css';
-
-// Import Resource
-import editImgSrc from '../../assets/general/edit_32x32.png';
-import deleteImgSrc from '../../assets/general/delete_32x32.png';
-import confirmImgSrc from '../../assets/general/confirm_32x32.png';
-import cancelImgSrc from '../../assets/general/close_32x32.png';
+import { theme } from '../../style/themes';
+import NotebookContainer from '../../style/components/Notebook';
 
 import NotebookContext from '../../context/notebooks/notebookContext';
+
+const { orange, gray } = theme;
 
 const Notebook = props => {
     const notebookContext = useContext(NotebookContext);
@@ -50,16 +48,35 @@ const Notebook = props => {
     //ToolPanel的可見狀態
     const [visible, setVisible] = useState(false);
 
+    const [color, setColor] = useState({
+        edit: gray,
+        delete: gray,
+        confirm: gray,
+        cancel: gray
+    });
+
     //滑鼠移過顯示toolpanel
-    const hoverOn = e => {
+    const cardHoverOn = e => {
         e.preventDefault();
         setVisible(true);
     }
 
     //滑鼠移出隱藏toolpanel
-    const hoverOff = e => {
+    const cardHoverOff = e => {
         e.preventDefault();
         setVisible(false);
+    }
+
+    //滑鼠移過icon時改變顏色
+    const iconHoverOn = e => {
+        e.preventDefault();
+        setColor({...color, [e.target.name]: orange});
+    }
+
+    //滑鼠移出icon時恢復顏色
+    const iconHoverOff = e => {
+        e.preventDefault();
+        setColor({...color, [e.target.name]: gray});
     }
 
     const history = useHistory();
@@ -136,21 +153,24 @@ const Notebook = props => {
     }
 
     return (
-        <div className={[deleteNotebookVisible ? 'danger-alert' : null,'notebook'].join(' ').replace(/^[\s]/,'')}>
+        <NotebookContainer className={[deleteNotebookVisible ? 'danger-alert' : null,'notebook'].join(' ').replace(/^[\s]/,'')}>
             <Card
-            onMouseEnter={hoverOn}
-            onMouseLeave={hoverOff}>
+                onMouseEnter={cardHoverOn}
+                onMouseLeave={cardHoverOff}>
                 <EDToolPanel 
                     isEnter={props.toolPanel === _id}
                     visible={visible} 
-                    editImgSrc={editImgSrc} 
-                    deleteImgSrc={deleteImgSrc} 
-                    confirmImgSrc={confirmImgSrc} 
-                    cancelImgSrc={cancelImgSrc}
                     onEdit={onEdit}
                     onDelete={onDelete}
                     onEnter={onEnter}
-                    onCancel={onCancel} />
+                    onCancel={onCancel}
+                    hoverOn={iconHoverOn}
+                    hoverOff={iconHoverOff}>
+                    <EDToolPanel.ConfirmBtn><Check size={20} color={color.confirm} weight='bold' /></EDToolPanel.ConfirmBtn>
+                    <EDToolPanel.CancelBtn><X size={20} color={color.cancel} weight='bold' /></EDToolPanel.CancelBtn>
+                    <EDToolPanel.EditBtn><Pencil size={20} color={color.edit} weight='bold' /></EDToolPanel.EditBtn>
+                    <EDToolPanel.DeleteBtn><Trash size={20} color={color.delete} weight='bold' /></EDToolPanel.DeleteBtn>
+                </EDToolPanel>
                 {/* { editNotebookVisible ? 
                     (<div className='tool-panel' style={toolPanelStyle}>
                         <button id='edit-confirm-btn' onClick={onEdit}><img src={confirmImg} alt='完成編輯' /></button>
@@ -230,7 +250,7 @@ const Notebook = props => {
                     )}
                 </CardBody>
             </Card>
-        </div>
+        </NotebookContainer>
     )
 }
 

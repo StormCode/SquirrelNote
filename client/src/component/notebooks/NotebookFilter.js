@@ -1,12 +1,14 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { MagnifyingGlass, X } from "phosphor-react";
 import IconInput from '../layout/IconInput';
 import styled from 'styled-components';
 
 // Import Style
-import { defaultColor, orange } from '../../style/colors';
+import { theme } from '../../style/themes';
 
 import NotebookContext from '../../context/notebooks/notebookContext';
+
+const { defaultColor, orange, gray } = theme;
 
 const HeadIconStyled = styled.span`
     float: left;
@@ -23,7 +25,12 @@ const NotebookFilter = () => {
 
     const { filterNotebook, clearFilterNotebook } = notebookContext;
 
-    const [color, setColor] = useState(defaultColor);
+    const [focus, setFocus] = useState(false);
+    const [color, setColor] = useState(gray);
+
+    useEffect(() => {
+        !focus && setColor(gray);
+    }, [focus]);
 
     const onChange = val => {
         if(val !== '')
@@ -33,29 +40,42 @@ const NotebookFilter = () => {
     }
 
     const hoverOn = () => {
-        setColor(orange);
+        setColor(focus ? orange : defaultColor);
     }
 
     const hoverOff = () => {
-        setColor(defaultColor);
+        setColor(gray);
+    }
+
+    const focusOn = state => {
+        setFocus(state);
+        setColor(orange);
     }
 
     return (
         <IconInput 
-            containerStyle={{
-                float: 'right',
-                width: '40%',
-                maxWidth: '200px'
-            }}
-            inputStyle={{
-                textIndent: '24px',
-                border: '1px solid ' + color,
-                outline: 'none'
-            }}
+            containerStyle={`
+                float: right;
+                width: 40%;
+                max-width: 200px;`
+            }
+            inputStyle={`
+                border: 1px solid ${color};
+                text-indent: 24px;
+                color: ${color};
+                ::placeholder{
+                    color: ${color};
+                }
+                &:focus {
+                    outline: none;
+                    border: 1px solid ${color};
+                }`
+            }
             placeholder='搜尋...' 
             onChange={onChange}
             hoverOn={hoverOn}
-            hoverOff={hoverOff}>
+            hoverOff={hoverOff}
+            focusOn={focusOn}>
                 <IconInput.HeadIcon>
                     <HeadIconStyled>
                         <MagnifyingGlass size={20} color={color} weight='bold'/>

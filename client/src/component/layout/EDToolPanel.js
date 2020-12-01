@@ -1,10 +1,14 @@
 import React, { Fragment, useState } from 'react'
 import PropTypes from 'prop-types';
-
 import ToolPanel from './ToolPanel';
+import styled from 'styled-components';
 
 // Import Style
 import ToolPanelStyled from '../../style/components/ToolPanel';
+
+const Button = styled.button`
+    ${props => props.btnStyle}
+`;
 
 //
 // 此組件設定有兩個按鈕：編輯、刪除
@@ -13,18 +17,41 @@ import ToolPanelStyled from '../../style/components/ToolPanel';
 // 傳入的屬性：
 // 判斷目前是否正在使用此ToolPanel內部的功能(boolean)
 // 可見性(boolean)
-// 編輯按鈕圖片位置
-// 刪除按鈕圖片位置
-// 完成按鈕圖片位置
-// 取消按鈕圖片位置
 // 執行編輯事件(function)
 // 執行刪除事件(function)
 // 取消事件(function)
 // 進行編輯、刪除事件(function)
+// 滑鼠移過時的callback(function)
+// 滑鼠移出時的callback(function)
+// 按鈕的樣式(string)
+// 子組件(children)：
+// 編輯按鈕內容(string or object)
+// 刪除按鈕內容(string or object)
+// 完成按鈕內容(string or object)
+// 取消按鈕內容(string or object)
 // 相依的組件：
 // ToolPanel
 //
-const EDToolPanel = ({isEnter, visible, editImgSrc, deleteImgSrc, confirmImgSrc, cancelImgSrc, onEdit, onDelete, onEnter, onCancel }) => {
+const EDToolPanelContext = React.createContext({
+    onEdit: () => {},
+    onDelete: () => {},
+    onEnter: () => {},
+    onCancel: () => {}
+});
+
+const EDToolPanel = props => {
+    const {
+        isEnter, 
+        visible, 
+        onEdit, 
+        onDelete, 
+        onEnter, 
+        onCancel,
+        hoverOn,
+        hoverOff,
+        btnStyle
+    } = props;
+    
     const operator = {
         edit: 'edit',
         delete: 'delete',
@@ -58,49 +85,116 @@ const EDToolPanel = ({isEnter, visible, editImgSrc, deleteImgSrc, confirmImgSrc,
         }
     };
 
+    const children = props.children;
+
     return (
-        <Fragment>
-            {visible?
-                isEnter ? 
-                <ToolPanel 
-                    confirmImg={confirmImgSrc}
-                    cancelImg={cancelImgSrc}
-                    onConfirm={onClick.confirm}
-                    onCancel={onClick.cancel} 
-                />
-                : <ToolPanelStyled>
-                    <button id='edit-btn' onClick={onClick.edit}><img src={editImgSrc} alt='編輯' /></button>
-                    <button id='delete-btn' onClick={onClick.delete}><img src={deleteImgSrc} alt='刪除' /></button>
-                </ToolPanelStyled>
-            : null}
-        </Fragment>
+        <EDToolPanelContext.Provider
+            value={{
+                isEnter: isEnter,
+                onEdit: onClick.edit,
+                onDelete: onClick.delete,
+                hoverOn: hoverOn,
+                hoverOff: hoverOff,
+                btnStyle: btnStyle
+            }}>
+            <Fragment>
+                {visible?
+                    isEnter ? 
+                    <ToolPanel 
+                        onConfirm={onClick.confirm}
+                        onCancel={onClick.cancel}
+                        hoverOn={hoverOn}
+                        hoverOff={hoverOff}
+                        btnStyle={btnStyle}>
+                            {children}
+                    </ToolPanel>
+                    : <ToolPanelStyled>
+                        {children}
+                    </ToolPanelStyled>
+                : null}
+            </Fragment>
+        </EDToolPanelContext.Provider>
     )
-}
+};
+
+EDToolPanel.ConfirmBtn = ({children}) =>
+    <EDToolPanelContext.Consumer>
+        {contextValue =>
+            contextValue.isEnter ? 
+                <ToolPanel.ConfirmBtn>{children}</ToolPanel.ConfirmBtn>
+            : null
+        }
+    </EDToolPanelContext.Consumer>;
+
+EDToolPanel.CancelBtn = ({children}) =>
+    <EDToolPanelContext.Consumer>
+        {contextValue =>
+            contextValue.isEnter ? 
+                <ToolPanel.CancelBtn>{children}</ToolPanel.CancelBtn>
+            : null
+        }
+    </EDToolPanelContext.Consumer>;
+
+EDToolPanel.EditBtn = ({children}) =>
+    <EDToolPanelContext.Consumer>
+        {contextValue =>
+            contextValue.isEnter ?
+                null 
+            : <Button id='edit-btn' 
+                name='edit'
+                onClick={contextValue.onEdit} 
+                onMouseEnter={contextValue.hoverOn}
+                onMouseLeave={contextValue.hoverOff}
+                btnStyle={contextValue.btnStyle}>
+                {children}
+            </Button>
+        }
+    </EDToolPanelContext.Consumer>;
+
+EDToolPanel.DeleteBtn = ({children}) =>
+    <EDToolPanelContext.Consumer>
+        {contextValue =>
+            contextValue.isEnter ?
+                null
+            : <Button id='delete-btn'
+                name='delete' 
+                onClick={contextValue.onDelete}
+                onMouseEnter={contextValue.hoverOn}
+                onMouseLeave={contextValue.hoverOff}
+                btnStyle={contextValue.btnStyle}>
+                {children}
+            </Button>
+        }
+    </EDToolPanelContext.Consumer>;
 
 EDToolPanel.defaultProps = {
     isEnter: null,
     visible: false,
-    editImgSrc: '',
-    deleteImgSrc: '',
-    confirmImgSrc: '',
-    cancelImgSrc: '',
-    onEdit: e => { e.preventDefault();},
-    onDelete: e => { e.preventDefault();},
-    onEnter: e => { e.preventDefault();},
-    onCancel: e => { e.preventDefault();}
+    onEdit: () => {},
+    onDelete: () => {},
+    onEnter: () => {},
+    onCancel: () => {},
+    hoverOn: () => {},
+    hoverOff: () => {},
+    btnStyle: `
+        border: none;
+        background: none;
+        padding: 0;
+        &:focus {
+            outline: none;
+        }`
 };
 
 EDToolPanel.propTypes = {
     isEnter: PropTypes.bool,
     visible: PropTypes.bool,
-    editImgSrc: PropTypes.string,
-    deleteImgSrc: PropTypes.string,
-    confirmImgSrc: PropTypes.string,
-    cancelImgSrc: PropTypes.string,
     onEdit: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired,
     onEnter: PropTypes.func.isRequired,
-    onCancel: PropTypes.func
+    onCancel: PropTypes.func,
+    hoverOn: PropTypes.func,
+    hoverOff: PropTypes.func,
+    btnStyle: PropTypes.string
 };
 
 export default EDToolPanel;
