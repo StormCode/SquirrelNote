@@ -1,5 +1,4 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { Redirect } from 'react-router-dom';
 import { 
     Alert, 
     Form, 
@@ -14,9 +13,6 @@ import {
     INVALID_CREDENTIALS,
     NOT_AUTHORIZED
 } from '../../status';
-
-//Import Style
-import AuthPanel from '../../style/components/AuthPanel';
 
 const Login = props => {
     const authContext = useContext(AuthContext);
@@ -77,7 +73,7 @@ const Login = props => {
     };
 
     return (
-        <AuthPanel className='form-container'>
+        <div className='form-container'>
             {/* 頁面跳轉至notebook */}
             {isAuthenticated && window.location.replace('/notebook')}
             <h2 className='title'>{props.title}</h2>
@@ -100,7 +96,7 @@ const Login = props => {
                 <a href='#!' onClick={toggleRegister}>建立帳號</a>
                 <a href='#!' onClick={toggleForgotPassword}>忘記密碼</a>
             </p>
-        </AuthPanel>
+        </div>
     )
 }
 

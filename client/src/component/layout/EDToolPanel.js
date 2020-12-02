@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react'
+import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 import ToolPanel from './ToolPanel';
 import styled from 'styled-components';
@@ -6,7 +6,7 @@ import styled from 'styled-components';
 // Import Style
 import ToolPanelStyled from '../../style/components/ToolPanel';
 
-const Button = styled.button`
+const Button = styled.span`
     ${props => props.btnStyle}
 `;
 
@@ -21,8 +21,6 @@ const Button = styled.button`
 // 執行刪除事件(function)
 // 取消事件(function)
 // 進行編輯、刪除事件(function)
-// 滑鼠移過時的callback(function)
-// 滑鼠移出時的callback(function)
 // 按鈕的樣式(string)
 // 子組件(children)：
 // 編輯按鈕內容(string or object)
@@ -47,8 +45,6 @@ const EDToolPanel = props => {
         onDelete, 
         onEnter, 
         onCancel,
-        hoverOn,
-        hoverOff,
         btnStyle
     } = props;
     
@@ -96,8 +92,6 @@ const EDToolPanel = props => {
                 isEnter: isEnter,
                 onEdit: onClick.edit,
                 onDelete: onClick.delete,
-                hoverOn: hoverOn,
-                hoverOff: hoverOff,
                 btnStyle: btnStyle
             }}>
             <Fragment>
@@ -106,8 +100,6 @@ const EDToolPanel = props => {
                     <ToolPanel 
                         onConfirm={onClick.confirm}
                         onCancel={onClick.cancel}
-                        hoverOn={hoverOn}
-                        hoverOff={hoverOff}
                         btnStyle={btnStyle}>
                             {children}
                     </ToolPanel>
@@ -120,53 +112,59 @@ const EDToolPanel = props => {
     )
 };
 
-EDToolPanel.ConfirmBtn = ({children}) =>
+EDToolPanel.ConfirmBtn = (props) =>
     <EDToolPanelContext.Consumer>
         {contextValue =>
             contextValue.isEnter ? 
-                <ToolPanel.ConfirmBtn>{children}</ToolPanel.ConfirmBtn>
+                React.cloneElement(props.container, 
+                    {},
+                    <ToolPanel.ConfirmBtn container={props.container}>
+                        {props.children}
+                    </ToolPanel.ConfirmBtn>)
             : null
         }
     </EDToolPanelContext.Consumer>;
 
-EDToolPanel.CancelBtn = ({children}) =>
+EDToolPanel.CancelBtn = (props) =>
     <EDToolPanelContext.Consumer>
         {contextValue =>
             contextValue.isEnter ? 
-                <ToolPanel.CancelBtn>{children}</ToolPanel.CancelBtn>
+                React.cloneElement(props.container, 
+                    {},
+                    <ToolPanel.CancelBtn container={props.container}>
+                        {props.children}
+                    </ToolPanel.CancelBtn>)
             : null
         }
     </EDToolPanelContext.Consumer>;
 
-EDToolPanel.EditBtn = ({children}) =>
+EDToolPanel.EditBtn = (props) =>
     <EDToolPanelContext.Consumer>
         {contextValue =>
             contextValue.isEnter ?
                 null 
-            : <Button id='edit-btn' 
-                name='edit'
-                onClick={contextValue.onEdit} 
-                onMouseEnter={contextValue.hoverOn}
-                onMouseLeave={contextValue.hoverOff}
-                btnStyle={contextValue.btnStyle}>
-                {children}
-            </Button>
+            : React.cloneElement(props.container, 
+                {},
+                <Button id='edit-btn' 
+                    onClick={contextValue.onEdit}
+                    btnStyle={contextValue.btnStyle}>
+                    {props.children}
+                </Button>)
         }
     </EDToolPanelContext.Consumer>;
 
-EDToolPanel.DeleteBtn = ({children}) =>
+EDToolPanel.DeleteBtn = (props) =>
     <EDToolPanelContext.Consumer>
         {contextValue =>
             contextValue.isEnter ?
                 null
-            : <Button id='delete-btn'
-                name='delete' 
-                onClick={contextValue.onDelete}
-                onMouseEnter={contextValue.hoverOn}
-                onMouseLeave={contextValue.hoverOff}
-                btnStyle={contextValue.btnStyle}>
-                {children}
-            </Button>
+            : React.cloneElement(props.container, 
+                {},
+                <Button id='delete-btn'
+                    onClick={contextValue.onDelete}
+                    btnStyle={contextValue.btnStyle}>
+                    {props.children}
+                </Button>)
         }
     </EDToolPanelContext.Consumer>;
 
@@ -177,15 +175,11 @@ EDToolPanel.defaultProps = {
     onDelete: () => {},
     onEnter: () => {},
     onCancel: () => {},
-    hoverOn: () => {},
-    hoverOff: () => {},
     btnStyle: `
-        border: none;
-        background: none;
+        margin: 0 5px;
         padding: 0;
-        &:focus {
-            outline: none;
-        }`
+        border: none;
+        background: none;`
 };
 
 EDToolPanel.propTypes = {
@@ -195,8 +189,6 @@ EDToolPanel.propTypes = {
     onDelete: PropTypes.func.isRequired,
     onEnter: PropTypes.func.isRequired,
     onCancel: PropTypes.func,
-    hoverOn: PropTypes.func,
-    hoverOff: PropTypes.func,
     btnStyle: PropTypes.string
 };
 

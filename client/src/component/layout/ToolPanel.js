@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import ToolPanelStyled from '../../style/components/ToolPanel';
 
-const Button = styled.button`
+const Button = styled.span`
     ${props => props.btnStyle}
 `;
 
@@ -12,8 +12,6 @@ const Button = styled.button`
 // 傳入的屬性：
 // 完成事件的callback(function)
 // 取消事件的callback(function)
-// 滑鼠移過時的callback(function)
-// 滑鼠移出時的callback(function)
 // 按鈕的樣式(string)
 // 子組件(children)：
 // 完成按鈕內容(string or object)
@@ -28,8 +26,6 @@ const ToolPanel = props => {
     const {
         onConfirm,
         onCancel,
-        hoverOn, 
-        hoverOff,
         btnStyle
     } = props;
 
@@ -38,8 +34,6 @@ const ToolPanel = props => {
             value={{
                 onConfirm: onConfirm,
                 onCancel: onCancel,
-                hoverOn: hoverOn,
-                hoverOff: hoverOff,
                 btnStyle: btnStyle
             }}>
             <ToolPanelStyled>
@@ -49,51 +43,45 @@ const ToolPanel = props => {
     )
 };
 
-ToolPanel.ConfirmBtn = ({children}) =>
+ToolPanel.ConfirmBtn = (props) =>
     <ToolPanelContext.Consumer>
         {contextValue =>
-            <Button id='confirm-btn' 
-                name='confirm'
-                onMouseEnter={contextValue.hoverOn}
-                onMouseLeave={contextValue.hoverOff}
-                onClick={contextValue.onConfirm} btnStyle={contextValue.btnStyle}>
-                {children}
-            </Button>
+            React.cloneElement(props.container, 
+                {},
+                <Button id='confirm-btn'
+                    onClick={contextValue.onConfirm}
+                    btnStyle={contextValue.btnStyle}>
+                    {props.children}
+                </Button>)
         }
     </ToolPanelContext.Consumer>;
 
-ToolPanel.CancelBtn = ({children}) =>
+ToolPanel.CancelBtn = (props) =>
     <ToolPanelContext.Consumer>
         {contextValue =>
-            <Button id='cancel-btn' 
-                name='cancel'
-                onMouseEnter={contextValue.hoverOn}
-                onMouseLeave={contextValue.hoverOff}
-                onClick={contextValue.onCancel} btnStyle={contextValue.btnStyle}>
-                {children}
-            </Button>
+            React.cloneElement(props.container, 
+                {},
+                <Button id='cancel-btn' 
+                    onClick={contextValue.onCancel}
+                    btnStyle={contextValue.btnStyle}>
+                    {props.children}
+                </Button>)
         }
     </ToolPanelContext.Consumer>;
 
 ToolPanel.defaultProps = {
     onConfirm: () => {},
     onCancel: () => {},
-    hoverOn: () => {},
-    hoverOff: () => {},
     btnStyle: `
-        border: none;
-        background: none;
+        margin: 0 5px;
         padding: 0;
-        &:focus {
-            outline: none;
-        }`
+        border: none;
+        background: none;`
 };
 
 ToolPanel.propTypes = {
     onConfirm: PropTypes.func.isRequired,
     onCancel: PropTypes.func,
-    hoverOn: PropTypes.func,
-    hoverOff: PropTypes.func,
     btnStyle: PropTypes.string
 };
 

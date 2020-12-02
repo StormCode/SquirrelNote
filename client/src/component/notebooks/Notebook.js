@@ -25,8 +25,8 @@ const Notebook = props => {
         enableDeleteNotebook,
         disableDeleteNotebook,
         updateNotebook, 
-        deleteNotebook,
-        error } = notebookContext;
+        deleteNotebook
+    } = notebookContext;
 
     const [notebook, setNotebook] = useState({
         ...props.notebook
@@ -48,12 +48,14 @@ const Notebook = props => {
     //ToolPanel的可見狀態
     const [visible, setVisible] = useState(false);
 
-    const [color, setColor] = useState({
+    const defaultColor = {
         edit: gray,
         delete: gray,
         confirm: gray,
         cancel: gray
-    });
+    };
+
+    const [color, setColor] = useState(defaultColor);
 
     //滑鼠移過顯示toolpanel
     const cardHoverOn = e => {
@@ -67,16 +69,22 @@ const Notebook = props => {
         setVisible(false);
     }
 
-    //滑鼠移過icon時改變顏色
-    const iconHoverOn = e => {
-        e.preventDefault();
-        setColor({...color, [e.target.name]: orange});
-    }
-
-    //滑鼠移出icon時恢復顏色
-    const iconHoverOff = e => {
-        e.preventDefault();
-        setColor({...color, [e.target.name]: gray});
+    const changeIcon = {
+        'confirm': () => {
+            setColor({...defaultColor, ['confirm']: orange});
+        },
+        'cancel': () => {
+            setColor({...defaultColor, ['cancel']: orange});
+        },
+        'edit': () => { 
+            setColor({...defaultColor, ['edit']: orange});
+        },
+        'delete': () => {
+            setColor({...defaultColor, ['delete']: orange});
+        },
+        'default': () => {
+            setColor(defaultColor);
+        }
     }
 
     const history = useHistory();
@@ -152,13 +160,43 @@ const Notebook = props => {
                     onEdit={onEdit}
                     onDelete={onDelete}
                     onEnter={onEnter}
-                    onCancel={onCancel}
-                    hoverOn={iconHoverOn}
-                    hoverOff={iconHoverOff}>
-                    <EDToolPanel.ConfirmBtn><Check size={20} color={color.confirm} weight='bold' /></EDToolPanel.ConfirmBtn>
-                    <EDToolPanel.CancelBtn><X size={20} color={color.cancel} weight='bold' /></EDToolPanel.CancelBtn>
-                    <EDToolPanel.EditBtn><Pencil size={20} color={color.edit} weight='bold' /></EDToolPanel.EditBtn>
-                    <EDToolPanel.DeleteBtn><Trash size={20} color={color.delete} weight='bold' /></EDToolPanel.DeleteBtn>
+                    onCancel={onCancel}>
+                    <EDToolPanel.ConfirmBtn
+                        container={
+                            React.cloneElement(<span></span>,
+                            {
+                                onMouseEnter: changeIcon.confirm, 
+                                onMouseLeave: changeIcon.default})
+                            }>
+                            <Check size={20} color={color.confirm} weight='bold' />
+                    </EDToolPanel.ConfirmBtn>
+                    <EDToolPanel.CancelBtn 
+                        container={
+                            React.cloneElement(<span></span>,
+                            {
+                                onMouseEnter: changeIcon.cancel, 
+                                onMouseLeave: changeIcon.default})
+                            }>
+                            <X size={20} color={color.cancel} weight='bold' />
+                    </EDToolPanel.CancelBtn>
+                    <EDToolPanel.EditBtn 
+                        container={
+                            React.cloneElement(<span></span>,
+                            {
+                                onMouseEnter: changeIcon.edit, 
+                                onMouseLeave: changeIcon.default})
+                            }>
+                            <Pencil size={20} color={color.edit} weight='bold' />
+                    </EDToolPanel.EditBtn>
+                    <EDToolPanel.DeleteBtn 
+                        container={
+                            React.cloneElement(<span></span>,
+                            {
+                                onMouseEnter: changeIcon.delete, 
+                                onMouseLeave: changeIcon.default})
+                            }>
+                            <Trash size={20} color={color.delete} weight='bold' />
+                    </EDToolPanel.DeleteBtn>
                 </EDToolPanel>
                 {/* { editNotebookVisible ? 
                     (<div className='tool-panel' style={toolPanelStyle}>

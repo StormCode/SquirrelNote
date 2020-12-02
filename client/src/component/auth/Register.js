@@ -13,9 +13,6 @@ import {
 } from '../../status';
 import { LOGIN } from '../../modelTypes';
 
-//Import Style
-import AuthPanel from '../../style/components/AuthPanel';
-
 const Register = props => {
     const authContext = useContext(AuthContext);
 
@@ -75,7 +72,7 @@ const Register = props => {
     };
 
     return (
-        <AuthPanel className='form-container'>
+        <div className='form-container'>
             <h2 className='title'>{props.title}</h2>
             {(formAuthError !== null && formAuthError !== '') &&
                     <Alert color="danger">
@@ -113,7 +110,7 @@ const Register = props => {
             <p>
                 <a href='#!' onClick={toggleLogin}>已有帳號？</a>
             </p>
-        </AuthPanel>
+        </div>
     )
 }
 

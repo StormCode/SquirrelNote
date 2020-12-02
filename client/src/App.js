@@ -27,7 +27,7 @@ const AppStyle = styled.div`
         display: flex;
         flex-flow: nowrap column;
         background-color: #ffe094;
-        background-image: linear-gradient(0deg, #ffe094 0%, #ffffff 30%);
+        background-image: linear-gradient(0deg, #ffe094 0%, #ffffff 10%);
         width: 100vw;
         height: 100vh;
     }

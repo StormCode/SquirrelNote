@@ -6,6 +6,7 @@ export const GlobalStyles = createGlobalStyle`
         height: 100%;
         margin: 0;
         padding: 0;
+        font-family: 'Microsoft Jhenghei', 'Arial', 'Segoe UI';
     }
 
     p {
@@ -15,6 +16,10 @@ export const GlobalStyles = createGlobalStyle`
     input[type='text'] {
         border-radius: 5px;
         padding: 3px !important;
+    }
+
+    button:focus {
+        outline: none;
     }
 
     button > img:not(.inline-img) {

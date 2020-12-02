@@ -62,14 +62,15 @@ const IconInput = props => {
                 text,
                 clearText
             }}>
-            <InputContainer containerStyle={containerStyle}>
+            <InputContainer 
+                containerStyle={containerStyle}
+                onMouseEnter={hoverOn}
+                onMouseLeave={hoverOff}>
                 <Input inputStyle={inputStyle}
                     type='text' 
                     ref={text} 
                     placeholder={placeholder} 
                     onChange={inputChange}
-                    onMouseEnter={hoverOn}
-                    onMouseLeave={hoverOff}
                     onFocus={inputFocus}
                     onBlur={inputBlur} />
                 {props.children}

@@ -1,24 +1,34 @@
 import styled from 'styled-components';
 
-const NotebookContainer = styled.div`
+const Notebook = styled.div`
     flex: 1 1 auto;
     max-width: 15rem;
     margin: 30px 10px;
 
     .card {
-        background: radial-gradient(circle, rgba(255,229,206,1) 0%, 
-                    rgba(255,180,99,0.969625350140056) 80%, 
-                    rgba(255,160,77,1) 100%);
-        border: none;
-        padding: 10px;
+        background: rgba(255,227,198,1);
+        border-left: 1em solid rgba(255,132,0,1);
+        border-radius: 15px 0 0 15px;
+        padding: 20px;
         width: 100%;
         height: 20rem;
         max-height: 250px;
         box-shadow: 3px 3px 8px 0px rgba(0,0,0,0.5);
     }
 
+        .card:hover {
+            background: linear-gradient(45deg, rgba(255,120,0,1) 25%, 
+                        rgba(255,227,198,1) 25%, 
+                        rgba(255,227,198,1) 100%);
+        }
+
         .card .card-body {
-            margin-top: 32px;
+            display: flex;
+            flex-flow: column wrap;
+            justify-content: space-around;
+            text-align: center;
+            background: rgba(255,229,206, .8);
+            box-shadow: 3px 3px 8px 0px rgba(0,0,0,0.5);
         }
 
         .card .card-title {
@@ -43,4 +53,4 @@ const NotebookContainer = styled.div`
         border: 2px solid #FF0000;
     }`;
 
-export default NotebookContainer;
+export default Notebook;

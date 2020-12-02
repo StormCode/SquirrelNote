@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { 
     Modal, 
@@ -10,11 +10,12 @@ import Login from './Login';
 import Register from './Register';
 import ForgotPassword from './ForgotPassword';
 
-import AuthContext from '../../context/auth/authContext';
-
 import { LOGIN, REGISTER, FORGOT_PWD } from '../../modelTypes';
 
-const ModelStyle = styled.div`
+const AuthPanel = styled.div`
+    padding: 0 5rem;
+    width: 100%;
+
     .modal-content {
         border: none;
         background: none;
@@ -23,7 +24,41 @@ const ModelStyle = styled.div`
     .modal-body {
         border-radius: 20px;
         background: #FFF;
-        box-shadow: inset 0 0 25px rgba(255,128,0,1), 5px 5px 10px;
+        padding: 30px 50px;
+        box-shadow: inset 0 0 25px ${({theme}) => theme.orange}, 5px 5px 10px;
+    }
+
+    .title {
+        text-align: center;
+        padding: 20px 0;
+    }
+
+    input[type='submit'] {
+        margin: 30px 0;
+        background: ${({theme}) => theme.orange};
+    }
+
+    p {
+        text-align: center;
+    }
+
+        p > a {
+            text-decoration: none;
+            color: ${({theme}) => theme.orange};
+        }
+
+    .column {
+        column-count: 2;
+    }
+    
+        .column > a {
+            display: block;
+        }
+
+    .tip {
+        margin-bottom: 10px;
+        font-size: .75rem;
+        color: ${({theme}) => theme.gray};
     }
 `;
 
@@ -34,8 +69,6 @@ const ModelsContext = React.createContext({
 });
 
 const Models = props => {
-    const authContext = useContext(AuthContext);
-    const { isAuthenticated } = authContext;
     const { 
         model, 
         isOpen, 
@@ -51,11 +84,11 @@ const Models = props => {
                 toggleModel: toggleModel
             }}>
                 {isOpen ? <Modal isOpen={isOpen} toggle={toggleOpen}>
-                    <ModelStyle>
+                    <AuthPanel>
                         <ModalBody>
                             {props.children}
                         </ModalBody>
-                    </ModelStyle>
+                    </AuthPanel>
                 </Modal> : null}
         </ModelsContext.Provider>
     )

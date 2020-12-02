@@ -30,26 +30,16 @@ const NewNotebook = () => {
 
     const { title, desc } = notebook;
 
-    const [color, setColor] = useState({
+    const defaultColor = {
         confirm: gray,
         cancel: gray
-    });
+    };
+
+    const [color, setColor] = useState(defaultColor);
 
     const onChange = e => setNotebook({
         ...notebook, [e.target.name]: e.target.value
     });
-
-    //滑鼠移過icon時改變顏色
-    const iconHoverOn = e => {
-        e.preventDefault();
-        setColor({...color, [e.target.name]: orange});
-    }
-
-    //滑鼠移出icon時恢復顏色
-    const iconHoverOff = e => {
-        e.preventDefault();
-        setColor({...color, [e.target.name]: gray});
-    }
 
     const onAddNotebook = e => {
         e.preventDefault();
@@ -71,6 +61,18 @@ const NewNotebook = () => {
         disableAddNotebook();
     };
 
+    const changeIcon = {
+        'confirm': () => {
+            setColor({...defaultColor, ['confirm']: orange});
+        },
+        'cancel': () => {
+            setColor({...defaultColor, ['cancel']: orange});
+        },
+        'default': () => {
+            setColor(defaultColor);
+        }
+    }
+
     return (
         <Fragment>
             {addNotebookVisible ? (<NotebookContainer className='notebook'>
@@ -84,11 +86,25 @@ const NewNotebook = () => {
                         </button> */}
                         <ToolPanel 
                             onConfirm={onAddNotebook}
-                            onCancel={onDisableAddNotebook}
-                            hoverOn={iconHoverOn}
-                            hoverOff={iconHoverOff}>
-                            <ToolPanel.ConfirmBtn><Check size={20} color={color.confirm} weight='bold' /></ToolPanel.ConfirmBtn>
-                            <ToolPanel.CancelBtn><X size={20} color={color.cancel} weight='bold' /></ToolPanel.CancelBtn>
+                            onCancel={onDisableAddNotebook}>
+                            <ToolPanel.ConfirmBtn
+                                container={
+                                    React.cloneElement(<span></span>,
+                                    {
+                                        onMouseEnter: changeIcon.confirm, 
+                                        onMouseLeave: changeIcon.default})
+                                    }>
+                                    <Check size={20} color={color.confirm} weight='bold' />
+                            </ToolPanel.ConfirmBtn>
+                            <ToolPanel.CancelBtn
+                                container={
+                                    React.cloneElement(<span></span>,
+                                    {
+                                        onMouseEnter: changeIcon.cancel, 
+                                        onMouseLeave: changeIcon.default})
+                                    }>
+                                    <X size={20} color={color.cancel} weight='bold' />
+                            </ToolPanel.CancelBtn>
                         </ToolPanel>
                         {/* <UncontrolledTooltip placement="bottom" target="add-confirm-btn">
                             確定新增
