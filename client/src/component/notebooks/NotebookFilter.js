@@ -16,6 +16,7 @@ const HeadIconStyled = styled.span`
 `;
 
 const ClearIconStyled = styled.span`
+    cursor: pointer;
     float: right;
     transform: translate(-150%, -125%);
 `;

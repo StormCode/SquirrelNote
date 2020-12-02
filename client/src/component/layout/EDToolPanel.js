@@ -116,11 +116,9 @@ EDToolPanel.ConfirmBtn = (props) =>
     <EDToolPanelContext.Consumer>
         {contextValue =>
             contextValue.isEnter ? 
-                React.cloneElement(props.container, 
-                    {},
-                    <ToolPanel.ConfirmBtn container={props.container}>
-                        {props.children}
-                    </ToolPanel.ConfirmBtn>)
+                <ToolPanel.ConfirmBtn>
+                    {props.children}
+                </ToolPanel.ConfirmBtn>
             : null
         }
     </EDToolPanelContext.Consumer>;
@@ -129,11 +127,9 @@ EDToolPanel.CancelBtn = (props) =>
     <EDToolPanelContext.Consumer>
         {contextValue =>
             contextValue.isEnter ? 
-                React.cloneElement(props.container, 
-                    {},
-                    <ToolPanel.CancelBtn container={props.container}>
-                        {props.children}
-                    </ToolPanel.CancelBtn>)
+                <ToolPanel.CancelBtn>
+                    {props.children}
+                </ToolPanel.CancelBtn>
             : null
         }
     </EDToolPanelContext.Consumer>;
@@ -143,13 +139,11 @@ EDToolPanel.EditBtn = (props) =>
         {contextValue =>
             contextValue.isEnter ?
                 null 
-            : React.cloneElement(props.container, 
-                {},
-                <Button id='edit-btn' 
-                    onClick={contextValue.onEdit}
-                    btnStyle={contextValue.btnStyle}>
-                    {props.children}
-                </Button>)
+            : <Button id='edit-btn' 
+                onClick={contextValue.onEdit}
+                btnStyle={contextValue.btnStyle}>
+                {props.children}
+            </Button>
         }
     </EDToolPanelContext.Consumer>;
 
@@ -158,13 +152,11 @@ EDToolPanel.DeleteBtn = (props) =>
         {contextValue =>
             contextValue.isEnter ?
                 null
-            : React.cloneElement(props.container, 
-                {},
-                <Button id='delete-btn'
-                    onClick={contextValue.onDelete}
-                    btnStyle={contextValue.btnStyle}>
-                    {props.children}
-                </Button>)
+            : <Button id='delete-btn'
+                onClick={contextValue.onDelete}
+                btnStyle={contextValue.btnStyle}>
+                {props.children}
+            </Button>
         }
     </EDToolPanelContext.Consumer>;
 

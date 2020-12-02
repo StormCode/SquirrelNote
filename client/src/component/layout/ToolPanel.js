@@ -46,26 +46,22 @@ const ToolPanel = props => {
 ToolPanel.ConfirmBtn = (props) =>
     <ToolPanelContext.Consumer>
         {contextValue =>
-            React.cloneElement(props.container, 
-                {},
-                <Button id='confirm-btn'
-                    onClick={contextValue.onConfirm}
-                    btnStyle={contextValue.btnStyle}>
-                    {props.children}
-                </Button>)
+            <Button id='confirm-btn'
+                onClick={contextValue.onConfirm}
+                btnStyle={contextValue.btnStyle}>
+                {props.children}
+            </Button>
         }
     </ToolPanelContext.Consumer>;
 
 ToolPanel.CancelBtn = (props) =>
     <ToolPanelContext.Consumer>
         {contextValue =>
-            React.cloneElement(props.container, 
-                {},
-                <Button id='cancel-btn' 
-                    onClick={contextValue.onCancel}
-                    btnStyle={contextValue.btnStyle}>
-                    {props.children}
-                </Button>)
+            <Button id='cancel-btn' 
+                onClick={contextValue.onCancel}
+                btnStyle={contextValue.btnStyle}>
+                {props.children}
+            </Button>
         }
     </ToolPanelContext.Consumer>;
 

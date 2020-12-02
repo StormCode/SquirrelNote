@@ -61,7 +61,7 @@ const NewNotebook = () => {
         disableAddNotebook();
     };
 
-    const changeIcon = {
+    const iconChange = {
         'confirm': () => {
             setColor({...defaultColor, ['confirm']: orange});
         },
@@ -72,6 +72,13 @@ const NewNotebook = () => {
             setColor(defaultColor);
         }
     }
+
+    const BtnContent = ({onChange, children}) => {
+        return <span
+                onMouseEnter={onChange}
+                onMouseLeave={iconChange.default}>
+                    {children}
+                </span>};
 
     return (
         <Fragment>
@@ -87,23 +94,11 @@ const NewNotebook = () => {
                         <ToolPanel 
                             onConfirm={onAddNotebook}
                             onCancel={onDisableAddNotebook}>
-                            <ToolPanel.ConfirmBtn
-                                container={
-                                    React.cloneElement(<span></span>,
-                                    {
-                                        onMouseEnter: changeIcon.confirm, 
-                                        onMouseLeave: changeIcon.default})
-                                    }>
-                                    <Check size={20} color={color.confirm} weight='bold' />
+                            <ToolPanel.ConfirmBtn>
+                                <BtnContent onChange={iconChange.confirm} children={<Check size={20} color={color.confirm} weight='bold' />} />
                             </ToolPanel.ConfirmBtn>
-                            <ToolPanel.CancelBtn
-                                container={
-                                    React.cloneElement(<span></span>,
-                                    {
-                                        onMouseEnter: changeIcon.cancel, 
-                                        onMouseLeave: changeIcon.default})
-                                    }>
-                                    <X size={20} color={color.cancel} weight='bold' />
+                            <ToolPanel.CancelBtn>
+                                <BtnContent onChange={iconChange.cancel} children={<X size={20} color={color.cancel} weight='bold' />} />
                             </ToolPanel.CancelBtn>
                         </ToolPanel>
                         {/* <UncontrolledTooltip placement="bottom" target="add-confirm-btn">

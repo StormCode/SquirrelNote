@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import axios from 'axios';
+import styled from 'styled-components';
 import { 
     Alert, 
     Form, 
@@ -10,8 +11,29 @@ import {
 
 import AlertContext from '../../context/alert/alertContext';
 
-//Import Style
-import AuthPanel from '../../style/components/AuthPanel';
+const ResetPasswordContainer = styled.div`
+    padding: 0 5rem;
+    width: 100%;
+
+    .title {
+        text-align: center;
+        padding: 20px 0;
+    }
+
+    input[type='submit'] {
+        margin: 30px 0;
+        background: ${({theme}) => theme.orange};
+    }
+
+    p {
+        text-align: center;
+    }
+
+        p > a {
+            text-decoration: none;
+            color: ${({theme}) => theme.orange};
+        }
+`;
 
 const ResetPassword = ({ match }) => {
     const alertContext = useContext(AlertContext);
@@ -71,7 +93,7 @@ const ResetPassword = ({ match }) => {
     };
 
     return (
-        <AuthPanel className='form-container'>
+        <ResetPasswordContainer className='form-container'>
             <h2 className='title'>重設密碼</h2>
             {auth !== null ?
                 (auth === true ?
@@ -91,7 +113,7 @@ const ResetPassword = ({ match }) => {
                   </Alert>)
                 :null
             }
-        </AuthPanel>
+        </ResetPasswordContainer>
     )
 }
 

@@ -9,9 +9,6 @@ import {
 
 import AuthContext from '../../context/auth/authContext';
 
-//Import Style
-import AuthPanel from '../../style/components/AuthPanel';
-
 const ForgotPassword = props => {
     const authContext = useContext(AuthContext);
     const { forgotPassword, emailSended, clearEmailSended } = authContext;
@@ -39,7 +36,7 @@ const ForgotPassword = props => {
     };
 
     return (
-        <AuthPanel className='form-container'>
+        <div className='form-container'>
             <h2 className='title'>{props.title}</h2>
             {(formAuthError !== null && formAuthError !== '') &&
                 <Alert color="danger">
@@ -63,7 +60,7 @@ const ForgotPassword = props => {
                 </FormGroup>
                 <input type='submit' value='寄出重設密碼信' className='btn btn-block' />
             </Form>
-        </AuthPanel>
+        </div>
     )
 }
 

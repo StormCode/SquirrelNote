@@ -69,7 +69,7 @@ const Notebook = props => {
         setVisible(false);
     }
 
-    const changeIcon = {
+    const iconChange = {
         'confirm': () => {
             setColor({...defaultColor, ['confirm']: orange});
         },
@@ -149,6 +149,13 @@ const Notebook = props => {
         props.setToolPanel(null);
     }
 
+    const BtnContent = ({onChange, children}) => {
+        return <span
+                onMouseEnter={onChange}
+                onMouseLeave={iconChange.default}>
+                    {children}
+                </span>};
+    
     return (
         <NotebookContainer className={[deleteNotebookVisible ? 'danger-alert' : null,'notebook'].join(' ').replace(/^[\s]/,'')}>
             <Card
@@ -161,41 +168,17 @@ const Notebook = props => {
                     onDelete={onDelete}
                     onEnter={onEnter}
                     onCancel={onCancel}>
-                    <EDToolPanel.ConfirmBtn
-                        container={
-                            React.cloneElement(<span></span>,
-                            {
-                                onMouseEnter: changeIcon.confirm, 
-                                onMouseLeave: changeIcon.default})
-                            }>
-                            <Check size={20} color={color.confirm} weight='bold' />
+                    <EDToolPanel.ConfirmBtn>
+                        <BtnContent onChange={iconChange.confirm} children={<Check size={20} color={color.confirm} weight='bold' />} />
                     </EDToolPanel.ConfirmBtn>
-                    <EDToolPanel.CancelBtn 
-                        container={
-                            React.cloneElement(<span></span>,
-                            {
-                                onMouseEnter: changeIcon.cancel, 
-                                onMouseLeave: changeIcon.default})
-                            }>
-                            <X size={20} color={color.cancel} weight='bold' />
+                    <EDToolPanel.CancelBtn>
+                        <BtnContent onChange={iconChange.cancel} children={<X size={20} color={color.cancel} weight='bold' />} />
                     </EDToolPanel.CancelBtn>
-                    <EDToolPanel.EditBtn 
-                        container={
-                            React.cloneElement(<span></span>,
-                            {
-                                onMouseEnter: changeIcon.edit, 
-                                onMouseLeave: changeIcon.default})
-                            }>
-                            <Pencil size={20} color={color.edit} weight='bold' />
+                    <EDToolPanel.EditBtn>
+                        <BtnContent onChange={iconChange.edit} children={<Pencil size={20} color={color.edit} weight='bold' />} />
                     </EDToolPanel.EditBtn>
-                    <EDToolPanel.DeleteBtn 
-                        container={
-                            React.cloneElement(<span></span>,
-                            {
-                                onMouseEnter: changeIcon.delete, 
-                                onMouseLeave: changeIcon.default})
-                            }>
-                            <Trash size={20} color={color.delete} weight='bold' />
+                    <EDToolPanel.DeleteBtn>
+                        <BtnContent onChange={iconChange.delete} children={<Trash size={20} color={color.delete} weight='bold' />} />
                     </EDToolPanel.DeleteBtn>
                 </EDToolPanel>
                 {/* { editNotebookVisible ? 

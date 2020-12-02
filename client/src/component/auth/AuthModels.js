@@ -13,7 +13,6 @@ import ForgotPassword from './ForgotPassword';
 import { LOGIN, REGISTER, FORGOT_PWD } from '../../modelTypes';
 
 const AuthPanel = styled.div`
-    padding: 0 5rem;
     width: 100%;
 
     .modal-content {

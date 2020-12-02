@@ -10,6 +10,7 @@ import NotebookContext from '../../context/notebooks/notebookContext'
 
 const { defaultColor, orange, gray } = theme;
 const SorterContainer = styled.span`
+    cursor: pointer;
     float: right;
     margin: 0 10px;
 `;

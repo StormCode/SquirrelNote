@@ -27,7 +27,7 @@ const Notebook = styled.div`
             flex-flow: column wrap;
             justify-content: space-around;
             text-align: center;
-            background: rgba(255,229,206, .8);
+            background: rgba(255, 245, 237, .8);
             box-shadow: 3px 3px 8px 0px rgba(0,0,0,0.5);
         }
 
