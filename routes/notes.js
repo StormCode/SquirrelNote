@@ -146,9 +146,15 @@ router.post('/', auth, async(req, res) => {
 });
 
 // route            Put /api/notes
-// desc             修改筆記
+// desc             修改/移動筆記
 // access           Private
 router.put('/:id', auth, async(req, res) => {
+    const error = {
+        notedir: 'notedir',
+        notebook: 'notebook',
+        notAuthorized: 'not_authorized'
+    };
+
     try {
         const newCrypto = crypto(process.env.SECRET_KEY);
         // 解密note資料
@@ -160,65 +166,154 @@ router.put('/:id', auth, async(req, res) => {
         const encryptedSummary = newCrypto.encrypt(require('../common/summary')(content), false);
         const encryptedContent = newCrypto.encrypt(content, false);
     
-        //建立筆記物件
-        const noteField = {
-            title: encryptedTitle,
-            content: encryptedContent,
-            notedir: data.notedir,
-            date: updateDateTime
-        };
-    
         const id = req.params.id;
         
         let note = await Note.findById(id);
         
         if(!note) return res.status(404).json({msg: '找不到筆記', status: NOT_FOUND});
 
-        // 取得此筆記的筆記目錄
-        let notedir = await Notedir.findById(data.notedir);
+        // 判斷要做修改還是移動
+        if(note.notedir !== data.notedir) {
+            //
+            // 移動筆記
+            //
 
-        if(!notedir) return res.status(404).json({msg: '找不到此筆記的存放目錄', status: NOT_FOUND});
+            const sourceNotedirId = note.notedir;
+            const destNotedirId = data.notedir;
 
-        // 取得筆記本資料
-        const notebook = await Notebook.findById(notedir.notebook);
+            let checkRes = await checkNoteDir(sourceNotedirId);
 
-        if(!notebook) return res.status(404).json({msg: '找不到此筆記的筆記本', status: NOT_FOUND});
-        
-        // 確認使用者是否真的擁有這個筆記本
-        if(notebook.author.toString() !== req.user.id) return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
+            if(checkRes !== true) {
+                switch(checkRes) {
+                    case error.notedir:
+                        return res.status(404).json({msg: '找不到來源筆記目錄', status: NOT_FOUND});
+                    case error.notebook:
+                        return res.status(404).json({msg: '找不到來源筆記本', status: NOT_FOUND});
+                    case error.notAuthorized:
+                        return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
+                }
+            }
 
-        const decryptedNote = newCrypto.decrypt(note.content, false);
-        const deleteImgs = require('../common/filterDeleteImgs')(decryptedNote, content);
+            checkRes = await checkNoteDir(destNotedirId);
 
-        //確認新的筆記內容是否有刪掉圖片，有則刪除Server上的檔案
-        if(deleteImgs.length > 0) {
-            deleteImgs.forEach((imgName) => {
-                let deletedImgPath = path.join(__dirname, '..', config.get('imageDirectory'), imgName);
-                
-                fs.unlink(deletedImgPath, (err) => {
-                      return;
-                    });
-            })
+            if(checkRes !== true) {
+                switch(checkRes) {
+                    case error.notedir:
+                        return res.status(404).json({msg: '找不到目的筆記目錄', status: NOT_FOUND});
+                    case error.notebook:
+                        return res.status(404).json({msg: '找不到目的筆記本', status: NOT_FOUND});
+                    case error.notAuthorized:
+                        return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
+                }
+            }
+
+            let noteField = {
+                title: encryptedTitle,
+                content: encryptedContent,
+                notedir: destNotedirId,
+                date: note.date
+            };
+
+            // 修改筆記中的目錄ID
+            note = await Note.findByIdAndUpdate(id,
+                { $set: noteField },
+                { new: true });
+
+            const newNotedirNote = {
+                _id: note._id,
+                title: note.title,
+                summary: encryptedSummary,
+                date: note.date
+            };
+
+            let sourceNotedir = await Notedir.findById(sourceNotedirId);
+            let destNotedir = await Notedir.findById(destNotedirId);
+    
+            // 新增筆記的標題、摘要到Notedir裡
+            destNotedir.notes.push(newNotedirNote);
+    
+            await destNotedir.save();
+
+            // 從原本的筆記目錄刪除此筆記
+            const deleteNoteIdx = sourceNotedir.notes.findIndex((el) => el._id == id);
+            sourceNotedir.notes.splice(deleteNoteIdx,1);
+            sourceNotedir.save();
+
+        } else {
+            //
+            // 修改筆記
+            //
+
+            let checkRes = await checkNoteDir(data.notedir);
+
+            if(checkRes !== true) {
+                switch(checkRes) {
+                    case error.notedir:
+                        return res.status(404).json({msg: '找不到此筆記的存放目錄', status: NOT_FOUND});
+                    case error.notebook:
+                        return res.status(404).json({msg: '找不到此筆記的筆記本', status: NOT_FOUND});
+                    case error.notAuthorized:
+                        return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
+                }
+            }
+    
+            const decryptedNote = newCrypto.decrypt(note.content, false);
+            const deleteImgs = require('../common/filterDeleteImgs')(decryptedNote, content);
+    
+            //確認新的筆記內容是否有刪掉圖片，有則刪除Server上的檔案
+            if(deleteImgs.length > 0) {
+                deleteImgs.forEach((imgName) => {
+                    let deletedImgPath = path.join(__dirname, '..', config.get('imageDirectory'), imgName);
+                    
+                    fs.unlink(deletedImgPath, (err) => {
+                          return;
+                        });
+                })
+            }
+    
+            //建立筆記物件
+            let noteField = {
+                title: encryptedTitle,
+                content: encryptedContent,
+                notedir: data.notedir,
+                date: updateDateTime
+            };
+    
+            // 修改筆記
+            note = await Note.findByIdAndUpdate(id,
+                { $set: noteField },
+                { new: true });
+    
+            // 連帶修改筆記目錄的筆記資訊
+            await Notedir.findOneAndUpdate({_id: data.notedir, 'notes._id': id},
+                { $set: {'notes.$.title': encryptedTitle, 'notes.$.summary': encryptedSummary, 'notes.$.date': updateDateTime}}
+            );
         }
-
-        // 修改筆記
-        note = await Note.findByIdAndUpdate(id,
-            { $set: noteField },
-            { new: true });
-
-        // 連帶修改筆記目錄的筆記資訊
-        await Notedir.findOneAndUpdate({_id: data.notedir, 'notes._id': id},
-            { $set: {'notes.$.title': encryptedTitle, 'notes.$.summary': encryptedSummary, 'notes.$.date': updateDateTime}}
-        );
         
         //取得新的筆記目錄
-        notedir = await Notedir.findById(data.notedir);
+        const notedir = await Notedir.findById(data.notedir);
         const updateNotedirNote = notedir.notes.find(note => note._id == id);
         
         // 加密修改的note資料
         const encryptedNotedirNote = newCrypto.encrypt(updateNotedirNote);
 
         res.json(encryptedNotedirNote);
+
+        async function checkNoteDir(id) {
+            let notedir = await Notedir.findById(id);
+
+            if(!notedir) return {error: error.notedir};
+
+            // 取得來源筆記本資料
+            const notebook = await Notebook.findById(notedir.notebook);
+                
+            if(!notebook) return {error: error.notebook};
+
+            // 確認使用者是否真的擁有這個筆記本
+            if(notebook.author.toString() !== req.user.id) return {error: error.notAuthorized};
+
+            return true;
+        }
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -285,11 +380,6 @@ router.delete('/:id', auth, async(req, res) => {
         const deleteNoteIdx = notedir.notes.findIndex((el) => el._id == id);
         notedir.notes.splice(deleteNoteIdx,1);
         notedir.save();
-        //todo: implement with better way
-        // await Notedir.findOneAndUpdate({_id: req.body.notedir, 'notes._id': id},
-        //     { $set: { $pullAll: {"notes.$._id": [id] }}}
-        // );
-
 
         res.json({msg: '筆記已刪除'});
     } catch (err) {
