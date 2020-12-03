@@ -53,7 +53,7 @@ const Index = () => {
     const authContext = useContext(AuthContext);
 
     useEffect(() => {
-        authContext.loadUser();
+        localStorage.getItem('token') !== null && authContext.loadUser();
 
         // eslint-disable-next-line
     }, []);

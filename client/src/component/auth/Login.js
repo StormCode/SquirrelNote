@@ -27,12 +27,10 @@ const Login = props => {
     const [formAuthError, setFormAuthError] = useState(null);
     const { email, password } = user;
 
-    const { toggleModel, toggleOpen } = props;
+    const { toggleModel } = props;
     
     useEffect(() => {
-        // if(isAuthenticated) {
-        //     toggleOpen();
-        // }
+        window.history.state && console.log(window.history.state.prevUrl);
 
         if(error === INVALID_CREDENTIALS) {
             setFormAuthError('帳號密碼不正確');

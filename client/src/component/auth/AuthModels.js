@@ -15,11 +15,6 @@ import { LOGIN, REGISTER, FORGOT_PWD } from '../../modelTypes';
 const AuthPanel = styled.div`
     width: 100%;
 
-    .modal-content {
-        border: none;
-        background: none;
-    }
-
     .modal-body {
         border-radius: 20px;
         background: #FFF;

@@ -1,96 +1,142 @@
-import React, { Fragment, useState, useRef, useEffect } from 'react';
+import React, { Fragment, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Button } from 'reactstrap';
+import styled from 'styled-components';
+
+const Button = styled.span`
+    ${props => props.btnStyle}
+`;
+
+const InputContainer = styled.div`
+    display: flex;
+    flexFlow: row nowrap;
+    padding: 5px 10px;
+`;
+
+const Input = styled.input`
+    background: none;
+    border: none;
+    width: 80%;
+    &:focus {
+        outline: none;
+    }
+`;
 
 //
-// 此組件是用來切換文字/文字輸入框
-// 初始狀態下顯示文字(也可以放任意Html)、被點擊後顯示文字輸入框、完成、取消按鈕(string)
+// 此組件是帶有確認、取消功能的文字輸入框
+// 預設顯示文字輸入框、完成、取消按鈕
 // 傳入的屬性：
-// 初始狀態下顯示的內容(string or object)
-// 被點擊後顯示的placeholder(string)
-// 完成按鈕的內容(string or object)
-// 取消按鈕的內容(string or object)
+// 可見性(boolean)
+// placeholder(string)
 // 完成事件(function)
+// 按鈕的樣式(string)
+// 子組件(children)：
+// 完成按鈕內容(string or object)
+// 取消按鈕內容(string or object)
 //
-const TextInput = ({defaultHtml, placeholder, applyHtml, cancelHtml, applyEvent}) => {
+const TextInputContext = React.createContext({
+    placeholder: '請輸入文字',
+    onConfirm: () => {},
+    onCancel: () => {},
+    btnStyle: `
+        margin: 0 5px;
+        padding: 0;
+        border: none;
+        background: none;`
+});
 
-    const styles = {
-        textInputStyle: {
-            display: 'flex',
-            flexFlow: 'row nowrap',
-            padding: '5px 10px'
-        },
-        textStyle: {
-            background: 'none',
-            border: 'none',
-            outline: 'none',
-            width: '80%'
-        },
-        defaultStyle: {
-            cursor: 'pointer',
-            paddingLeft: '10px',
-            fontSize: '1.2rem'
-        }
-    };
-    const { textInputStyle, textStyle, defaultStyle } = styles;
-
-    const [visible, setVisible] = useState(false);
+const TextInput = (props) => {
+    const {
+        visible,
+        placeholder, 
+        onConfirm, 
+        onCancel,
+        btnStyle
+    } = props;
     const text = useRef('');
+
+    useEffect(() => {
+        return () => {
+            if(text.current)
+                text.current.value = '';
+        }
+
+        // eslint-disable-next-line
+    }, []);
 
     useEffect(() => {
         if(visible) 
             text.current.focus();
-
-        // 清除文字內容
-        if(text.current)
-            text.current.value = '';
     }, [visible]);
 
-    const hideInput = e => {
+    const inputCancel = e => {
         e.preventDefault();
-        setVisible(false);
+        onCancel();
+        text.current.value = '';
     }
 
-    const toggleVisible = e => {
+    const inputConfirm = e => {
         e.preventDefault();
-        setVisible(!visible);
-    }
-
-    const onApply = async e => {
-        e.preventDefault();
-        let status = await applyEvent(text.current.value);
-        if(status) {
-            text.current.value = '';
-            setVisible(false);
-        }
+        onConfirm(text.current.value);
+        text.current.value = '';
     }
 
     return (
-        <Fragment>
-            {visible ? (<div style={textInputStyle}>
-                    <input type='text' placeholder={placeholder} ref={text} style={textStyle} />
-                    <Button onClick={onApply} outline color='primary' size='sm'>{applyHtml}</Button>
-                    <Button onClick={hideInput} outline color='danger' size='sm'>{cancelHtml}</Button>
-                </div>) 
-            : defaultHtml ? <div style={defaultStyle} onClick={toggleVisible}>{defaultHtml}</div> : null}
-        </Fragment>
+        <TextInputContext.Provider
+            value={{
+                inputConfirm: inputConfirm,
+                inputCancel: inputCancel,
+                btnStyle: btnStyle
+            }}>
+            <Fragment>
+                {visible ? 
+                    (<InputContainer>
+                        <Input type='text' placeholder={placeholder} ref={text} />
+                        {props.children}
+                    </InputContainer>) 
+                : null}
+            </Fragment>
+        </TextInputContext.Provider>
     )
 };
 
+TextInput.ConfirmBtn = ({children}) =>
+    <TextInputContext.Consumer>
+        {contextValue =>
+            <Button 
+                onClick={contextValue.inputConfirm}
+                btnStyle={contextValue.btnStyle}>
+                {children}
+            </Button>
+        }
+    </TextInputContext.Consumer>;
+
+TextInput.CancelBtn = ({children}) =>
+    <TextInputContext.Consumer>
+        {contextValue =>
+            <Button 
+                onClick={contextValue.inputCancel}
+                btnStyle={contextValue.btnStyle}>
+                {children}
+            </Button>
+        }
+    </TextInputContext.Consumer>
+
 TextInput.defaultProps = {
-    defaultHtml: '點擊輸入文字',
     placeholder: '請輸入文字',
-    applyHtml: 'OK',
-    cancelHtml: '取消',
-    applyEvent: () => { return true }
+    onConfirm: () => {},
+    onCancel: () => {},
+    btnStyle: `
+        margin: 0 5px;
+        padding: 0;
+        border: none;
+        background: none;`
 }
 
 TextInput.propTypes = {
-    defaultHtml: PropTypes.oneOfType([PropTypes.string,PropTypes.object]),
     placeholder: PropTypes.string,
-    applyHtml: PropTypes.oneOfType([PropTypes.string,PropTypes.object]),
-    cancelHtml: PropTypes.oneOfType([PropTypes.string,PropTypes.object]),
-    applyEvent: PropTypes.func.isRequired
+    onConfirm: PropTypes.func.isRequired,
+    onCancel: PropTypes.func,
+    btnStyle: PropTypes.string
 }
 
 export default TextInput;

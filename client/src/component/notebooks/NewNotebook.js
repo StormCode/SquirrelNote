@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useContext } from 'react'
+import React, { Fragment, useState, useContext, useEffect } from 'react'
 import {
     Card, CardImg, CardText, CardBody,
     CardTitle, CardSubtitle, Button, UncontrolledTooltip
@@ -14,11 +14,10 @@ import NotebookContext from '../../context/notebooks/notebookContext';
 
 const { orange, gray } = theme;
 
-const NewNotebook = () => {
+const NewNotebook = ({visible}) => {
     const notebookContext = useContext(NotebookContext);
 
     const { 
-        addNotebookVisible, 
         disableAddNotebook, 
         addNotebook 
     } = notebookContext;
@@ -37,6 +36,16 @@ const NewNotebook = () => {
 
     const [color, setColor] = useState(defaultColor);
 
+    useEffect(() => {
+        setColor(defaultColor);
+        setNotebook({
+            title: '',
+            desc: ''
+        });
+
+        // eslint-disable-next-line
+    }, []);
+
     const onChange = e => setNotebook({
         ...notebook, [e.target.name]: e.target.value
     });
@@ -49,6 +58,8 @@ const NewNotebook = () => {
             title: '',
             desc: ''
         });
+        //恢復預設顏色
+        setColor(defaultColor);
     };
 
     const onDisableAddNotebook = e => {
@@ -58,6 +69,8 @@ const NewNotebook = () => {
             title: '',
             desc: ''
         });
+        //恢復預設顏色
+        setColor(defaultColor);
         disableAddNotebook();
     };
 
@@ -82,7 +95,7 @@ const NewNotebook = () => {
 
     return (
         <Fragment>
-            {addNotebookVisible ? (<NotebookContainer className='notebook'>
+            {visible ? (<NotebookContainer className='notebook'>
                 <Card>
                     {/* <div className='tool-panel'> */}
                         {/* <button id='add-confirm-btn' onClick={onAddNotebook}>

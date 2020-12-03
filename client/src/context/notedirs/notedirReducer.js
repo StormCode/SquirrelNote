@@ -6,6 +6,8 @@ import {
     UPDATE_NOTEDIR,
     DELETE_NOTEDIR,
     SORT_NOTEDIR,
+    ENABLE_ADDNOTEDIR,
+    DISABLE_ADDNOTEDIR,
     ENABLE_EDITNOTEDIR,
     DISABLE_EDITNOTEDIR,
     ENABLE_DELETENOTEDIR,
@@ -76,6 +78,16 @@ export default (state, action) => {
                 orderBy: action.payload.orderBy,
                 sortBy: action.payload.sortBy,
                 notedirs: state.notedirs === null ? state.notedirs : state.notedirs.sort(sortNotedir)
+            }
+        case ENABLE_ADDNOTEDIR:
+            return {
+                ...state,
+                addNotedirVisible: true
+            }
+        case DISABLE_ADDNOTEDIR:
+            return {
+                ...state,
+                addNotedirVisible: false
             }
         case ENABLE_EDITNOTEDIR:
             return {

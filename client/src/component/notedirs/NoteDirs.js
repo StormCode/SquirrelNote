@@ -1,14 +1,33 @@
 import React, { Fragment, useContext, useState, useEffect } from 'react'
+import styled from 'styled-components';
+import { Check, X } from "phosphor-react";
+
 import Spinner from '../../component/layout/Spinner'
 import TextInput from '../../component/layout/TextInput'
+import NotedirSorter from './NotedirSorter';
 import Notedir from './NoteDir';
+
+// Import Style
+import { theme } from '../../style/themes';
 
 import NotebookContext from '../../context/notebooks/notebookContext';
 import NotedirContext from '../../context/notedirs/notedirContext';
 
-// Import Resource
-import confirmImg from '../../assets/general/confirm_32x32.png';
-import cancelImg from '../../assets/general/close_32x32.png';
+const { orange, gray } = theme;
+
+const AddNotedirBtn = styled.button`
+    position: relative;
+    background: ${({theme}) => theme.orange};
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    color: #FFF;
+    box-shadow: 3px 3px 5px rgba(0,0,0,.5);
+
+        &:hover {
+            background: ${({theme}) => theme.darkOrange};
+        }
+`;
 
 const Notedirs = ({notebookId}) => {
     const notebookContext = useContext(NotebookContext);
@@ -23,20 +42,15 @@ const Notedirs = ({notebookId}) => {
         getNotedirs, 
         clearNotedir,
         setCurrentNotedir, 
+        addNotedirVisible, 
+        enableAddNotedir,
+        disableAddNotedir,
         addNotedir, 
-        loading,
-        error 
+        loading
     } = notedirContext;
 
-    const text = {
-        addNewText: '新增筆記目錄',
-        placeholder: '',
-        applyText: '新增',
-        cancelText: '取消'
-    };
-
-    const { addNewText, placeholder, applyText, cancelText } = text;
-
+    
+    
     useEffect(() => {
         !notebooks && getNotebooks();
         notebookId && getNotedirs(notebookId);
@@ -57,6 +71,32 @@ const Notedirs = ({notebookId}) => {
             setCurrentNotedir(defaultNotedir._id);
         }
     }, [notebooks, notedirs]);
+
+    const defaultColor = {
+        confirm: gray,
+        cancel: gray
+    };
+
+    const [color, setColor] = useState(defaultColor);
+
+    const iconChange = {
+        'confirm': () => {
+            setColor({...defaultColor, ['confirm']: orange});
+        },
+        'cancel': () => {
+            setColor({...defaultColor, ['cancel']: orange});
+        },
+        'default': () => {
+            setColor(defaultColor);
+        }
+    }
+
+    const BtnContent = ({onChange, children}) => {
+        return <span
+                onMouseEnter={onChange}
+                onMouseLeave={iconChange.default}>
+                    {children}
+                </span>};
     
     //目前正在使用的ToolPanel
     const [currentToolPanel, setCurrentToolPanel] = useState(null);
@@ -69,26 +109,45 @@ const Notedirs = ({notebookId}) => {
         setCurrentNotedir(id);
     }
 
-    const handleAddNotedir = async title => {
+    const onConfirm = title => {
         let notedir = {
             title,
             notebook: notebookId
         };
 
-        await addNotedir(notedir);
-        return error ? false : true;
+        addNotedir(notedir);
+        disableAddNotedir();
+    }
+
+    const onCancel = () => {
+        disableAddNotedir();
+    }
+
+    const onEnableAddNotedir = e => {
+        e.preventDefault();
+        enableAddNotedir();
     }
 
     return (
         <Fragment>
             { notedirs && !loading ?
                 (<div className='notedir-list'>
-                    <TextInput 
-                        defaultHtml={addNewText} 
-                        placeholder={placeholder} 
-                        applyHtml={<img src={confirmImg} alt={applyText} />} 
-                        cancelHtml={<img src={cancelImg} alt={cancelText} /> }
-                        applyEvent={handleAddNotedir} />
+                    <AddNotedirBtn alt='add notedir' onClick={onEnableAddNotedir}>
+                        新增筆記目錄
+                    </AddNotedirBtn>
+                    <TextInput  
+                        visible={addNotedirVisible}
+                        placeholder={'請輸入筆記目錄名稱'}
+                        onConfirm={onConfirm}
+                        onCancel={onCancel}>
+                        <TextInput.ConfirmBtn>
+                            <BtnContent onChange={iconChange.confirm} children={<Check size={20} color={color.confirm} weight='bold' />} />
+                        </TextInput.ConfirmBtn>
+                        <TextInput.CancelBtn>
+                            <BtnContent onChange={iconChange.cancel} children={<X size={20} color={color.cancel} weight='bold' />} />
+                        </TextInput.CancelBtn>
+                    </TextInput>
+                    <NotedirSorter />
                     <ul>
                         {notedirs.map(notedir => {
                             return !notedir.default 

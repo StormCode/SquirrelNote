@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect, useCallback } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { decrypt } from '../../utils/crypto';
@@ -8,8 +8,8 @@ import ImgSrcParser from '../../utils/imgSrcParser';
 import Notedirs from '../notedirs/NoteDirs';
 import Notes from '../notes/Notes';
 import Editor from '../layout/Editor';
-import NotedirSorter from '../notedirs/NotedirSorter';
 
+import AuthContext from '../../context/auth/authContext';
 import NotebookContext from '../../context/notebooks/notebookContext';
 import NotedirContext from '../../context/notedirs/notedirContext';
 import NoteContext from '../../context/notes/noteContext';
@@ -22,8 +22,97 @@ import {
     DISABLESAVE
 } from '../../saveState';
 
-// Import Style
-import '../../style/page/Note.css';
+const NoteContainer = styled.div`
+    display: grid;
+    grid-template-columns: 1.2fr 1.5fr 3.5fr;
+    grid-template-rows: auto .1fr;
+    grid-template-areas: 
+        "notedir-list note-list editor-area"
+        "recycle-bin note-list editor-area";
+    width: 100%;
+    height: 100%;
+
+    .note-list {
+        grid-area: note-list;
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    .notedir-list {
+        grid-area: notedir-list;
+    }
+
+        .note-list > ul,
+        .notedir-list > ul {
+            margin: 0;
+            padding: 0;
+        }
+
+            .note-list > ul > li {
+                padding: 10px 0 10px 10px;
+                font-size: 1rem;
+                height: auto;
+                &:hover {
+                    background-color: ${props => props.isCurrent ? props.theme.lightGreenOnHover : props.theme.gray};
+                };
+            }
+
+                .note-list > ul > li {
+                    position: relative;
+                    width: 10ch;
+                }
+
+                    .note-list > ul > li > p {
+                        white-space: nowrap;
+                        text-overflow: ellipsis;
+                        overflow: hidden;
+                    }
+
+    .note-title-container {
+        display: flex;
+        flex-flow: row nowrap;
+        margin-top: 10px;
+        width: 100%;
+    }
+
+        .note-title-container .note-title {
+            flex: 1 1 auto;
+            border: none;
+            outline: none;
+            padding: 10px;
+        }
+
+            .note-title-container .note-title:disabled {
+                color: #000;
+                font-size: 1.2rem;
+                background: none;
+            }
+
+        .note-title-container .note-save-btn {
+            flex: 0 1 15%;
+        }
+
+    .editor-area {
+        grid-area: editor-area;
+        display: flex;
+        flex-flow: column nowrap;
+        height: 100%;
+        overflow-y: auto;
+    }
+
+        .editor-area .note-header {
+            flex: 0 1 50px;
+        }
+
+        .editor-area .editor {
+            flex: 1 1 auto;
+            overflow-x: hidden;
+        }
+
+    .recycle-bin {
+        grid-area: recycle-bin;
+    }
+`;
 
 const EditorArea = styled.div`
     .ck-sticky-panel {
@@ -33,9 +122,16 @@ const EditorArea = styled.div`
 
 const Note = ({ match }) => {
     const history = useHistory();
+    const authContext = useContext(AuthContext);
     const notebookContext = useContext(NotebookContext);
     const notedirContext = useContext(NotedirContext);
     const noteContext = useContext(NoteContext);
+
+    useEffect(() => {
+        authContext.loadUser();
+
+        // eslint-disable-next-line
+    }, []);
 
     const { 
         notes, 
@@ -297,11 +393,7 @@ const Note = ({ match }) => {
     };
 
     return (
-        <div className='note-container'>
-            <div className='header'>
-                <Link to='../Notebook'>回到筆記本</Link>
-                <NotedirSorter />
-            </div>
+        <NoteContainer>
             <Notedirs notebookId={match.params.id} />
             <Notes
                 addEvent={onAdd} 
@@ -339,7 +431,7 @@ const Note = ({ match }) => {
             <div className='recycle-bin'>
                 <button className='recycle-bin-btn' onClick={LoadRecycleBin}>回收站</button>
             </div>
-        </div>
+        </NoteContainer>
     )
 }
 

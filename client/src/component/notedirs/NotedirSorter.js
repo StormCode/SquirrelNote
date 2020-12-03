@@ -1,12 +1,17 @@
-import React, { useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { FunnelSimple } from "phosphor-react";
 import styled from 'styled-components';
 import Sorter from '../layout/Sorter';
 
+// Import Style
+import { theme } from '../../style/themes';
+
 import NotedirContext from '../../context/notedirs/notedirContext'
 
+const { defaultColor, orange, gray } = theme;
 const SorterContainer = styled.span`
-    float: left;
+    cursor: pointer;
+    float: right;
     margin: 0 10px;
 `;
 
@@ -14,6 +19,19 @@ const NotedirSorter = () => {
     const notedirContext = useContext(NotedirContext);
 
     const { orderBy, sortBy, sortNotedir } = notedirContext;
+
+    // 下拉選單狀態
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    const [color, setColor] = useState(gray);
+
+    useEffect(() => {
+        setColor(dropdownOpen ? orange : color);
+    }, [dropdownOpen]);
+
+    const toggleDropdownOpen = () => {
+        setDropdownOpen(!dropdownOpen);
+    };
 
     const onSortBy = sortByParam => {
         sortNotedir(orderBy, sortByParam);
@@ -23,8 +41,14 @@ const NotedirSorter = () => {
         sortNotedir(orderByParam, sortBy);
     };
 
-    // const sortFields = [{text: '名稱', value: 'title'},
-    //                     {text: '建立日期', value: 'date'}];
+    const hoverOn = () => {
+        setColor(defaultColor);
+    };
+
+    const hoverOff = () => {
+        setColor(gray);
+        setDropdownOpen(false);
+    };
 
     return (
         <SorterContainer>
@@ -33,9 +57,14 @@ const NotedirSorter = () => {
                 sortBy={sortBy}
                 onSortBy={onSortBy}
                 onToggleSort={onToggleSort}
+                dropdownOpen={dropdownOpen}
+                toggleDropdown={toggleDropdownOpen}
+                color={color}
+                hoverOn={hoverOn}
+                hoverOff={hoverOff}
             >
                 <Sorter.Title>
-                    <FunnelSimple size={24} />
+                    <FunnelSimple size={24} color={color} />
                 </Sorter.Title>
                 <Sorter.DropdownMenu>
                     <Sorter.SortBy value='title'>名稱</Sorter.SortBy>

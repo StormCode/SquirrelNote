@@ -1,14 +1,14 @@
 import React, { Fragment, useState, useContext } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import {
-  Collapse,
-  Navbar,
-  NavbarToggler,
-  NavbarBrand,
-  Nav,
-  NavItem,
-  NavLink
+    Collapse,
+    Navbar,
+    NavbarToggler,
+    NavbarBrand,
+    Nav,
+    NavItem,
+    NavLink
 } from 'reactstrap';
 import styled from 'styled-components';
 
@@ -21,6 +21,15 @@ import { LOGIN, REGISTER } from '../../modelTypes';
 const NavContainer = styled.div`
     background: linear-gradient(180deg, rgba(255,140,40,1) 0%, rgba(255,149,56,1) 20%, rgba(255,119,0,1) 75%);
     box-shadow: 3px 3px 18px 0px rgba(0,0,0,0.75);
+
+    .navbar-nav {
+        width: 100%;
+    }
+
+    .right-nav-items {
+        display: flex;
+        margin-left: auto;
+    }
 `;
 
 const NavText = styled.li`
@@ -37,7 +46,7 @@ const NavText = styled.li`
 `;
 
 const MainNavbar = ({ title }) => {
-    const location = useLocation();
+    const history = useHistory();
 
     const authContext = useContext(AuthContext)
 
@@ -63,38 +72,47 @@ const MainNavbar = ({ title }) => {
         logout();
     }
 
+    const loadNotebook = () => {
+        history.push('/notebook');
+    }
+
     const guestLinks = (
-        <Fragment>
+        <span className="right-nav-items">
             <NavItem>
                 <NavLink href='#!' onClick={openLogin}>登入</NavLink>
             </NavItem>
             <NavItem>
                 <NavLink href='#!' onClick={openRegister}>註冊</NavLink>
             </NavItem>
-        </Fragment>
+        </span>
     );
 
     const userLinks = (
         <Fragment>
-            <NavText>
-                {user && user.name}
-            </NavText>
             <NavItem>
-                <NavLink href='#!' onClick={onLogout}>登出</NavLink>
+                <NavLink href='#!' onClick={loadNotebook}>
+                    筆記本
+                </NavLink>
             </NavItem>
+            <span className="right-nav-items">
+                <NavText>
+                    {user && user.name}
+                </NavText>
+                <NavItem>
+                    <NavLink href='#!' onClick={onLogout}>登出</NavLink>
+                </NavItem>
+            </span>
         </Fragment>
     );
 
     return (
-        //當路徑在筆記頁面的時候要隱藏Navbar
-        location.pathname.match(/notebook\/[0-9\w]+/) ? null :
         <div className="header">
             <NavContainer>
                 <Navbar expand="md">
                     <NavbarBrand href="/">{title}</NavbarBrand>
                     <NavbarToggler onClick={toggleMenu} />
                     <Collapse isOpen={menuOpen} navbar>
-                        <Nav className="ml-auto" navbar>
+                        <Nav navbar>
                             {isAuthenticated ? userLinks : guestLinks}
                         </Nav>
                     </Collapse>

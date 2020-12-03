@@ -21,6 +21,7 @@ const Notebooks = () => {
         notebooks, 
         getNotebooks, 
         clearNotebook, 
+        addNotebookVisible,
         filtered, 
         loading 
     } = notebookContext;
@@ -45,7 +46,7 @@ const Notebooks = () => {
     return <Fragment>
             { notebooks != null && !loading ?
                 <NotebookContainer className='notebook-container'>
-                    <NewNotebook />
+                    <NewNotebook visible={addNotebookVisible} />
                     { filtered !== null ?
                     (filtered.map(notebook => 
                         <Notebook key={notebook._id} 

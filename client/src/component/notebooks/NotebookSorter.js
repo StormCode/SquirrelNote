@@ -20,10 +20,6 @@ const NotebookSorter = () => {
 
     const { orderBy, sortBy, sortNotebook } = notebookContext;
 
-    const onSortBy = sortByParam => {
-        sortNotebook(orderBy, sortByParam);
-    };
-
     // 下拉選單狀態
     const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -35,6 +31,10 @@ const NotebookSorter = () => {
 
     const toggleDropdownOpen = () => {
         setDropdownOpen(!dropdownOpen);
+    };
+
+    const onSortBy = sortByParam => {
+        sortNotebook(orderBy, sortByParam);
     };
 
     const onToggleSort = orderByParam => {

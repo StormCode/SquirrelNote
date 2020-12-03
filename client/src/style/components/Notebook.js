@@ -7,6 +7,7 @@ const Notebook = styled.div`
 
     .card {
         background: rgba(255,227,198,1);
+        border: none;
         border-left: 1em solid rgba(255,132,0,1);
         border-radius: 15px 0 0 15px;
         padding: 20px;
