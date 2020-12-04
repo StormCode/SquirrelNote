@@ -13,6 +13,10 @@ export const GlobalStyles = createGlobalStyle`
         margin: 0;
     }
 
+    li {
+        list-style: none;
+    }
+
     input[type='text'] {
         border-radius: 5px;
         padding: 3px !important;

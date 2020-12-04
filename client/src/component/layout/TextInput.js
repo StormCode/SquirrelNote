@@ -10,12 +10,13 @@ const InputContainer = styled.div`
     display: flex;
     flexFlow: row nowrap;
     padding: 5px 10px;
+    width: 100%;
 `;
 
 const Input = styled.input`
     background: none;
     border: none;
-    width: 80%;
+    width: 100%;
     &:focus {
         outline: none;
     }
@@ -26,6 +27,7 @@ const Input = styled.input`
 // 預設顯示文字輸入框、完成、取消按鈕
 // 傳入的屬性：
 // 可見性(boolean)
+// 初始文字(string)
 // placeholder(string)
 // 完成事件(function)
 // 按鈕的樣式(string)
@@ -47,17 +49,18 @@ const TextInputContext = React.createContext({
 const TextInput = (props) => {
     const {
         visible,
+        text,
         placeholder, 
         onConfirm, 
         onCancel,
         btnStyle
     } = props;
-    const text = useRef('');
+    const textRef = useRef(text);
 
     useEffect(() => {
         return () => {
-            if(text.current)
-                text.current.value = '';
+            if(textRef.current)
+                textRef.current.value = '';
         }
 
         // eslint-disable-next-line
@@ -65,19 +68,19 @@ const TextInput = (props) => {
 
     useEffect(() => {
         if(visible) 
-            text.current.focus();
+            textRef.current.focus();
     }, [visible]);
 
     const inputCancel = e => {
         e.preventDefault();
         onCancel();
-        text.current.value = '';
+        textRef.current.value = '';
     }
 
     const inputConfirm = e => {
         e.preventDefault();
-        onConfirm(text.current.value);
-        text.current.value = '';
+        onConfirm(textRef.current.value);
+        textRef.current.value = '';
     }
 
     return (
@@ -90,7 +93,7 @@ const TextInput = (props) => {
             <Fragment>
                 {visible ? 
                     (<InputContainer>
-                        <Input type='text' placeholder={placeholder} ref={text} />
+                        <Input type='text' placeholder={placeholder} ref={textRef} />
                         {props.children}
                     </InputContainer>) 
                 : null}
@@ -122,10 +125,13 @@ TextInput.CancelBtn = ({children}) =>
     </TextInputContext.Consumer>
 
 TextInput.defaultProps = {
+    visible: false,
+    text: '',
     placeholder: '請輸入文字',
     onConfirm: () => {},
     onCancel: () => {},
     btnStyle: `
+        cursor: pointer;
         margin: 0 5px;
         padding: 0;
         border: none;
@@ -133,6 +139,8 @@ TextInput.defaultProps = {
 }
 
 TextInput.propTypes = {
+    visible: PropTypes.bool,
+    text: PropTypes.string,
     placeholder: PropTypes.string,
     onConfirm: PropTypes.func.isRequired,
     onCancel: PropTypes.func,

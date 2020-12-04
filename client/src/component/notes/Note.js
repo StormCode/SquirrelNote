@@ -2,15 +2,35 @@ import React, { Fragment, useContext } from 'react';
 import styled from 'styled-components';
 import { ReactComponent as UnsavedMark } from  '../../assets/general/unsaved_mark.svg';
 
+// Import Style
+import { theme } from '../../style/themes';
+
 import NoteContext from '../../context/notes/noteContext';
 
+const { orange, darkOrange, gray } = theme;
+
 const NoteContainer = styled.li`
+    cursor: pointer;
     position: relative;
-    padding: 10px;
-    background-color: ${props => props.isCurrent ? props.theme.lightGreen : props.theme.gray};
+    color: ${props => props.isCurrent ? orange : gray};
+    border-left: ${props => props.isCurrent ? '.5rem solid ' + orange : 'none'};
+    padding: .5rem 0 .5rem ${props => props.isCurrent ? '.3rem' : '.8rem'};
+    font-size: 1rem;
+    line-height: 1.5rem;
+    width: 100%;
+    height: auto;
+    min-height: 4rem;
     &:hover {
-        background-color: ${props => props.isCurrent ? props.theme.lightGreenOnHover: props.theme.gray};
+        padding-left: .3rem;
+        color: ${props => props.isCurrent ? darkOrange : orange};
+        border-left: .5rem solid ${props => props.isCurrent ? darkOrange : orange};
     };
+
+    p {
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
 
     > svg {
         display: ${props => props.isUnsaved ? 'inline-block' : 'none'};

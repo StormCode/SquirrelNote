@@ -4,6 +4,11 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { decrypt } from '../../utils/crypto';
 import styled from 'styled-components';
+import { NotePencil, Browser, Backspace, Trash } from "phosphor-react";
+
+// Import Style
+import { theme } from '../../style/themes';
+
 import ImgSrcParser from '../../utils/imgSrcParser';
 import Notedirs from '../notedirs/NoteDirs';
 import Notes from '../notes/Notes';
@@ -22,6 +27,8 @@ import {
     DISABLESAVE
 } from '../../saveState';
 
+const { orange, gray } = theme;
+
 const NoteContainer = styled.div`
     display: grid;
     grid-template-columns: 1.2fr 1.5fr 3.5fr;
@@ -31,42 +38,6 @@ const NoteContainer = styled.div`
         "recycle-bin note-list editor-area";
     width: 100%;
     height: 100%;
-
-    .note-list {
-        grid-area: note-list;
-        height: 100%;
-        overflow-y: auto;
-    }
-
-    .notedir-list {
-        grid-area: notedir-list;
-    }
-
-        .note-list > ul,
-        .notedir-list > ul {
-            margin: 0;
-            padding: 0;
-        }
-
-            .note-list > ul > li {
-                padding: 10px 0 10px 10px;
-                font-size: 1rem;
-                height: auto;
-                &:hover {
-                    background-color: ${props => props.isCurrent ? props.theme.lightGreenOnHover : props.theme.gray};
-                };
-            }
-
-                .note-list > ul > li {
-                    position: relative;
-                    width: 10ch;
-                }
-
-                    .note-list > ul > li > p {
-                        white-space: nowrap;
-                        text-overflow: ellipsis;
-                        overflow: hidden;
-                    }
 
     .note-title-container {
         display: flex;
@@ -92,31 +63,54 @@ const NoteContainer = styled.div`
             flex: 0 1 15%;
         }
 
-    .editor-area {
-        grid-area: editor-area;
-        display: flex;
-        flex-flow: column nowrap;
-        height: 100%;
-        overflow-y: auto;
-    }
-
-        .editor-area .note-header {
-            flex: 0 1 50px;
-        }
-
-        .editor-area .editor {
-            flex: 1 1 auto;
-            overflow-x: hidden;
-        }
-
     .recycle-bin {
         grid-area: recycle-bin;
     }
 `;
 
 const EditorArea = styled.div`
+    grid-area: editor-area;
+    display: flex;
+    border-left: 1px solid rgba(255,120,0,1);
+    flex-flow: column nowrap;
+    height: 100%;
+    overflow-y: auto;
+
+    .note-header {
+        flex: 0 1 50px;
+    }
+
+    .editor {
+        flex: 1 1 auto;
+        overflow-x: hidden;
+    }
+
     .ck-sticky-panel {
         display: ${props => props.showToolPanel ? 'block' : 'none'};
+    }
+
+    .ck-editor__editable {
+        border: none;
+    }
+
+    button {
+        margin: 0 5px;
+        padding: 0;
+        border: none;
+        background: none;
+    }
+
+    &.note-discard-btn {
+        cursor: ${props => props.cacheCurrent ? 'pointer' : 'default'};
+    }
+
+    &.note-edit-btn {
+        cursor: ${props => props.current && props.cacheCurrent ? 'pointer' : 'default'};
+    }
+    
+    button&:not(&.note-discard-btn),
+    button&:not(&.note-edit-btn) {
+        cursor: pointer;
     }
 `;
 
@@ -219,6 +213,15 @@ const Note = ({ match }) => {
         
         current && setCurrentNote({ title: e.target.value });
     },[current]);
+
+    const defaultColor = {
+        edit: gray,
+        view: gray,
+        discard: gray,
+        delete: gray
+    };
+
+    const [color, setColor] = useState(defaultColor);
 
     const contentChange = useCallback(data => {
         console.log('data: ' + data);
@@ -392,6 +395,31 @@ const Note = ({ match }) => {
         history.push('/recyclebin');
     };
 
+    const iconChange = {
+        'edit': () => {
+            setColor({...defaultColor, ['edit']: current && cacheCurrent ? orange : defaultColor.edit});
+        },
+        'view': () => {
+            setColor({...defaultColor, ['view']: orange});
+        },
+        'discard': () => { 
+            setColor({...defaultColor, ['discard']: cacheCurrent ? orange : defaultColor.discard});
+        },
+        'delete': () => {
+            setColor({...defaultColor, ['delete']: orange});
+        },
+        'default': () => {
+            setColor(defaultColor);
+        }
+    }
+
+    const BtnContent = ({onChange, children}) => {
+        return <span
+                onMouseEnter={onChange}
+                onMouseLeave={iconChange.default}>
+                    {children}
+                </span>};
+
     return (
         <NoteContainer>
             <Notedirs notebookId={match.params.id} />
@@ -399,18 +427,27 @@ const Note = ({ match }) => {
                 addEvent={onAdd} 
                 setCacheNoteContent={setCacheNoteContent} 
                 setNoteContent = {setNoteContent} />
-            <EditorArea className='editor-area' showToolPanel={noteMode === NOTEMODE.EDIT}>
+            <EditorArea className='editor-area' 
+                showToolPanel={noteMode === NOTEMODE.EDIT}
+                current={current}
+                cacheCurrent={cacheCurrent}>
                 <div className='note-header'>
-                    {deleteEnable ? (<button className='note-delete-btn right-align' onClick={onDelete}>刪除</button>)
-                    : (<button className='note-discard-btn right-align' onClick={onDiscard} disabled={!cacheCurrent}>捨棄</button>)}
+                    {deleteEnable ? (<button className='note-delete-btn right-align' onClick={onDelete}>
+                        <BtnContent onChange={iconChange.delete} children={<Trash size={20} color={color.delete} />} />
+                    </button>)
+                    : (<button className='note-discard-btn right-align' onClick={onDiscard} disabled={!cacheCurrent}>
+                            <BtnContent onChange={iconChange.discard} children={<Backspace size={20} color={color.discard} />} />
+                        </button>)}
                     {noteMode === NOTEMODE.EDIT ? 
                     (<button 
                         className='note-view-btn right-align' 
                         onClick={onView} 
                         disabled={!(cacheCurrent && current && cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) === -1)}>
-                            檢視
-                        </button>)
-                    : (<button className='note-edit-btn right-align' onClick={onEdit} disabled={!(current && cacheCurrent)}>編輯</button>)}
+                        <BtnContent onChange={iconChange.view} children={<Browser size={20} color={color.view} />} />
+                    </button>)
+                    : (<button className='note-edit-btn right-align' onClick={onEdit} disabled={!(current && cacheCurrent)}>
+                        <BtnContent onChange={iconChange.edit} children={<NotePencil size={20} color={color.edit} />} />
+                    </button>)}
                     <div className='note-title-container'>
                         <input type='text' placeholder='新筆記' className='note-title' value={current ? current.title || '' : ''} onChange={titleChange} disabled={noteMode !== NOTEMODE.EDIT}/>
                         <SaveButton 

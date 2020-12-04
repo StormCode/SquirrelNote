@@ -141,10 +141,11 @@ const Notebook = props => {
             setVisible(true);
         }
         //設回原本筆記本內容
-        setNotebook({
-            title: props.notebook.title,
-            desc: props.notebook.desc
+        setNotebook({...notebook,
+            ['title']: props.notebook.title,
+            ['desc']: props.notebook.desc
         });
+
         //取消目前正在使用的ToolPanel
         props.setToolPanel(null);
     }

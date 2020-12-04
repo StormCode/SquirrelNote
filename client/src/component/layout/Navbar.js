@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useContext } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import {
     Collapse,
@@ -26,6 +26,20 @@ const NavContainer = styled.div`
         width: 100%;
     }
 
+    .nav-link {
+        color: #FFF;
+    }
+
+        .nav-link-notebook {
+            border-bottom: 3px solid #FDFF6F;
+            color: #FDFF6F;
+        }
+
+        .nav-link:hover {
+            border-bottom: 3px solid #EBED68;
+            color: #EBED68;
+        }
+
     .right-nav-items {
         display: flex;
         margin-left: auto;
@@ -33,9 +47,10 @@ const NavContainer = styled.div`
 `;
 
 const NavText = styled.li`
-    font-size: 1.2rem;
+    font-size: 1.15rem;
     font-weight: 400;
-    color: #9e9e9e;
+    color: #FFF;
+    margin-right: .5rem;
 
     &:before {
         content: '';
@@ -47,6 +62,7 @@ const NavText = styled.li`
 
 const MainNavbar = ({ title }) => {
     const history = useHistory();
+    const location = useLocation();
 
     const authContext = useContext(AuthContext)
 
@@ -90,7 +106,7 @@ const MainNavbar = ({ title }) => {
     const userLinks = (
         <Fragment>
             <NavItem>
-                <NavLink href='#!' onClick={loadNotebook}>
+                <NavLink href='#!' className={location.pathname.match(/notebook(?!\/)/g) ? 'nav-link-notebook' : null} onClick={loadNotebook}>
                     筆記本
                 </NavLink>
             </NavItem>

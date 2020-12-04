@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useContext, useEffect } from 'react';
+import React, { Fragment, useCallback, useState, useContext, useEffect } from 'react';
 import styled from 'styled-components';
 import { Pencil, Trash, Check, X } from "phosphor-react";
 import EDToolPanel from '../layout/EDToolPanel';
@@ -9,18 +9,19 @@ import { theme } from '../../style/themes';
 import NotebookContext from '../../context/notebooks/notebookContext';
 import NotedirContext from '../../context/notedirs/notedirContext';
 
-const { orange, gray } = theme;
+const { orange, darkOrange, gray } = theme;
+const currentFontColor = '#FFF'; 
 
 const NoteDirContainer = styled.li`
     cursor: pointer;
-    background-color: ${props => props.isCurrent ? orange : 'none'};
+    background: ${props => props.isCurrent ? orange : 'none'};
     color: ${props => props.isCurrent ? '#FFF' : gray};
-    padding: 10px 0 10px 10px;
+    padding: .5rem 0 .5rem .5rem;
     font-size: 1rem;
     height: auto;
     &:hover {
-        background-color: ${props => props.isCurrent ? '#FFF' : 'none'};
-        color: ${orange};
+        background: ${props => props.isCurrent ? darkOrange : 'none'};
+        color: ${props => props.isCurrent ? '#FFF' : orange};
     };
 
         .text-container,
@@ -29,7 +30,8 @@ const NoteDirContainer = styled.li`
         }
 
         .text-container {
-            width: 10ch;
+            width: 20ch;
+            max-width: 100%;
         }
 
             .text-container p {
@@ -40,7 +42,17 @@ const NoteDirContainer = styled.li`
 
         .toolpanel-container {
             width: 100%;
+            z-index: 1;
         }
+`;
+
+const Input = styled.input`
+    background: none;
+    border: none;
+    width: 100%;
+    &:focus {
+        outline: none;
+    }
 `;
 
 const Notedir = props => {
@@ -96,6 +108,17 @@ const Notedir = props => {
         //依目前刪除的狀態切換是否顯示刪除
         currentDeleteNotedir === _id ? setDeleteNotedirVisible(true) : setDeleteNotedirVisible(false);
     },[currentEditNotedir, currentDeleteNotedir]);
+    
+    const notedirTextRef = useCallback(inputElement => {
+        if (inputElement) {
+          inputElement.focus();
+        }
+      }, []);
+
+    const onChange = e => {
+        e.preventDefault();
+        setNotedir({...notedir, ['title']:e.target.value});
+    }
 
     const onClick = e => {
         e.preventDefault();
@@ -148,8 +171,6 @@ const Notedir = props => {
     //滑鼠移過顯示toolpanel
     const cardHoverOn = e => {
         e.preventDefault();
-        console.log('hover');
-        
         setVisible(true);
     }
 
@@ -161,25 +182,20 @@ const Notedir = props => {
 
     const iconChange = {
         'confirm': () => {
-            setColor({...defaultColor, ['confirm']: orange});
+            setColor({...defaultColor, ['confirm']: currentNotedirId === _id ? currentFontColor : orange});
         },
         'cancel': () => {
-            setColor({...defaultColor, ['cancel']: orange});
+            setColor({...defaultColor, ['cancel']: currentNotedirId === _id ? currentFontColor : orange});
         },
         'edit': () => { 
-            setColor({...defaultColor, ['edit']: orange});
+            setColor({...defaultColor, ['edit']: currentNotedirId === _id ? currentFontColor : orange});
         },
         'delete': () => {
-            setColor({...defaultColor, ['delete']: orange});
+            setColor({...defaultColor, ['delete']: currentNotedirId === _id ? currentFontColor : orange});
         },
         'default': () => {
             setColor(defaultColor);
         }
-    }
-
-    const onChange = e => {
-        e.preventDefault();
-        setNotedir({...notedir, [e.target.name]:e.target.value});
     }
 
     const onEnter = (operator) => {
@@ -192,9 +208,7 @@ const Notedir = props => {
         currentEditNotedir === _id && disableEditNotedir();
         currentDeleteNotedir === _id && disableDeleteNotedir();
         //設回原本筆記目錄內容
-        setNotedir({
-            title: props.notedir.title
-        });
+        setNotedir({...props.notedir, ['title']: props.notedir.title});
         //取消目前正在使用的ToolPanel
         props.setToolPanel(null);
     }
@@ -210,8 +224,7 @@ const Notedir = props => {
         <NoteDirContainer
             isCurrent = {currentNotedirId === _id}
             onMouseEnter={cardHoverOn}
-            onMouseLeave={cardHoverOff} 
-            onClick={onClick}>
+            onMouseLeave={cardHoverOff}>
             { notedir !== null ?
             <Fragment>
                 <div className='toolpanel-container'>
@@ -223,25 +236,26 @@ const Notedir = props => {
                         onEnter={onEnter}
                         onCancel={onCancel}>
                         <EDToolPanel.ConfirmBtn>
-                            <BtnContent onChange={iconChange.confirm} children={<Check size={20} color={color.confirm} weight='bold' />} />
+                            <BtnContent onChange={iconChange.confirm} children={<Check size={20} color={color.confirm} />} />
                         </EDToolPanel.ConfirmBtn>
                         <EDToolPanel.CancelBtn>
-                            <BtnContent onChange={iconChange.cancel} children={<X size={20} color={color.cancel} weight='bold' />} />
+                            <BtnContent onChange={iconChange.cancel} children={<X size={20} color={color.cancel} />} />
                         </EDToolPanel.CancelBtn>
                         <EDToolPanel.EditBtn>
-                            <BtnContent onChange={iconChange.edit} children={<Pencil size={20} color={color.edit} weight='bold' />} />
+                            <BtnContent onChange={iconChange.edit} children={<Pencil size={20} color={color.edit} />} />
                         </EDToolPanel.EditBtn>
                         <EDToolPanel.DeleteBtn>
-                            <BtnContent onChange={iconChange.delete} children={<Trash size={20} color={color.delete} weight='bold' />} />
+                            <BtnContent onChange={iconChange.delete} children={<Trash size={20} color={color.delete} />} />
                         </EDToolPanel.DeleteBtn>
                     </EDToolPanel>
                 </div>
-                <div className='text-container'>
+                <div className='text-container'
+                    onClick={onClick}>
                     {editNotedirVisible && 
-                        (<input type='text' 
-                            name='title' 
-                            placeholder='請輸入資料夾名稱' 
-                            value={title} 
+                        (<Input type='text'
+                            value={title}
+                            ref={notedirTextRef}
+                            placeholder='請輸入資料夾名稱'
                             onChange={onChange} />)
                     || deleteNotedirVisible && 
                         (<p className='warning'>確定要刪除{props.notedir.title}嗎?</p>) 

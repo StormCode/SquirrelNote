@@ -26,8 +26,6 @@ const AppStyle = styled.div`
     #container {
         display: flex;
         flex-flow: nowrap column;
-        background-color: #ffe094;
-        background-image: linear-gradient(0deg, #ffe094 0%, #ffffff 10%);
         width: 100vw;
         height: 100vh;
     }
@@ -52,6 +50,8 @@ const AppStyle = styled.div`
         display: flex;
         flex-flow: column nowrap;
         justify-content: center;
+        background-color: #ffe094;
+        background-image: linear-gradient(0deg, #ffe094 0%, rgba(255,255,255,.9) 100%);
 
         > p:before {
             content: '';

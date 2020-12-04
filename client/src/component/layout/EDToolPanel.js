@@ -168,6 +168,7 @@ EDToolPanel.defaultProps = {
     onEnter: () => {},
     onCancel: () => {},
     btnStyle: `
+        cursor: pointer;
         margin: 0 5px;
         padding: 0;
         border: none;

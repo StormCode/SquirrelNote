@@ -42,7 +42,7 @@ const NotedirSorter = () => {
     };
 
     const hoverOn = () => {
-        setColor(defaultColor);
+        setColor(orange);
     };
 
     const hoverOff = () => {
