@@ -6,79 +6,67 @@ import styled from 'styled-components';
 // Import Style
 import { theme } from '../../style/themes';
 
-import NotebookContext from '../../context/notebooks/notebookContext';
+import NoteContext from '../../context/notes/noteContext';
 
-const { defaultColor, orange, gray } = theme;
+const { orange, gray } = theme;
 
 const HeadIconStyled = styled.span`
     float: left;
-    transform: translate(3px,-125%);
+    transform: translate(3px,-120%);
 `;
 
 const ClearIconStyled = styled.span`
     cursor: pointer;
     float: right;
-    transform: translate(-150%, -125%);
+    transform: translate(-150%, -120%);
 `;
 
-const NotebookFilter = () => {
-    const notebookContext = useContext(NotebookContext);
+const NoteFilter = () => {
+    const noteContext = useContext(NoteContext);
 
-    const { filterNotebook, clearFilterNotebook } = notebookContext;
+    const { filterNote, clearFilterNote } = noteContext;
 
-    const [focus, setFocus] = useState(false);
     const [color, setColor] = useState(gray);
-
-    useEffect(() => {
-        !focus && setColor(gray);
-    }, [focus]);
 
     const onChange = val => {
         if(val !== '')
-            filterNotebook(val);
+            filterNote(val);
         else
-            clearFilterNotebook();
+            clearFilterNote();
     }
 
     const hoverOn = () => {
-        setColor(focus ? orange : defaultColor);
+        setColor(orange);
     }
 
     const hoverOff = () => {
         setColor(gray);
     }
 
-    const focusOn = state => {
-        setFocus(state);
-        setColor(orange);
-    }
-
     return (
         <IconInput 
             containerStyle={`
-                float: right;
-                width: 40%;
-                max-width: 200px;`
+                flex: 1 1 auto;
+                height: 0;`
             }
             inputStyle={`
-                border: 1px solid ${color};
-                text-indent: 24px;
+                border: none;
+                background: none;
+                text-indent: 20px;
                 color: ${color};
+                width: 100%;
                 ::placeholder{
                     color: ${color};
-                }
-                &:focus {
-                    border: 1px solid ${color};
+                    font-size: 16px;
                 }`
             }
-            placeholder='搜尋...' 
+            placeholder='搜尋筆記標題...' 
             onChange={onChange}
             hoverOn={hoverOn}
-            hoverOff={hoverOff}
-            focusOn={focusOn}>
+            hoverOff={hoverOff}>
                 <IconInput.HeadIcon>
                     <HeadIconStyled>
-                        <MagnifyingGlass size={20} color={color} weight='bold'/>
+                        <MagnifyingGlass size={16} color={color} weight='bold'/>
                     </HeadIconStyled>
                 </IconInput.HeadIcon>
                 <IconInput.ClearIcon>
@@ -90,4 +78,4 @@ const NotebookFilter = () => {
     )
 }
 
-export default NotebookFilter;
+export default NoteFilter;

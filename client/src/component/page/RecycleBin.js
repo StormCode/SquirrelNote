@@ -1,5 +1,6 @@
 import React, { useContext, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+
 import AuthContext from '../../context/auth/authContext';
 import NotebookContext from '../../context/notebooks/notebookContext';
 
@@ -25,8 +26,8 @@ const RecycleBin = () => {
         <div className='single-content-container'>
             <div className='recycle-content'>
                 { notebookId !== null ? 
-                    <Link to={`/Notebook/${notebookId}`}>回到筆記</Link> 
-                : <Link to='../Notebook'>回到筆記本</Link>
+                    <Link to={`/notebook/${notebookId}`}>回到筆記</Link> 
+                : <Link to='../notebook'>回到筆記本</Link>
                 }
                 <h2>回收站</h2>
                 <RecycleList />

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import ToolPanelStyled from '../../style/components/ToolPanel';
 
-const Button = styled.span`
+const Button = styled.button`
     ${props => props.btnStyle}
 `;
 
@@ -46,7 +46,7 @@ const ToolPanel = props => {
 ToolPanel.ConfirmBtn = (props) =>
     <ToolPanelContext.Consumer>
         {contextValue =>
-            <Button id='confirm-btn'
+            <Button className='confirm-btn'
                 onClick={contextValue.onConfirm}
                 btnStyle={contextValue.btnStyle}>
                 {props.children}
@@ -57,7 +57,7 @@ ToolPanel.ConfirmBtn = (props) =>
 ToolPanel.CancelBtn = (props) =>
     <ToolPanelContext.Consumer>
         {contextValue =>
-            <Button id='cancel-btn' 
+            <Button className='cancel-btn' 
                 onClick={contextValue.onCancel}
                 btnStyle={contextValue.btnStyle}>
                 {props.children}

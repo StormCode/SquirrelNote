@@ -29,7 +29,7 @@ router.get('/', auth, async(req, res) => {
         const notedirId = newCrypto.decrypt(req.header('x-notedir'), false);
 
         if(!notedirId) return res.status(400).json({msg: '缺少參數', status: MISSING_PARAM});
-        
+
         // 取得此筆記的筆記目錄
         const notedir = await Notedir.findById(notedirId);
 
@@ -39,7 +39,7 @@ router.get('/', auth, async(req, res) => {
         const notebook = await Notebook.findById(notedir.notebook);
 
         if(!notebook) return res.status(404).json({msg: '找不到此筆記的筆記本', status: NOT_FOUND});
-                
+
         // 確認使用者是否真的擁有這個筆記本
         if(notebook.author.toString() !== req.user.id) return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
 
@@ -62,9 +62,9 @@ router.get('/:id', auth, async(req, res) => {
     try {
         // 取得單一筆記
         const note = await Note.findById(req.params.id);
-        
+
         if(!note) return res.status(404).json({msg: '找不到筆記', status: NOT_FOUND});
-        
+
         // 取得此筆記的筆記目錄
         const notedir = await Notedir.findById(note.notedir);
 
@@ -74,10 +74,10 @@ router.get('/:id', auth, async(req, res) => {
         const notebook = await Notebook.findById(notedir.notebook);
 
         if(!notebook) return res.status(404).json({msg: '找不到此筆記的筆記本', status: NOT_FOUND});
-        
+
         // 確認使用者是否真的擁有這個筆記本
         if(notebook.author.toString() !== req.user.id) return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
-        
+
         // 加密note資料
         const encryptedNote = crypto(process.env.SECRET_KEY).encrypt(note);
         res.json(encryptedNote);
@@ -96,7 +96,7 @@ router.post('/', auth, async(req, res) => {
         // 解密note資料
         const data = newCrypto.decrypt(req.body.data);
         const { title, content } = data;
-    
+
         // 取得此筆記的筆記目錄
         const notedir = await Notedir.findById(data.notedir);
 
@@ -106,7 +106,7 @@ router.post('/', auth, async(req, res) => {
         const notebook = await Notebook.findById(notedir.notebook);
 
         if(!notebook) return res.status(404).json({msg: '找不到此筆記的筆記本', status: NOT_FOUND});
-        
+
         // 確認使用者是否真的擁有這個筆記本
         if(notebook.author.toString() !== req.user.id) return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
 
@@ -134,7 +134,7 @@ router.post('/', auth, async(req, res) => {
         notedir.notes.push(newNotedirNote);
 
         await notedir.save();
-        
+
         // 加密新增的note資料
         const encryptedNewNotedirNote = newCrypto.encrypt(newNotedirNote);
 
@@ -156,21 +156,15 @@ router.put('/:id', auth, async(req, res) => {
     };
 
     try {
+        const id = req.params.id;
+
+        let note = await Note.findById(id);
+
+        if(!note) return res.status(404).json({msg: '找不到筆記', status: NOT_FOUND});
+
         const newCrypto = crypto(process.env.SECRET_KEY);
         // 解密note資料
         const data = newCrypto.decrypt(req.body.data);
-        const { title, content } = data;
-        const updateDateTime = new Date();
-
-        const encryptedTitle = newCrypto.encrypt(title, false);
-        const encryptedSummary = newCrypto.encrypt(require('../common/summary')(content), false);
-        const encryptedContent = newCrypto.encrypt(content, false);
-    
-        const id = req.params.id;
-        
-        let note = await Note.findById(id);
-        
-        if(!note) return res.status(404).json({msg: '找不到筆記', status: NOT_FOUND});
 
         // 判斷要做修改還是移動
         if(note.notedir !== data.notedir) {
@@ -208,8 +202,8 @@ router.put('/:id', auth, async(req, res) => {
             }
 
             let noteField = {
-                title: encryptedTitle,
-                content: encryptedContent,
+                title: note.title,
+                content: note.content,
                 notedir: destNotedirId,
                 date: note.date
             };
@@ -219,30 +213,33 @@ router.put('/:id', auth, async(req, res) => {
                 { $set: noteField },
                 { new: true });
 
-            const newNotedirNote = {
-                _id: note._id,
-                title: note.title,
-                summary: encryptedSummary,
-                date: note.date
-            };
+            const sourceNotedir = await Notedir.findById(sourceNotedirId);
+            const destNotedir = await Notedir.findById(destNotedirId);
 
-            let sourceNotedir = await Notedir.findById(sourceNotedirId);
-            let destNotedir = await Notedir.findById(destNotedirId);
-    
-            // 新增筆記的標題、摘要到Notedir裡
-            destNotedir.notes.push(newNotedirNote);
-    
+            const sourceNotedirNoteIdx = sourceNotedir.notes.findIndex((el) => el._id == id);
+            const sourceNotedirNote = sourceNotedir.notes[sourceNotedirNoteIdx];
+
+            // 新增筆記到目的Notedir裡
+            destNotedir.notes.push(sourceNotedirNote);
+
             await destNotedir.save();
 
-            // 從原本的筆記目錄刪除此筆記
-            const deleteNoteIdx = sourceNotedir.notes.findIndex((el) => el._id == id);
-            sourceNotedir.notes.splice(deleteNoteIdx,1);
+            // 從來源筆記目錄刪除此筆記
+            sourceNotedir.notes.splice(sourceNotedirNoteIdx,1);
             sourceNotedir.save();
 
+            res.status(200).send();
         } else {
             //
             // 修改筆記
             //
+
+            const { title, content } = data;
+            const updateDateTime = new Date();
+
+            const encryptedTitle = newCrypto.encrypt(title, false);
+            const encryptedSummary = newCrypto.encrypt(require('../common/summary')(content), false);
+            const encryptedContent = newCrypto.encrypt(content, false);
 
             let checkRes = await checkNoteDir(data.notedir);
 
@@ -256,21 +253,21 @@ router.put('/:id', auth, async(req, res) => {
                         return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
                 }
             }
-    
+
             const decryptedNote = newCrypto.decrypt(note.content, false);
             const deleteImgs = require('../common/filterDeleteImgs')(decryptedNote, content);
-    
+
             //確認新的筆記內容是否有刪掉圖片，有則刪除Server上的檔案
             if(deleteImgs.length > 0) {
                 deleteImgs.forEach((imgName) => {
                     let deletedImgPath = path.join(__dirname, '..', config.get('imageDirectory'), imgName);
-                    
+
                     fs.unlink(deletedImgPath, (err) => {
                           return;
                         });
                 })
             }
-    
+
             //建立筆記物件
             let noteField = {
                 title: encryptedTitle,
@@ -278,26 +275,26 @@ router.put('/:id', auth, async(req, res) => {
                 notedir: data.notedir,
                 date: updateDateTime
             };
-    
+
             // 修改筆記
             note = await Note.findByIdAndUpdate(id,
                 { $set: noteField },
                 { new: true });
-    
+
             // 連帶修改筆記目錄的筆記資訊
             await Notedir.findOneAndUpdate({_id: data.notedir, 'notes._id': id},
                 { $set: {'notes.$.title': encryptedTitle, 'notes.$.summary': encryptedSummary, 'notes.$.date': updateDateTime}}
             );
-        }
-        
-        //取得新的筆記目錄
-        const notedir = await Notedir.findById(data.notedir);
-        const updateNotedirNote = notedir.notes.find(note => note._id == id);
-        
-        // 加密修改的note資料
-        const encryptedNotedirNote = newCrypto.encrypt(updateNotedirNote);
 
-        res.json(encryptedNotedirNote);
+            //取得新的筆記目錄
+            const notedir = await Notedir.findById(data.notedir);
+            const updateNotedirNote = notedir.notes.find(note => note._id == id);
+
+            // 加密修改的note資料
+            const encryptedNotedirNote = newCrypto.encrypt(updateNotedirNote);
+
+            res.json(encryptedNotedirNote);
+        }
 
         async function checkNoteDir(id) {
             let notedir = await Notedir.findById(id);
@@ -306,7 +303,7 @@ router.put('/:id', auth, async(req, res) => {
 
             // 取得來源筆記本資料
             const notebook = await Notebook.findById(notedir.notebook);
-                
+
             if(!notebook) return {error: error.notebook};
 
             // 確認使用者是否真的擁有這個筆記本
@@ -367,7 +364,7 @@ router.delete('/:id', auth, async(req, res) => {
                 userId: userId,
                 items: [deleteItems]
             });
-            await newDeletedGroup.save(); 
+            await newDeletedGroup.save();
         } else {
             deletedGroup.items.push(deleteItems);
             await deletedGroup.save();

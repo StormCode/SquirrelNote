@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import styled from 'styled-components';
 import { FilePlus } from "phosphor-react";
 import Spinner from '../layout/Spinner';
+import NoteFilter from './NoteFilter';
 import Note from './Note';
 
 // Import Style
@@ -21,18 +22,22 @@ const NoteList = styled.div`
     overflow-y: auto;
 
     > .header {
+        display: flex;
+        flex-flow: row nowarp;
         border-bottom: 1px solid ${({theme}) => theme.orange};
         padding: .3rem;
+        align-items: baseline;
     }
 
         > .header > .title {
+            flex: 1 0 auto;
             color: ${({theme}) => theme.gray};
             font-size: 1rem;
             font-weight: bold;
         }
         
         > .header > button {
-            float: right;
+            flex: 0 1 auto;
             position: relative;
             background: none;
             border: none;
@@ -41,6 +46,15 @@ const NoteList = styled.div`
     > ul {
         margin: 0;
         padding: 0;
+    }
+
+    .parlgrm {
+        background: ${({theme}) => theme.orange};
+        display: inline-block;
+        width: .5rem;
+        height: 1rem;
+        margin-right: .5rem;
+        transform: skew(-30deg);
     }
 `;
 
@@ -51,6 +65,7 @@ const Notes = ({ addEvent, setCacheNoteContent, setNoteContent }) => {
     const notedirId = notedirContext.current ? notedirContext.current._id : null;
 
     const { notes, 
+        filtered,
         cacheNotes, 
         getNotes,
         clearNote, 
@@ -101,7 +116,9 @@ const Notes = ({ addEvent, setCacheNoteContent, setNoteContent }) => {
     return (
         <NoteList>
             <div className='header'>
+                <i className='parlgrm'></i>
                 <span className='title'>筆記</span>
+                <NoteFilter />
                 <button alt='add note' onClick={addEvent}>
                     <BtnContent onChange={iconChange.note} children={<FilePlus size={20} color={color} />} />
                 </button>
@@ -121,19 +138,30 @@ const Notes = ({ addEvent, setCacheNoteContent, setNoteContent }) => {
                                                 setCurrentNote={setCacheNoteContent} 
                                             />
                                 })}
-                                {notes.filter(note => {
-                                    return cacheNotes.map(cacheNote => cacheNote._id).indexOf(note._id) == -1;
-                                }).map(note => {
-                                    return <Note 
-                                                key={note._id}
-                                                isUnsaved={false}
-                                                note= {{
-                                                    ...note,
-                                                    ['summary']: appendDot(note.summary)
-                                                }} 
-                                                setCurrentNote={setNoteContent} 
-                                            />
-                                })}
+                                { filtered != null && !loading ?
+                                    (filtered.map(note => 
+                                        <Note key={note._id} 
+                                            note={{
+                                                ...note,
+                                                ['summary']: appendDot(note.summary)
+                                            }} 
+                                            setCurrentNote={setNoteContent}
+                                        />
+                                    )) :
+                                    notes.filter(note => {
+                                        return cacheNotes.map(cacheNote => cacheNote._id).indexOf(note._id) == -1;
+                                    }).map(note => {
+                                        return <Note 
+                                                    key={note._id}
+                                                    isUnsaved={false}
+                                                    note= {{
+                                                        ...note,
+                                                        ['summary']: appendDot(note.summary)
+                                                    }} 
+                                                    setCurrentNote={setNoteContent} 
+                                                />
+                                    })
+                                }
                             </ul>)
             : <Spinner /> }
         </NoteList>

@@ -6,6 +6,9 @@ import {
     ADD_NOTE,
     UPDATE_NOTE,
     DELETE_NOTE,
+    MOVE_NOTE,
+    FILTER_NOTE,
+    CLEAR_FILTER_NOTE,
     APPEND_CACHE_NOTE,
     MODIFY_CACHE_NOTE,
     REMOVE_CACHE_NOTE,
@@ -85,6 +88,20 @@ export default (state, action) => {
                 notes: state.notes.filter(note => 
                     note._id !== action.payload)
             }
+        case MOVE_NOTE:
+            return {
+                ...state,
+                notes: state.notes.filter(note => 
+                    note._id !== action.payload)
+            }
+        case FILTER_NOTE:
+            return {
+                ...state,
+                filtered: state.notes.filter(note => {
+                    const regex = new RegExp(`${action.payload}`, 'gi');
+                    return note.title.match(regex);
+                })
+            }
         case APPEND_CACHE_NOTE:
             return {
                 ...state,
@@ -126,6 +143,11 @@ export default (state, action) => {
             return {
                 ...state,
                 deleteEnable: false
+            }
+        case CLEAR_FILTER_NOTE:
+            return {
+                ...state,
+                filtered: null
             }
         case CLEAR_NOTE:
             return {

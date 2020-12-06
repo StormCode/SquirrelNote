@@ -22,6 +22,7 @@ export const GlobalStyles = createGlobalStyle`
         padding: 3px !important;
     }
 
+    input:focus,
     button:focus {
         outline: none;
     }

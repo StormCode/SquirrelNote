@@ -44,6 +44,15 @@ const NotedirList = styled.div`
             margin: 0;
             padding: 0;
         }
+
+        .parlgrm {
+            background: ${({theme}) => theme.orange};
+            display: inline-block;
+            width: .5rem;
+            height: 1rem;
+            margin-right: .5rem;
+            transform: skew(-30deg);
+        }
 `;
 
 const Notedirs = ({notebookId}) => {
@@ -154,6 +163,7 @@ const Notedirs = ({notebookId}) => {
             { notedirs && !loading ?
                 (<NotedirList className='notedir-list'>
                     <div className='header'>
+                        <i className='parlgrm'></i>
                         <span className='title'>目錄</span>
                         <NotedirSorter />
                         <button alt='add notedir' onClick={onEnableAddNotedir}>

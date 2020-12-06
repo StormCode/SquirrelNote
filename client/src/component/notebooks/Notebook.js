@@ -6,10 +6,12 @@ import {
   } from 'reactstrap';
 import { Pencil, Trash, Check, X } from "phosphor-react";
 import EDToolPanel from '../layout/EDToolPanel';
+import Models from '../layout/Models';
 
 // Import Style
 import { theme } from '../../style/themes';
 import NotebookContainer from '../../style/components/Notebook';
+import { deleteStyle } from '../../style/model/delete';
 
 import NotebookContext from '../../context/notebooks/notebookContext';
 
@@ -126,20 +128,17 @@ const Notebook = props => {
     const onEnter = operator => {
         if(operator === 'edit') {
             enableEditNotebook(_id);
-        } else {
+            //設定目前正在使用的ToolPanel
+            props.setToolPanel(_id);
+        } else if(operator === 'delete') {
             enableDeleteNotebook(_id);
             setVisible(false);
         }
-        //設定目前正在使用的ToolPanel
-        props.setToolPanel(_id);
     }
 
-    const onCancel = () => {
+    const onCancelEdit = () => {
         currentEditNotebook === _id && disableEditNotebook();
-        if(currentDeleteNotebook === _id) {
-            disableDeleteNotebook();
-            setVisible(true);
-        }
+
         //設回原本筆記本內容
         setNotebook({...notebook,
             ['title']: props.notebook.title,
@@ -148,6 +147,17 @@ const Notebook = props => {
 
         //取消目前正在使用的ToolPanel
         props.setToolPanel(null);
+    }
+
+    const onCancelDelete = () => {
+        if(currentDeleteNotebook === _id) {
+            disableDeleteNotebook();
+            setVisible(true);
+        }
+    }
+
+    const toggleDeleteOpen = () => {
+        deleteNotebookVisible ? disableDeleteNotebook() : enableDeleteNotebook();
     }
 
     const BtnContent = ({onChange, children}) => {
@@ -168,7 +178,7 @@ const Notebook = props => {
                     onEdit={onEdit}
                     onDelete={onDelete}
                     onEnter={onEnter}
-                    onCancel={onCancel}>
+                    onCancel={onCancelEdit}>
                     <EDToolPanel.ConfirmBtn>
                         <BtnContent onChange={iconChange.confirm} children={<Check size={20} color={color.confirm} weight='bold' />} />
                     </EDToolPanel.ConfirmBtn>
@@ -252,13 +262,18 @@ const Notebook = props => {
                                 onChange={onChange} />
                             ) : props.notebook.desc}
                     </CardText>
-                    {deleteNotebookVisible && (
-                        <Fragment>
-                            <p>確定要刪除{props.notebook.title}嗎?</p>
-                            <Button outline color="danger" onClick={onDelete}>確定刪除</Button>
-                            <Button outline color="primary" onClick={onCancel}>取消</Button>
-                        </Fragment>
-                    )}
+                    <Models
+                        isOpen={deleteNotebookVisible}
+                        toggleOpen={toggleDeleteOpen}
+                        onConfirm={onDelete}
+                        onCancel={onCancelDelete}
+                        modelStyle={deleteStyle}>
+                        <Models.Content>
+                            <p>筆記本將會移動至回收站，確定刪除嗎？</p>
+                        </Models.Content>
+                        <Models.ConfirmBtn enable={true}>刪除</Models.ConfirmBtn>
+                        <Models.CancelBtn>取消</Models.CancelBtn>
+                    </Models>
                 </CardBody>
             </Card>
         </NotebookContainer>

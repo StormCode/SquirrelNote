@@ -24,7 +24,7 @@ const AuthPanel = styled.div`
 
     .title {
         text-align: center;
-        padding: 20px 0;
+        padding: 1rem 0;
     }
 
     input[type='submit'] {

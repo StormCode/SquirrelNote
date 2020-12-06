@@ -4,15 +4,17 @@ import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { decrypt } from '../../utils/crypto';
 import styled from 'styled-components';
-import { NotePencil, Browser, Backspace, Trash } from "phosphor-react";
-
-// Import Style
-import { theme } from '../../style/themes';
+import { NotePencil, Browser, FileX, Trash, ArrowsLeftRight } from "phosphor-react";
 
 import ImgSrcParser from '../../utils/imgSrcParser';
 import Notedirs from '../notedirs/NoteDirs';
 import Notes from '../notes/Notes';
 import Editor from '../layout/Editor';
+import Models from '../layout/Models';
+
+// Import Style
+import { theme } from '../../style/themes';
+import { deleteStyle } from '../../style/model/delete';
 
 import AuthContext from '../../context/auth/authContext';
 import NotebookContext from '../../context/notebooks/notebookContext';
@@ -27,7 +29,7 @@ import {
     DISABLESAVE
 } from '../../saveState';
 
-const { orange, gray } = theme;
+const { orange, darkOrange, gray, darkGray } = theme;
 
 const NoteContainer = styled.div`
     display: grid;
@@ -104,13 +106,92 @@ const EditorArea = styled.div`
         cursor: ${props => props.cacheCurrent ? 'pointer' : 'default'};
     }
 
-    &.note-edit-btn {
+    &.note-edit-btn,
+    &.note-move-btn {
         cursor: ${props => props.current && props.cacheCurrent ? 'pointer' : 'default'};
     }
     
     button&:not(&.note-discard-btn),
+    button&:not(&.note-move-btn),
     button&:not(&.note-edit-btn) {
         cursor: pointer;
+    }
+`;
+
+const NotedirContainer = styled.li`
+    cursor: pointer;
+    background: ${props => props.isCurrent ? orange : 'none'};
+    color: ${props => props.isCurrent ? '#FFF' : gray};
+    padding: .5rem;
+    font-size: 1rem;
+    height: auto;
+    &:hover {
+        background: ${props => props.isCurrent ? darkOrange : 'none'};
+        color: ${props => props.isCurrent ? '#FFF' : orange};
+    };
+`;
+
+const modelStyle = `
+    width: 100%;
+
+    .modal-body {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-around;
+        border-radius: 20px;
+        background: #FFF;
+        padding: 30px 50px;
+        box-shadow: 5px 5px 10px #000;
+    }
+
+        .modal-body > div {
+            flex: 1 0 100%;
+        }
+
+    p {
+        text-align: center;
+    }
+
+    .title {
+        font-size: 1.5rem;
+        text-align: center;
+        padding: 1rem 0;
+    }
+
+    .tip {
+        margin-bottom: 10px;
+        font-size: .75rem;
+        color: ${gray};
+    }
+
+    ul {
+        border: 1px solid ${orange};
+        border-left-width: .5rem;
+        margin: 1.5rem auto;
+    }
+
+    .confirm-btn {
+        background: ${orange};
+
+        &:hover {
+            background: ${darkOrange};
+        }        
+    }
+
+    .confirm-btn:disabled {
+        background: ${gray};
+
+        &:hover {
+            background: ${gray};
+        }        
+    }
+
+    .cancel-btn {
+        background: ${gray};
+
+        &:hover {
+            background: ${darkGray};
+        }
     }
 `;
 
@@ -146,6 +227,7 @@ const Note = ({ match }) => {
         addNote,
         updateNote,
         deleteNote,
+        moveNote,
         error,
         loading 
     } = noteContext;
@@ -154,6 +236,11 @@ const Note = ({ match }) => {
     const [autoSave, setAutoSave] = useState(true);
     const [autoSaveIntervalToken, setAutoSaveIntervalToken] = useState({});
     const [saveTextUpdateInterval, setSaveTextUpdateInterval] = useState(10000);
+    const [modelOpen, setModelOpen] = useState(false);
+    const [deleteNoteVisible, setDeleteNoteVisible] = useState(false);
+    const [destNotedir, setDestNotedir] = useState(null);
+
+    const toggleOpen = () => setModelOpen(!modelOpen);
 
     //目前筆記的狀態：編輯/閱讀模式
     const NOTEMODE = {
@@ -218,7 +305,8 @@ const Note = ({ match }) => {
         edit: gray,
         view: gray,
         discard: gray,
-        delete: gray
+        delete: gray,
+        move: gray
     };
 
     const [color, setColor] = useState(defaultColor);
@@ -267,6 +355,11 @@ const Note = ({ match }) => {
     const onDelete = e => {
         e.preventDefault();
         current && deleteNote(notedirContext.current._id, current._id);
+        setDeleteNoteVisible(false);
+    }
+
+    const onCancelDelete = e => {
+        setDeleteNoteVisible(false);
     }
 
     const onView = e => {
@@ -277,6 +370,31 @@ const Note = ({ match }) => {
     const onDiscard = e => {
         e.preventDefault();
         current && discardCacheNote(current._id);
+    }
+
+    const openMoveNoteModel = e => {
+        e.preventDefault();
+        current && setModelOpen(!modelOpen);
+    }
+
+    const onMove = e => {
+        e.preventDefault();
+        if(destNotedir) {
+            const noteField = {...current, ['notedir']: destNotedir};
+            moveNote(current._id, noteField);
+            setDestNotedir(null);
+            setModelOpen(false);
+        }
+    }
+
+    const onModelClose = e => {
+        e.preventDefault();
+        setDestNotedir(null);
+        setModelOpen(false);
+    }
+
+    const toggleDeleteOpen = () => {
+        setDeleteNoteVisible(!deleteNoteVisible);
     }
 
     const onSave = async () => {
@@ -408,17 +526,34 @@ const Note = ({ match }) => {
         'delete': () => {
             setColor({...defaultColor, ['delete']: orange});
         },
+        'move': () => {
+            setColor({...defaultColor, ['move']: current && cacheCurrent ? orange : defaultColor.move});
+        },
         'default': () => {
             setColor(defaultColor);
         }
     }
 
+    const Notedir = ({notedir, onSelect}) => {
+        const notedirSelect = e => {
+            e.preventDefault();
+            onSelect(notedir._id);
+        }
+
+        return <NotedirContainer
+                    isCurrent={destNotedir === notedir._id}
+                    onClick={notedirSelect}>
+                    {notedir.title}
+                </NotedirContainer>;
+    };
+
     const BtnContent = ({onChange, children}) => {
         return <span
-                onMouseEnter={onChange}
-                onMouseLeave={iconChange.default}>
+                    onMouseEnter={onChange}
+                    onMouseLeave={iconChange.default}>
                     {children}
-                </span>};
+                </span>;
+    };
 
     return (
         <NoteContainer>
@@ -432,11 +567,11 @@ const Note = ({ match }) => {
                 current={current}
                 cacheCurrent={cacheCurrent}>
                 <div className='note-header'>
-                    {deleteEnable ? (<button className='note-delete-btn right-align' onClick={onDelete}>
+                    {deleteEnable ? (<button className='note-delete-btn right-align' onClick={toggleDeleteOpen}>
                         <BtnContent onChange={iconChange.delete} children={<Trash size={20} color={color.delete} />} />
                     </button>)
                     : (<button className='note-discard-btn right-align' onClick={onDiscard} disabled={!cacheCurrent}>
-                            <BtnContent onChange={iconChange.discard} children={<Backspace size={20} color={color.discard} />} />
+                            <BtnContent onChange={iconChange.discard} children={<FileX size={20} color={color.discard} />} />
                         </button>)}
                     {noteMode === NOTEMODE.EDIT ? 
                     (<button 
@@ -448,6 +583,9 @@ const Note = ({ match }) => {
                     : (<button className='note-edit-btn right-align' onClick={onEdit} disabled={!(current && cacheCurrent)}>
                         <BtnContent onChange={iconChange.edit} children={<NotePencil size={20} color={color.edit} />} />
                     </button>)}
+                    <button className='note-move-btn right-align' onClick={openMoveNoteModel} disabled={!(current && cacheCurrent)}>
+                        <BtnContent onChange={iconChange.move} children={<ArrowsLeftRight size={20} color={color.move} />} />
+                    </button>
                     <div className='note-title-container'>
                         <input type='text' placeholder='新筆記' className='note-title' value={current ? current.title || '' : ''} onChange={titleChange} disabled={noteMode !== NOTEMODE.EDIT}/>
                         <SaveButton 
@@ -468,6 +606,40 @@ const Note = ({ match }) => {
             <div className='recycle-bin'>
                 <button className='recycle-bin-btn' onClick={LoadRecycleBin}>回收站</button>
             </div>
+            <Models
+                isOpen={deleteNoteVisible}
+                toggleOpen={toggleDeleteOpen}
+                onConfirm={onDelete}
+                onCancel={onCancelDelete}
+                modelStyle={deleteStyle}>
+                <Models.Content>
+                    <p>筆記將會移動至回收站，確定刪除嗎？</p>
+                </Models.Content>
+                <Models.ConfirmBtn enable={true}>刪除</Models.ConfirmBtn>
+                <Models.CancelBtn>取消</Models.CancelBtn>
+            </Models>
+            <Models
+                isOpen={modelOpen}
+                toggleOpen={toggleOpen}
+                onConfirm={onMove}
+                onCancel={onModelClose}
+                modelStyle={modelStyle}>
+                <Models.Content>
+                    <p className='title'>移動筆記</p>
+                    <p className='tip'>請選擇要存放此筆記的目錄</p>
+                    <ul>
+                        {notedirContext.notedirs && notedirContext.notedirs.map(notedir => {
+                            return !notedir.default 
+                            && (<Notedir 
+                                key={notedir._id} 
+                                notedir={notedir}
+                                onSelect={setDestNotedir} />)
+                        })}
+                    </ul>
+                </Models.Content>
+                <Models.ConfirmBtn enable={destNotedir !== null}>移動</Models.ConfirmBtn>
+                <Models.CancelBtn>取消</Models.CancelBtn>
+            </Models>
         </NoteContainer>
     )
 }

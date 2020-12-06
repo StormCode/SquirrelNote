@@ -6,7 +6,7 @@ import styled from 'styled-components';
 // Import Style
 import ToolPanelStyled from '../../style/components/ToolPanel';
 
-const Button = styled.span`
+const Button = styled.button`
     ${props => props.btnStyle}
 `;
 
@@ -101,7 +101,7 @@ const EDToolPanel = props => {
                         onConfirm={onClick.confirm}
                         onCancel={onClick.cancel}
                         btnStyle={btnStyle}>
-                            {children}
+                        {children}
                     </ToolPanel>
                     : <ToolPanelStyled>
                         {children}
@@ -139,7 +139,7 @@ EDToolPanel.EditBtn = (props) =>
         {contextValue =>
             contextValue.isEnter ?
                 null 
-            : <Button id='edit-btn' 
+            : <Button className='edit-btn' 
                 onClick={contextValue.onEdit}
                 btnStyle={contextValue.btnStyle}>
                 {props.children}
@@ -152,7 +152,7 @@ EDToolPanel.DeleteBtn = (props) =>
         {contextValue =>
             contextValue.isEnter ?
                 null
-            : <Button id='delete-btn'
+            : <Button className='delete-btn'
                 onClick={contextValue.onDelete}
                 btnStyle={contextValue.btnStyle}>
                 {props.children}

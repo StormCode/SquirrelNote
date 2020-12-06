@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const path = require('path');
 const config = require('config');
+const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const {
     NOT_FOUND,
@@ -246,18 +247,19 @@ router.delete('/:id', auth, async(req, res) => {
         //
         // server上的照片也一併刪除
         //
-        let deleteImgs = [];
-        if(deletedGroup.type === 'note') {
-            let decryptedContent = newCrypto.decrypt(deletedItem.notes.content, false); 
-            deleteImgs = require('../common/filterDeleteImgs')(decryptedContent);
-        } else {
-            deletedItem.notes.forEach(deletedNotes => {
-                let decryptedContent = newCrypto.decrypt(deletedNotes.content, false); 
-                let deleteImgItems = require('../common/filterDeleteImgs')(decryptedContent);
-                deleteImgs = [].concat(deleteImgs, deleteImgItems);
-            })
-        }
+        let deleteImgs = [], deletedNotes = [];
 
+        if(deletedItem.type === 'note') {
+            deletedNotes.push(deletedItem.notes);
+        } else {
+            deletedNotes = deletedItem.notes;
+        }
+        deletedNotes.forEach(deletedNote => {
+            let decryptedContent = newCrypto.decrypt(deletedNote.content, false); 
+            let deleteImgItems = require('../common/filterDeleteImgs')(decryptedContent);
+            deleteImgs = [].concat(deleteImgs, deleteImgItems);
+        });
+        
         // 刪除在Server上的所有檔案 
         if(deleteImgs.length > 0) {
             deleteImgs.forEach((imgName) => {

@@ -23,22 +23,38 @@ const NavContainer = styled.div`
     box-shadow: 3px 3px 18px 0px rgba(0,0,0,0.75);
 
     .navbar-nav {
-        width: 100%;
+        flex: 1 1 auto;
     }
 
-    .nav-link {
+    .nat-link-active {
+        color: #FDFF6F;
+    }
+
+    .nav-link:not(.nat-link-active) {
         color: #FFF;
     }
-
-        .nav-link-notebook {
-            border-bottom: 3px solid #FDFF6F;
-            color: #FDFF6F;
-        }
-
+        
         .nav-link:hover {
-            border-bottom: 3px solid #EBED68;
             color: #EBED68;
         }
+
+        .nav-item:not(.nat-link-active):after {
+            background: #FFF;
+        }
+
+        .nat-link-active:after {
+            background: #FDFF6F;
+        }
+
+        .nav-link:after {
+            content: '';
+            display: block;
+            height: 3px;
+        }
+
+            .nav-link:hover:after {
+                background: #EBED68;
+            }
 
     .right-nav-items {
         display: flex;
@@ -106,7 +122,7 @@ const MainNavbar = ({ title }) => {
     const userLinks = (
         <Fragment>
             <NavItem>
-                <NavLink href='#!' className={location.pathname.match(/notebook(?!\/)/g) ? 'nav-link-notebook' : null} onClick={loadNotebook}>
+                <NavLink href='#!' className={location.pathname.match(/notebook(?!\/)/g) ? 'nat-link-active' : null} onClick={loadNotebook}>
                     筆記本
                 </NavLink>
             </NavItem>

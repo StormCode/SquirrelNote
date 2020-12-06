@@ -2,7 +2,7 @@ import React, { Fragment, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-const Button = styled.span`
+const Button = styled.button`
     ${props => props.btnStyle}
 `;
 

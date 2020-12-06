@@ -8,7 +8,8 @@ import { theme } from '../../style/themes';
 
 import NotedirContext from '../../context/notedirs/notedirContext'
 
-const { defaultColor, orange, gray } = theme;
+const { orange, gray } = theme;
+
 const SorterContainer = styled.span`
     cursor: pointer;
     float: right;

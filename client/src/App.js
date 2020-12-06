@@ -26,7 +26,7 @@ const AppStyle = styled.div`
     #container {
         display: flex;
         flex-flow: nowrap column;
-        width: 100vw;
+        width: 100%;
         height: 100vh;
     }
 
@@ -46,12 +46,13 @@ const AppStyle = styled.div`
 
     .footer {
         flex: 1 0 auto;
+        background-color: #ffe094;
+        background-image: linear-gradient(0deg, #ffe094 0%, rgba(255,255,255,.9) 100%);
         text-align: center;
         display: flex;
         flex-flow: column nowrap;
         justify-content: center;
-        background-color: #ffe094;
-        background-image: linear-gradient(0deg, #ffe094 0%, rgba(255,255,255,.9) 100%);
+        min-height: 100px;
 
         > p:before {
             content: '';

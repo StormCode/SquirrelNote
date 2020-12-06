@@ -2,15 +2,17 @@ import React, { Fragment, useCallback, useState, useContext, useEffect } from 'r
 import styled from 'styled-components';
 import { Pencil, Trash, Check, X } from "phosphor-react";
 import EDToolPanel from '../layout/EDToolPanel';
+import Models from '../layout/Models';
 
 // Import Style
 import { theme } from '../../style/themes';
+import { deleteStyle } from '../../style/model/delete';
 
 import NotebookContext from '../../context/notebooks/notebookContext';
 import NotedirContext from '../../context/notedirs/notedirContext';
 
 const { orange, darkOrange, gray } = theme;
-const currentFontColor = '#FFF'; 
+const currentFontColor = '#FFF';
 
 const NoteDirContainer = styled.li`
     cursor: pointer;
@@ -199,18 +201,31 @@ const Notedir = props => {
     }
 
     const onEnter = (operator) => {
-        operator === 'edit' ? enableEditNotedir(_id) : enableDeleteNotedir(_id);
-        //設定目前正在使用的ToolPanel
-        props.setToolPanel(_id);
+        if(operator === 'edit') {
+            enableEditNotedir(_id);
+            //設定目前正在使用的ToolPanel
+            props.setToolPanel(_id);
+        } else if(operator === 'delete') {
+            enableDeleteNotedir(_id);
+        }
     }
 
-    const onCancel = () => {
-        currentEditNotedir === _id && disableEditNotedir();
-        currentDeleteNotedir === _id && disableDeleteNotedir();
+    const onCancelEdit = () => {
+        disableEditNotedir();
+
         //設回原本筆記目錄內容
         setNotedir({...props.notedir, ['title']: props.notedir.title});
+
         //取消目前正在使用的ToolPanel
         props.setToolPanel(null);
+    }
+
+    const onCancelDelete = () => {
+        disableDeleteNotedir();
+    }
+
+    const toggleDeleteOpen = () => {
+        deleteNotedirVisible ? disableDeleteNotedir() : enableDeleteNotedir();
     }
 
     const BtnContent = ({onChange, children}) => {
@@ -234,7 +249,7 @@ const Notedir = props => {
                         onEdit={onEdit}
                         onDelete={onDelete}
                         onEnter={onEnter}
-                        onCancel={onCancel}>
+                        onCancel={onCancelEdit}>
                         <EDToolPanel.ConfirmBtn>
                             <BtnContent onChange={iconChange.confirm} children={<Check size={20} color={color.confirm} />} />
                         </EDToolPanel.ConfirmBtn>
@@ -257,10 +272,20 @@ const Notedir = props => {
                             ref={notedirTextRef}
                             placeholder='請輸入資料夾名稱'
                             onChange={onChange} />)
-                    || deleteNotedirVisible && 
-                        (<p className='warning'>確定要刪除{props.notedir.title}嗎?</p>) 
                     || (<p>{props.notedir.title}</p>)}
                 </div>
+                <Models
+                    isOpen={deleteNotedirVisible}
+                    toggleOpen={toggleDeleteOpen}
+                    onConfirm={onDelete}
+                    onCancel={onCancelDelete}
+                    modelStyle={deleteStyle}>
+                    <Models.Content>
+                        <p>筆記目錄將會移動至回收站，確定刪除嗎？</p>
+                    </Models.Content>
+                    <Models.ConfirmBtn enable={true}>刪除</Models.ConfirmBtn>
+                    <Models.CancelBtn>取消</Models.CancelBtn>
+                </Models>
             </Fragment>
                 // (<div style={{position: 'relative'}} onClick={props.setCurrent}>
                 //     {editNotedirVisible ? 

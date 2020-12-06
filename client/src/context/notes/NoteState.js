@@ -11,6 +11,9 @@ import {
     ADD_NOTE,
     UPDATE_NOTE,
     DELETE_NOTE,
+    MOVE_NOTE,
+    FILTER_NOTE,
+    CLEAR_FILTER_NOTE,
     APPEND_CACHE_NOTE,
     MODIFY_CACHE_NOTE,
     REMOVE_CACHE_NOTE,
@@ -188,6 +191,35 @@ const NoteState = props => {
         }
     }
 
+    //移動筆記
+    const moveNote = async (id, note) => {
+        const config = {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+
+        try {
+            // 加密傳至Server的note資料
+            const encryptedData = {data: encrypt(note, process.env.REACT_APP_SECRET_KEY)};
+            await axios.put(`/api/notes/${id}`, encryptedData, config);
+            dispatch({
+                type: MOVE_NOTE,
+                payload: id
+            });
+        } catch (err) {
+            dispatch({ type: NOTE_ERROR});
+        }
+    }
+
+    //篩選筆記
+    const filterNote = text => {
+        dispatch({
+            type: FILTER_NOTE,
+            payload: text
+        });
+    }
+
     //新增暫存的筆記
     const appendCacheNote = note => {
         try {
@@ -266,6 +298,11 @@ const NoteState = props => {
         }
     }
 
+    //清除篩選筆記
+    const clearFilterNote = () => {
+        dispatch({ type: CLEAR_FILTER_NOTE });
+    }
+
     //清除筆記資料
     const clearNote = () => {
         try {
@@ -295,6 +332,9 @@ const NoteState = props => {
             addNote,
             updateNote,
             deleteNote,
+            moveNote,
+            filterNote,
+            clearFilterNote,
             appendCacheNote,
             modifyCacheNote,
             removeCacheNote,

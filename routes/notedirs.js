@@ -155,7 +155,7 @@ router.put('/:id', auth, async(req, res) => {
 router.delete('/:id', auth, async(req, res) => {
     try {
         const id = req.params.id;
-        const userId = userId;
+        const userId = req.user.id;
         const notedir = await Notedir.findById(id);
         const deleteItems = {
             id: uuidv4(),
@@ -182,7 +182,7 @@ router.delete('/:id', auth, async(req, res) => {
         // 移動至回收站
         //
         deleteItems.title = notedir.title;
-        deleteItems.notedirs = await Notedir.find({ notebook: notebook._id });
+        deleteItems.notedirs = await Notedir.findById(id);
         deleteItems.notes = await require('../common/getNotes')(deleteItems.notedirs);
 
         // 取得刪除的項目
