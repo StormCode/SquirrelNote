@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import styled from 'styled-components';
-import { FilePlus } from "phosphor-react";
+import { FilePlus, ArrowLineLeft } from "phosphor-react";
 import Spinner from '../layout/Spinner';
 import NoteFilter from './NoteFilter';
 import Note from './Note';
@@ -58,7 +58,7 @@ const NoteList = styled.div`
     }
 `;
 
-const Notes = ({ addEvent, setCacheNoteContent, setNoteContent }) => {
+const Notes = ({ addEvent, setCacheNoteContent, setNoteContent, toggleCollapse }) => {
     const notedirContext = useContext(NotedirContext);
     const noteContext = useContext(NoteContext);
 
@@ -71,7 +71,12 @@ const Notes = ({ addEvent, setCacheNoteContent, setNoteContent }) => {
         clearNote, 
         loading 
     } = noteContext;
-    const [color, setColor] = useState(gray);
+
+    const defaultColor = {
+        note: gray,
+        collapse: gray
+    };
+    const [color, setColor] = useState(defaultColor);
 
     useEffect(() => {
         return () => {
@@ -97,12 +102,22 @@ const Notes = ({ addEvent, setCacheNoteContent, setNoteContent }) => {
         return element ? appendDot(element.textContent) : '';
     }
 
+    const onToggleCollapse = e => {
+        e.preventDefault();
+        toggleCollapse();
+    }
+
     const iconChange = {
         'note': () => {
-            setColor(orange);
+            setColor({...defaultColor, ['note']: orange});
+
+        },
+        'collapse': () => {
+            setColor({...defaultColor, ['collapse']: orange});
+
         },
         'default': () => {
-            setColor(gray);
+            setColor(defaultColor);
         }
     }
 
@@ -120,7 +135,10 @@ const Notes = ({ addEvent, setCacheNoteContent, setNoteContent }) => {
                 <span className='title'>筆記</span>
                 <NoteFilter />
                 <button alt='add note' onClick={addEvent}>
-                    <BtnContent onChange={iconChange.note} children={<FilePlus size={20} color={color} />} />
+                    <BtnContent onChange={iconChange.note} children={<FilePlus size={20} color={color.note} />} />
+                </button>
+                <button alt='collapse/expand note' onClick={onToggleCollapse}>
+                    <BtnContent onChange={iconChange.collapse} children={<ArrowLineLeft size={20} color={color.collapse} />} />
                 </button>
             </div>
             {notes && !loading ?

@@ -31,13 +31,17 @@ import {
 
 const { orange, darkOrange, gray, darkGray } = theme;
 
+// grid-template-columns: 50px 1.2fr 1.5fr 3.5fr;
+// "side-bar notedir-list note-list editor-area";
+// .recycle-bin {
+    //     grid-area: recycle-bin;
+    // }
 const NoteContainer = styled.div`
     display: grid;
-    grid-template-columns: 1.2fr 1.5fr 3.5fr;
-    grid-template-rows: auto .1fr;
-    grid-template-areas: 
-        "notedir-list note-list editor-area"
-        "recycle-bin note-list editor-area";
+    grid-template-columns: ${props => props.notedirCollapse || props.noteCollapse ? '30px' : ''} ${props => props.notedirCollapse ? '' : '1.2fr'} ${props => props.noteCollapse ? '' : '1.5fr'} ${props => props.notedirCollapse ? props.noteCollapse ? '6.2fr' : '4.7fr' : props.noteCollapse ? '5fr' : '3.5fr'};
+    grid-template-rows: 100%;
+    grid-template-areas:
+        "${props => props.notedirCollapse || props.noteCollapse ? 'side-bar' : ''} ${props => props.notedirCollapse ? '' : 'notedir-list'} ${props => props.noteCollapse ? '' : 'note-list'} editor-area";
     width: 100%;
     height: 100%;
 
@@ -65,8 +69,24 @@ const NoteContainer = styled.div`
             flex: 0 1 15%;
         }
 
-    .recycle-bin {
-        grid-area: recycle-bin;
+    
+
+    .side-bar {
+        grid-area: side-bar;
+        background: ${orange};
+
+        .notedir-item,
+        .note-item {
+            background: ${darkOrange};
+        }
+
+        .notedir-item {
+            display: ${props => props.notedirCollapse ? 'inline-block' : 'none'};
+        }
+
+        .note-item {
+            display: ${props => props.noteCollapse ? 'inline-block' : 'none'};
+        }
     }
 `;
 
@@ -110,7 +130,7 @@ const EditorArea = styled.div`
     &.note-move-btn {
         cursor: ${props => props.current && props.cacheCurrent ? 'pointer' : 'default'};
     }
-    
+
     button&:not(&.note-discard-btn),
     button&:not(&.note-move-btn),
     button&:not(&.note-edit-btn) {
@@ -175,7 +195,7 @@ const modelStyle = `
 
         &:hover {
             background: ${darkOrange};
-        }        
+        }
     }
 
     .confirm-btn:disabled {
@@ -183,7 +203,7 @@ const modelStyle = `
 
         &:hover {
             background: ${gray};
-        }        
+        }
     }
 
     .cancel-btn {
@@ -208,18 +228,18 @@ const Note = ({ match }) => {
         // eslint-disable-next-line
     }, []);
 
-    const { 
-        notes, 
-        current, 
+    const {
+        notes,
+        current,
         cacheCurrent,
-        cacheNotes, 
-        appendCacheNote, 
-        modifyCacheNote, 
-        removeCacheNote, 
+        cacheNotes,
+        appendCacheNote,
+        modifyCacheNote,
+        removeCacheNote,
         discardCacheNote,
-        setCurrentNote, 
+        setCurrentNote,
         getNoteDetail,
-        save, 
+        save,
         setSave,
         deleteEnable,
         enableDelete,
@@ -229,7 +249,7 @@ const Note = ({ match }) => {
         deleteNote,
         moveNote,
         error,
-        loading 
+        loading
     } = noteContext;
 
     const autoSaveInterval = 10000;
@@ -249,7 +269,7 @@ const Note = ({ match }) => {
     };
 
     const [noteMode, setNoteMode] = useState(NOTEMODE.READ);
-    
+
     const host = `${window.location.protocol}//${window.location.host}`;
 
     const notebooks = notebookContext.notebooks;
@@ -265,12 +285,12 @@ const Note = ({ match }) => {
             if(cacheCurrent) {
                 //控制儲存狀態(筆記載入時顯示已儲存)
                 setSave({state: SAVED, showUpdateTime: true});
-    
+
                 if(cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) {
                     modifyCacheNote(current);
                 } else {
                     let currentNote = notes.find(note => note._id === current._id);
-                    currentNote && (cacheCurrent.title !== current.title || cacheCurrent.content !== current.content) 
+                    currentNote && (cacheCurrent.title !== current.title || cacheCurrent.content !== current.content)
                                 && appendCacheNote(current);
                 }
             }
@@ -297,7 +317,7 @@ const Note = ({ match }) => {
 
     const titleChange = useCallback(e => {
         e.preventDefault();
-        
+
         current && setCurrentNote({ title: e.target.value });
     },[current]);
 
@@ -310,6 +330,10 @@ const Note = ({ match }) => {
     };
 
     const [color, setColor] = useState(defaultColor);
+    const [listCollapse, setListCollapse] = useState({
+        notedir: false,
+        note: false
+    });
 
     const contentChange = useCallback(data => {
         console.log('data: ' + data);
@@ -397,6 +421,14 @@ const Note = ({ match }) => {
         setDeleteNoteVisible(!deleteNoteVisible);
     }
 
+    const toggleNotedirCollapse = () => {
+        setListCollapse({...listCollapse, ['notedir']: !listCollapse.notedir});
+    }
+
+    const toggleNoteCollapse = () => {
+        setListCollapse({...listCollapse, ['note']: !listCollapse.note});
+    }
+
     const onSave = async () => {
         //設定儲存狀態為正在儲存
         if(current && (current.title !== '' || current.content !== '')
@@ -411,7 +443,7 @@ const Note = ({ match }) => {
                     setSave({state: SAVED, showUpdateTime: true});
                     return;
                 }
-    
+
                 setSave({state: SAVING, showUpdateTime: false});
 
                 let newContent = await ReplaceImage(current.content);
@@ -422,7 +454,7 @@ const Note = ({ match }) => {
                     content: newContent,
                     notedir: notedirContext.current._id
                 };
-    
+
                 //判斷要做Add還是Update
                 if(notes.map(note => note._id).indexOf(current._id) === -1) {
                     //新增筆記到資料庫
@@ -431,11 +463,11 @@ const Note = ({ match }) => {
                     //更新筆記到資料庫
                     await updateNote(current._id, saveNote);
                 }
-    
+
                 //wrong
                 if(error){
                     setSave({state: UNSAVE, showUpdateTime: false});
-    
+
                     console.log('error');
                 } else {
                     removeCacheNote(current._id);
@@ -468,13 +500,13 @@ const Note = ({ match }) => {
                     };
 
                     if(!imgFile) throw '圖片轉換發生錯誤';
-                    
+
                     // 上傳圖片至Server
                     const data = new FormData();
                     data.append( 'image', imgFile );
                     const res = await axios.post('/api/images/upload', data, config);
 
-                    // 釋放掉Blob參照   
+                    // 釋放掉Blob參照
                     window.URL.revokeObjectURL(imgSrc);
 
                     // 把圖片的src重新設定為server上的檔案位置
@@ -493,11 +525,11 @@ const Note = ({ match }) => {
     useEffect(() => {
         // 清除上一次的token
         autoSaveIntervalToken && clearInterval(autoSaveIntervalToken);
-    
+
         // 當自動儲存開啟/關閉改變時執行(清除setinterval或設定setinterval)
         if(autoSave && noteMode === NOTEMODE.EDIT){
             console.log('autosave launch');
-            
+
             cacheNotes.length > 0 && setAutoSaveIntervalToken(setInterval(onSave, autoSaveInterval));
         }
         else{
@@ -506,7 +538,7 @@ const Note = ({ match }) => {
             clearInterval(autoSaveIntervalToken);
             setAutoSaveIntervalToken(null);
         }
-    
+
     }, [autoSave, current, cacheCurrent, cacheNotes , autoSaveInterval, noteMode]);
 
     const LoadRecycleBin = () => {
@@ -520,7 +552,7 @@ const Note = ({ match }) => {
         'view': () => {
             setColor({...defaultColor, ['view']: orange});
         },
-        'discard': () => { 
+        'discard': () => {
             setColor({...defaultColor, ['discard']: cacheCurrent ? orange : defaultColor.discard});
         },
         'delete': () => {
@@ -556,13 +588,18 @@ const Note = ({ match }) => {
     };
 
     return (
-        <NoteContainer>
-            <Notedirs notebookId={match.params.id} />
+        <NoteContainer notedirCollapse={listCollapse.notedir} noteCollapse={listCollapse.note}>
+            <ul className='side-bar'>
+                <li className='notedir-item' onClick={toggleNotedirCollapse}>目 錄</li>
+                <li className='note-item' onClick={toggleNoteCollapse}>筆 記</li>
+            </ul>
+            <Notedirs notebookId={match.params.id} toggleCollapse={toggleNotedirCollapse}/>
             <Notes
-                addEvent={onAdd} 
-                setCacheNoteContent={setCacheNoteContent} 
-                setNoteContent = {setNoteContent} />
-            <EditorArea className='editor-area' 
+                addEvent={onAdd}
+                setCacheNoteContent={setCacheNoteContent}
+                setNoteContent = {setNoteContent}
+                toggleCollapse={toggleNoteCollapse} />
+            <EditorArea className='editor-area'
                 showToolPanel={noteMode === NOTEMODE.EDIT}
                 current={current}
                 cacheCurrent={cacheCurrent}>
@@ -573,10 +610,10 @@ const Note = ({ match }) => {
                     : (<button className='note-discard-btn right-align' onClick={onDiscard} disabled={!cacheCurrent}>
                             <BtnContent onChange={iconChange.discard} children={<FileX size={20} color={color.discard} />} />
                         </button>)}
-                    {noteMode === NOTEMODE.EDIT ? 
-                    (<button 
-                        className='note-view-btn right-align' 
-                        onClick={onView} 
+                    {noteMode === NOTEMODE.EDIT ?
+                    (<button
+                        className='note-view-btn right-align'
+                        onClick={onView}
                         disabled={!(cacheCurrent && current && cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) === -1)}>
                         <BtnContent onChange={iconChange.view} children={<Browser size={20} color={color.view} />} />
                     </button>)
@@ -588,24 +625,24 @@ const Note = ({ match }) => {
                     </button>
                     <div className='note-title-container'>
                         <input type='text' placeholder='新筆記' className='note-title' value={current ? current.title || '' : ''} onChange={titleChange} disabled={noteMode !== NOTEMODE.EDIT}/>
-                        <SaveButton 
+                        <SaveButton
                             visible={noteMode === NOTEMODE.EDIT}
-                            state={save.state} 
-                            onSave={onSave} 
-                            showUpdateTime={save.showUpdateTime} 
-                            updateTime={current && current._id ? current.date : null} 
+                            state={save.state}
+                            onSave={onSave}
+                            showUpdateTime={save.showUpdateTime}
+                            updateTime={current && current._id ? current.date : null}
                             updateInterval={saveTextUpdateInterval} />
                     </div>
                 </div>
-                <Editor 
+                <Editor
                     enable={noteMode === NOTEMODE.EDIT}
-                    content={current && current.content ? current.content : ''} 
-                    loading={loading} 
+                    content={current && current.content ? current.content : ''}
+                    loading={loading}
                     contentChange={contentChange} />
             </EditorArea>
-            <div className='recycle-bin'>
+            {/* <div className='recycle-bin'>
                 <button className='recycle-bin-btn' onClick={LoadRecycleBin}>回收站</button>
-            </div>
+            </div> */}
             <Models
                 isOpen={deleteNoteVisible}
                 toggleOpen={toggleDeleteOpen}
@@ -629,9 +666,9 @@ const Note = ({ match }) => {
                     <p className='tip'>請選擇要存放此筆記的目錄</p>
                     <ul>
                         {notedirContext.notedirs && notedirContext.notedirs.map(notedir => {
-                            return !notedir.default 
-                            && (<Notedir 
-                                key={notedir._id} 
+                            return !notedir.default
+                            && (<Notedir
+                                key={notedir._id}
                                 notedir={notedir}
                                 onSelect={setDestNotedir} />)
                         })}

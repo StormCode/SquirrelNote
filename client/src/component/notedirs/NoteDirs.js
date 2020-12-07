@@ -1,6 +1,6 @@
 import React, { Fragment, useContext, useState, useEffect } from 'react'
 import styled from 'styled-components';
-import { Check, X, FolderSimplePlus } from "phosphor-react";
+import { Check, X, FolderSimplePlus, ArrowLineLeft } from "phosphor-react";
 
 import Spinner from '../../component/layout/Spinner'
 import TextInput from '../../component/layout/TextInput'
@@ -55,7 +55,7 @@ const NotedirList = styled.div`
         }
 `;
 
-const Notedirs = ({notebookId}) => {
+const Notedirs = ({notebookId, toggleCollapse}) => {
     const notebookContext = useContext(NotebookContext);
     const notedirContext = useContext(NotedirContext);
     const {
@@ -101,7 +101,8 @@ const Notedirs = ({notebookId}) => {
     const defaultColor = {
         confirm: gray,
         cancel: gray,
-        notedir: gray
+        notedir: gray,
+        collapse: gray
     };
 
     const [color, setColor] = useState(defaultColor);
@@ -115,6 +116,9 @@ const Notedirs = ({notebookId}) => {
         },
         'notedir': () => {
             setColor({...defaultColor, ['notedir']: orange});
+        },
+        'collapse': () => {
+            setColor({...defaultColor, ['collapse']: orange});
         },
         'default': () => {
             setColor(defaultColor);
@@ -158,6 +162,11 @@ const Notedirs = ({notebookId}) => {
         enableAddNotedir();
     }
 
+    const onToggleCollapse = e => {
+        e.preventDefault();
+        toggleCollapse();
+    }
+
     return (
         <Fragment>
             { notedirs && !loading ?
@@ -165,6 +174,9 @@ const Notedirs = ({notebookId}) => {
                     <div className='header'>
                         <i className='parlgrm'></i>
                         <span className='title'>目錄</span>
+                        <button alt='collapse/expand notedir' onClick={onToggleCollapse}>
+                            <BtnContent onChange={iconChange.collapse} children={<ArrowLineLeft size={20} color={color.collapse} />} />
+                        </button>
                         <NotedirSorter />
                         <button alt='add notedir' onClick={onEnableAddNotedir}>
                             <BtnContent onChange={iconChange.notedir} children={<FolderSimplePlus size={20} color={color.notedir} />} />
