@@ -1,4 +1,4 @@
-import React, { Fragment, useRef } from 'react';
+import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
@@ -7,9 +7,17 @@ const IconInputContext = React.createContext({
     onChange: () => {}
 });
 
-const InputContainer = styled.div`${props => props.containerStyle}`;
+const Container = styled.div`
+        ${props => props.containerStyle};
+    `;
 
-const Input = styled.input`${props => props.inputStyle}`;
+const Input = styled.input`
+    ${props => props.inputStyle};
+`
+
+const ClearIcon = styled.span`
+    ${props => props.iconStyle};
+`;
 
 //
 // 此組件是一個文字輸入框，使用者輸入文字即呼叫onChange反應輸入的內容
@@ -30,22 +38,23 @@ const Input = styled.input`${props => props.inputStyle}`;
 const IconInput = props => {
     const { 
         containerStyle, 
-        inputStyle, 
+        inputStyle,
         placeholder, 
         onChange, 
         hoverOn, 
         hoverOff,
         focusOn 
     } = props;
-    const text = useRef('');
+    const [text, setText] = useState('');
 
     const clearText = () => {
-        text.current.value = '';
-        onChange(text.current.value);
+        setText('');
+        onChange('');
     };
 
-    const inputChange = () => {
-        onChange(text.current.value);
+    const inputChange = e => {
+        setText(e.target.value);
+        onChange(e.target.value);
     };
 
     const inputFocus = () => {
@@ -62,35 +71,32 @@ const IconInput = props => {
                 text,
                 clearText
             }}>
-            <InputContainer 
-                containerStyle={containerStyle}
+            <Container containerStyle={containerStyle}
                 onMouseEnter={hoverOn}
                 onMouseLeave={hoverOff}>
-                <Input inputStyle={inputStyle}
+                <Input
+                    inputStyle={inputStyle}
                     type='text' 
-                    ref={text} 
                     placeholder={placeholder} 
                     onChange={inputChange}
                     onFocus={inputFocus}
-                    onBlur={inputBlur} />
+                    onBlur={inputBlur}
+                    value={text} />
                 {props.children}
-            </InputContainer>
+            </Container>
         </IconInputContext.Provider>
     )
 }
 
-IconInput.HeadIcon = ({children}) =>
-    <Fragment>
-        {children}
-    </Fragment>
-
-IconInput.ClearIcon = ({children}) =>
+IconInput.ClearIcon = props =>
     <IconInputContext.Consumer>
         {contextValue =>
-            contextValue.text.current.value 
-            ? <span onClick={e => {
-                    contextValue.clearText();
-                }}>{children}</span>
+            contextValue.text !== '' 
+            ? <ClearIcon 
+                iconStyle={props.iconStyle}
+                onClick={contextValue.clearText}>
+                {props.children}
+            </ClearIcon>
             : null
         }
     </IconInputContext.Consumer>

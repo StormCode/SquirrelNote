@@ -10,12 +10,12 @@ import NotebookContext from '../../context/notebooks/notebookContext';
 
 const { defaultColor, orange, gray } = theme;
 
-const HeadIconStyled = styled.span`
+const HeadIcon = styled.span`
     float: left;
     transform: translate(3px,-125%);
 `;
 
-const ClearIconStyled = styled.span`
+const ClearIconStyled = `
     cursor: pointer;
     float: right;
     transform: translate(-150%, -125%);
@@ -32,6 +32,24 @@ const NotebookFilter = () => {
     useEffect(() => {
         !focus && setColor(gray);
     }, [focus]);
+
+    const IconInputContainerStyled = `
+        float: right;
+        width: 40%;
+        max-width: 200px;
+    `;
+
+    const IconInputStyled = `
+        border: 1px solid ${color};
+        text-indent: 24px;
+        color: ${color};
+        ::placeholder{
+            color: ${color};
+        }
+        &:focus {
+            border: 1px solid ${color};
+        }
+    `;
 
     const onChange = val => {
         if(val !== '')
@@ -55,36 +73,24 @@ const NotebookFilter = () => {
 
     return (
         <IconInput 
-            containerStyle={`
-                float: right;
-                width: 40%;
-                max-width: 200px;`
-            }
-            inputStyle={`
-                border: 1px solid ${color};
-                text-indent: 24px;
-                color: ${color};
-                ::placeholder{
-                    color: ${color};
-                }
-                &:focus {
-                    border: 1px solid ${color};
-                }`
-            }
+            containerStyle={IconInputContainerStyled}
+            inputStyle={IconInputStyled}
             placeholder='搜尋...' 
             onChange={onChange}
             hoverOn={hoverOn}
             hoverOff={hoverOff}
             focusOn={focusOn}>
-                <IconInput.HeadIcon>
-                    <HeadIconStyled>
-                        <MagnifyingGlass size={20} color={color} weight='bold'/>
-                    </HeadIconStyled>
+                {/* <IconInput.HeadIcon iconStyle={HeadIconStyled}>
+                    <MagnifyingGlass size={20} color={color} weight='bold'/>
                 </IconInput.HeadIcon>
-                <IconInput.ClearIcon>
-                    <ClearIconStyled>
-                        <X size={14} color={color} weight='bold'/>
-                    </ClearIconStyled>
+                <IconInput.ClearIcon iconStyle={ClearIconStyled}>
+                    <X size={14} color={color} weight='bold'/>
+                </IconInput.ClearIcon> */}
+                <HeadIcon>
+                    <MagnifyingGlass size={20} color={color} weight='bold'/>
+                </HeadIcon>
+                <IconInput.ClearIcon iconStyle={ClearIconStyled}>
+                    <X size={14} color={color} weight='bold'/>
                 </IconInput.ClearIcon>
         </IconInput>
     )

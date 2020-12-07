@@ -11,7 +11,6 @@ import {
     NavLink
 } from 'reactstrap';
 import styled from 'styled-components';
-
 import AuthModels from '../auth/AuthModels';
 
 import AuthContext from '../../context/auth/authContext';
@@ -104,6 +103,10 @@ const MainNavbar = ({ title }) => {
         logout();
     }
 
+    const loadHomePage = () => {
+        history.push('/');
+    }
+
     const loadNotebook = () => {
         history.push('/notebook');
     }
@@ -140,8 +143,8 @@ const MainNavbar = ({ title }) => {
     return (
         <div className="header">
             <NavContainer>
-                <Navbar expand="md">
-                    <NavbarBrand href="/">{title}</NavbarBrand>
+                <Navbar expand="md" dark>
+                    <NavbarBrand href='#!' onClick={loadHomePage}>{title}</NavbarBrand>
                     <NavbarToggler onClick={toggleMenu} />
                     <Collapse isOpen={menuOpen} navbar>
                         <Nav navbar>

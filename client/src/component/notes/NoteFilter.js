@@ -10,7 +10,7 @@ import NoteContext from '../../context/notes/noteContext';
 
 const { orange, gray } = theme;
 
-const HeadIconStyled = styled.span`
+const HeadIcon = styled.span`
     float: left;
     transform: translate(3px,-120%);
 `;
@@ -64,15 +64,11 @@ const NoteFilter = () => {
             onChange={onChange}
             hoverOn={hoverOn}
             hoverOff={hoverOff}>
-                <IconInput.HeadIcon>
-                    <HeadIconStyled>
-                        <MagnifyingGlass size={16} color={color} weight='bold'/>
-                    </HeadIconStyled>
-                </IconInput.HeadIcon>
-                <IconInput.ClearIcon>
-                    <ClearIconStyled>
-                        <X size={14} color={color} weight='bold'/>
-                    </ClearIconStyled>
+                <HeadIcon>
+                    <MagnifyingGlass size={16} color={color} weight='bold'/>
+                </HeadIcon>
+                <IconInput.ClearIcon iconStyle={ClearIconStyled}>
+                    <X size={14} color={color} weight='bold'/>
                 </IconInput.ClearIcon>
         </IconInput>
     )

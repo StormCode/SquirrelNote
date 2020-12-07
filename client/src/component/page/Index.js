@@ -1,6 +1,10 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { CheckSquareOffset } from "phosphor-react";
+import AuthModels from '../auth/AuthModels';
+
+// Import Resource
 import BackgroundImage from '../../assets/index/background_icons.png';
 import FrontImage from '../../assets/index/front_image.png';
 import NoteImage from '../../assets/index/background_note.png';
@@ -13,6 +17,8 @@ import SecureImage from '../../assets/index/secure.png';
 import { theme } from '../../style/themes';
 
 import AuthContext from '../../context/auth/authContext';
+
+import { REGISTER } from '../../modelTypes';
 
 const { orange, lightOrange, darkOrange, blue } = theme;
 
@@ -83,33 +89,36 @@ const Container = styled.div`
 
     .feature-container {
         background: rgba(255, 255, 255, .8);
-        width: 100%;
+        margin: 3rem auto;
+        width: 90%;
         display: flex;
         flex-flow: row wrap;    
     }
 
         .feature-container > div {
             flex: 1 1 50%;
-            display: flex;
-            flex-flow: row nowrap;
-            padding: 2rem;
+            padding: .5rem;
             height: 300px;
         }
 
         .feature-container > div:not(.desc-block) {
+            display: flex;
+            flex-flow: row nowrap;
             justify-content: center;
             align-items: center;
         }
 
         .feature-container > div.desc-block {
-            background: rgba(245, 255, 255, .6);
+            background: rgba(0, 15, 90, .75);
+            background-clip: content-box;
         }
 
             .feature-container > div > .title {
                 font-size: 1.5rem;
                 font-weight: bold;
-                line-height: 2rem;
-                color: ${blue};
+                line-height: 5rem;
+                text-indent: 1rem;
+                color: #FFF;
             }
 
             .feature-container > div > img {
@@ -120,21 +129,31 @@ const Container = styled.div`
     .intro-container {
         background: url(${NoteImage}) right center/contain no-repeat local;
         position: relative;
-        height: 40vh;
+        display: flex;
+        flex-flow: row nowrap;
     }
 
         .intro-container > ul {
+            flex: 1 1 50%;
             position: relative;
-            float: right;
             text-align: center;
             margin-top: 5rem;
-            width: 40%;
         }
 
             .intro-container > ul > li {
                 font-size: 1.5rem;
                 line-height: 5rem;
                 color: ${blue};
+                text-decoration: underline;
+            }
+
+            .intro-container > .front-img {
+                flex: 1 1 50%;
+                position: relative;
+                margin-top: 2rem;
+                margin-left: -5%;
+                max-width: 60vw;
+                max-height: 100%;
             }
 
     .mask {
@@ -145,31 +164,44 @@ const Container = styled.div`
         width: 100%;
         height: 100%;
     }
-
-    .front-img {
-        position: relative;
-        margin-top: 2rem;
-        margin-left: -5%;
-        max-width: 60vw;
-        max-height: 100%;
-    }
 `;
 
 const Index = () => {
+    const history = useHistory();
     const authContext = useContext(AuthContext);
 
+    const {
+        isAuthenticated,
+        loadUser
+    } = authContext;
+
     useEffect(() => {
-        localStorage.getItem('token') !== null && authContext.loadUser();
+        localStorage.getItem('token') !== null && loadUser();
 
         // eslint-disable-next-line
     }, []);
+
+    const [modelOpen, setModelOpen] = useState(false);
+    const [model, setModel] = useState(null);
+
+    const toggleOpen = () => setModelOpen(!modelOpen);
+    const toggleModel = model => setModel(model);
+    const openRegister = () => {
+        toggleOpen();
+        toggleModel(REGISTER);
+    }
+
+    const loadEntry = e => {
+        e.preventDefault();
+        isAuthenticated ? history.push('/notebook') : openRegister();
+    }
 
     return (
         <Container>
             <div className='banner'>
                 <div className='mask'></div>
                 <p className='banner-header'>輕量級筆記應用</p>
-                <button className='start-btn'>開始使用</button>
+                <button className='start-btn' onClick={loadEntry}>開始使用</button>
             </div>
             <div className='feature-container'>
                 <div><img src={WYSIWYGImage} /></div>
@@ -183,13 +215,22 @@ const Index = () => {
             </div>   
             <div className='intro-container'>
                 <div className='mask'></div>
+                <img className='front-img' src={FrontImage}></img>
                 <ul>
                     <li><CheckSquareOffset size={48} />整理你的思緒</li>
                     <li><CheckSquareOffset size={48} />記錄珍貴回憶</li>
                     <li><CheckSquareOffset size={48} />學習更有效率</li>
                 </ul>
-                <img className='front-img' src={FrontImage}></img>
             </div>
+            <AuthModels
+                model={model}
+                isOpen={modelOpen}
+                toggleModel={toggleModel}
+                toggleOpen={toggleOpen}>
+                <AuthModels.Login>登入</AuthModels.Login>
+                <AuthModels.Register>註冊</AuthModels.Register>
+                <AuthModels.ForgotPassword>忘記密碼</AuthModels.ForgotPassword>
+            </AuthModels>
         </Container>
     )
 }
