@@ -7,7 +7,7 @@ const IconInputContext = React.createContext({
     onChange: () => {}
 });
 
-const Container = styled.div`
+const Container = styled.span`
         ${props => props.containerStyle};
     `;
 

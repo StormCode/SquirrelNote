@@ -6,6 +6,7 @@ import Spinner from '../../component/layout/Spinner'
 import TextInput from '../../component/layout/TextInput'
 import NotedirSorter from './NotedirSorter';
 import Notedir from './NoteDir';
+import makeResponsiveCSS from '../../utils/make-responsive-css'
 
 // Import Style
 import { theme } from '../../style/themes';
@@ -15,44 +16,70 @@ import NotedirContext from '../../context/notedirs/notedirContext';
 
 const { orange, gray } = theme;
 
+const NotedirListBaseStyle = theme => {
+    return `
+        padding: .5rem;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+
+            > .header {
+                border-bottom: 1px solid ${theme.orange};
+                padding: .3rem;
+            }
+        
+                > .header > .title {
+                    color: ${theme.gray};
+                    font-size: 1rem;
+                    font-weight: bold;
+                }
+                
+                > .header > button {
+                    float: right;
+                    position: relative;
+                    background: none;
+                    border: none;
+                }
+
+            ul {
+                margin: 0;
+                padding: 0;
+            }
+
+            .parlgrm {
+                background: ${theme.orange};
+                display: inline-block;
+                width: .5rem;
+                height: 1rem;
+                margin-right: .5rem;
+                transform: skew(-30deg);
+            }
+    `;
+}
+
+const NotedirListResponsiveStyle = () => {
+    return makeResponsiveCSS([
+        {
+            constraint: 'min',
+            width: '0px',
+            rules: `
+                display: flex;
+            `
+        }, {
+            constraint: 'min',
+            width: '768px',
+            rules: `
+                grid-area: notedir-list;
+                display: block;
+            `
+        }
+      ])
+}
+
+
 const NotedirList = styled.div`
-    grid-area: notedir-list;
-    padding: .5rem;
-    height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
-
-        > .header {
-            border-bottom: 1px solid ${({theme}) => theme.orange};
-            padding: .3rem;
-        }
-    
-            > .header > .title {
-                color: ${({theme}) => theme.gray};
-                font-size: 1rem;
-                font-weight: bold;
-            }
-            
-            > .header > button {
-                float: right;
-                position: relative;
-                background: none;
-                border: none;
-            }
-
-        ul {
-            margin: 0;
-            padding: 0;
-        }
-
-        .parlgrm {
-            background: ${({theme}) => theme.orange};
-            display: inline-block;
-            width: .5rem;
-            height: 1rem;
-            margin-right: .5rem;
-            transform: skew(-30deg);
-        }
+    ${({theme}) => NotedirListBaseStyle(theme)}
+    ${NotedirListResponsiveStyle()}
 `;
 
 const Notedirs = ({notebookId, toggleCollapse}) => {

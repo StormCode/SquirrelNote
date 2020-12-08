@@ -1,32 +1,26 @@
 import React from 'react'
-import styled from 'styled-components'
 
-const makeResponsiveComponent = (rulesets, tagName = 'div') =>
-    styled(tagName)`
-    ${buildStyles(rulesets)}
-  `
-
-const buildStyles = rulesets =>
+const makeResponsiveCSS = rulesets =>
     rulesets.reduce(
         (cssString, { constraint, width, rules }) =>
-            `${cssString} @media (${constraint}-width: ${width}) { ${rules} }`,
-        '',
-  )
+            `${cssString} @media (${constraint}-width: ${width}) { ${rules} }`
+        ,''
+    );
 
 export const hideAt = breakpoints => {
     const rulesets = Object.entries(breakpoints).reduce(
         (rulesets, [constraint, width]) => [
             ...rulesets,
             {
-            constraint,
-            width,
-            rules: `display: none;`,
+                constraint,
+                width,
+                rules: `display: none;`,
             },
         ],
         [],
     )
 
-    return makeResponsiveComponent(rulesets)
+    return makeResponsiveCSS(rulesets);
 }
 
 export const Breakpoint = ({ min, max, children }) => {
@@ -34,4 +28,4 @@ export const Breakpoint = ({ min, max, children }) => {
     return <Component>{children}</Component>
 }
 
-export default makeResponsiveComponent;
+export default makeResponsiveCSS;

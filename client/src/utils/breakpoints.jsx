@@ -1,7 +1,8 @@
-import { hideAt } from './make-responsive-component'
+import { hideAt } from './make-responsive-css';
+import styled from 'styled-components';
 
-export const SmallAndBelow = hideAt({ min: '320px' })
-export const MediumAndBelow = hideAt({ min: '960px' })
-export const MediumOnly = hideAt({ max: '640px', min: '960px' })
-export const MediumAndAbove = hideAt({ max: '640px' })
-export const LargeAndAbove = hideAt({ max: '960px' })
+export const SmallAndBelow = styled.div`${hideAt({ min: '320px' })}`
+export const MediumAndBelow = styled.div`${hideAt({ min: '768px' })}`
+export const MediumOnly = styled.div`${hideAt({ max: '768px', min: '960px' })}`
+export const MediumAndAbove = styled.div`${hideAt({ max: '768px' })}`
+export const LargeAndAbove = styled.div`${hideAt({ max: '960px' })}`

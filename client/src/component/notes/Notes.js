@@ -4,6 +4,7 @@ import { FilePlus, ArrowLineLeft } from "phosphor-react";
 import Spinner from '../layout/Spinner';
 import NoteFilter from './NoteFilter';
 import Note from './Note';
+import makeResponsiveCSS from '../../utils/make-responsive-css'
 
 // Import Style
 import { theme } from '../../style/themes';
@@ -13,49 +14,74 @@ import NoteContext from '../../context/notes/noteContext';
 
 const { orange, gray } = theme;
 
+const NoteListBaseStyle = theme => {
+    return `
+        border-left: 1px solid rgba(255,120,0,1);
+        padding: .5rem;
+        height: 100%;
+        overflow-x: hidden;
+        overflow-y: auto;
+
+        > .header {
+            display: flex;
+            flex-flow: row nowarp;
+            border-bottom: 1px solid ${theme.orange};
+            padding: .3rem;
+            align-items: baseline;
+        }
+
+            > .header > .title {
+                flex: 1 0 auto;
+                color: ${theme.gray};
+                font-size: 1rem;
+                font-weight: bold;
+            }
+            
+            > .header > button {
+                flex: 0 1 auto;
+                position: relative;
+                background: none;
+                border: none;
+            }
+
+        > ul {
+            margin: 0;
+            padding: 0;
+        }
+
+        .parlgrm {
+            background: ${theme.orange};
+            display: inline-block;
+            width: .5rem;
+            height: 1rem;
+            margin-right: .5rem;
+            transform: skew(-30deg);
+        }
+    `;
+}
+
+const NoteListResponsiveStyle = () => {
+    return makeResponsiveCSS([
+        {
+            constraint: 'min',
+            width: '0px',
+            rules: `
+                display: flex;
+            `
+        }, {
+            constraint: 'min',
+            width: '768px',
+            rules: `
+                grid-area: note-list;
+                display: block;
+            `
+        }
+      ])
+}
+
 const NoteList = styled.div`
-    grid-area: note-list;
-    border-left: 1px solid rgba(255,120,0,1);
-    padding: .5rem;
-    height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
-
-    > .header {
-        display: flex;
-        flex-flow: row nowarp;
-        border-bottom: 1px solid ${({theme}) => theme.orange};
-        padding: .3rem;
-        align-items: baseline;
-    }
-
-        > .header > .title {
-            flex: 1 0 auto;
-            color: ${({theme}) => theme.gray};
-            font-size: 1rem;
-            font-weight: bold;
-        }
-        
-        > .header > button {
-            flex: 0 1 auto;
-            position: relative;
-            background: none;
-            border: none;
-        }
-
-    > ul {
-        margin: 0;
-        padding: 0;
-    }
-
-    .parlgrm {
-        background: ${({theme}) => theme.orange};
-        display: inline-block;
-        width: .5rem;
-        height: 1rem;
-        margin-right: .5rem;
-        transform: skew(-30deg);
-    }
+    ${({theme}) => NoteListBaseStyle(theme)}
+    ${NoteListResponsiveStyle()}
 `;
 
 const Notes = ({ addEvent, setCacheNoteContent, setNoteContent, toggleCollapse }) => {

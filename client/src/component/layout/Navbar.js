@@ -12,12 +12,16 @@ import {
 } from 'reactstrap';
 import styled from 'styled-components';
 import AuthModels from '../auth/AuthModels';
+import makeResponsiveCSS from '../../utils/make-responsive-css'
+import {
+    MediumAndAbove,
+} from '../../utils/breakpoints.jsx';
 
 import AuthContext from '../../context/auth/authContext';
 
 import { LOGIN, REGISTER } from '../../modelTypes';
 
-const NavContainer = styled.div`
+const NavContainerBaseStyle = `
     background: linear-gradient(180deg, rgba(255,140,40,1) 0%, rgba(255,149,56,1) 20%, rgba(255,119,0,1) 75%);
     box-shadow: 3px 3px 18px 0px rgba(0,0,0,0.75);
 
@@ -25,24 +29,20 @@ const NavContainer = styled.div`
         flex: 1 1 auto;
     }
 
-    .nat-link-active {
-        color: #FDFF6F;
+    .nav-link-active {
+        color: #FDFF6F !important;
     }
 
-    .nav-link:not(.nat-link-active) {
+    .nav-link:not(.nav-link-active) {
         color: #FFF;
     }
         
         .nav-link:hover {
-            color: #EBED68;
+            color: #EBED68 !important;
         }
 
-        .nav-item:not(.nat-link-active):after {
+        .nav-item:not(.nav-link-active):after {
             background: #FFF;
-        }
-
-        .nat-link-active:after {
-            background: #FDFF6F;
         }
 
         .nav-link:after {
@@ -51,28 +51,71 @@ const NavContainer = styled.div`
             height: 3px;
         }
 
-            .nav-link:hover:after {
-                background: #EBED68;
-            }
-
     .right-nav-items {
         display: flex;
-        margin-left: auto;
+    }
+
+        .right-nav-items > div:after {
+            content: '';
+            width: 0;
+            height: 100%;
+        }
+
+    .nav-text {
+        display: inline-block;
+        height: 1.15rem;
+        font-size: 1.15rem;
+        font-weight: 400;
+        color: #FFF;
+        margin-right: .5rem;
+        vertical-align: middle;
     }
 `;
 
-const NavText = styled.li`
-    font-size: 1.15rem;
-    font-weight: 400;
-    color: #FFF;
-    margin-right: .5rem;
+const NavContainerResponsiveStyle = () => {
+    return makeResponsiveCSS([
+        {
+            constraint: 'min',
+            width: '0px',
+            rules: `
+                .nav-link-active:after {
+                    background: none;
+                }
+        
+                .nav-link:hover:after {
+                    background: none;
+                }
 
-    &:before {
-        content: '';
-        display: inline-block;
-        height: 100%;
-        vertical-align: middle;
-    }
+                .right-nav-items {
+                    flex-flow: column wrap;
+                    margin-left: 0;
+                    padding: 0;
+                }
+            `
+        }, {
+            constraint: 'min',
+            width: '768px',
+            rules: `
+                .nav-link-active:after {
+                    background: #FDFF6F;
+                }
+        
+                .nav-link:hover:after {
+                    background: #EBED68;
+                }
+
+                .right-nav-items {
+                    flex-flow: row wrap;
+                    margin-left: auto;
+                }
+            `
+        }
+    ]);
+}
+
+const NavContainer = styled.div`
+    ${NavContainerBaseStyle}
+    ${NavContainerResponsiveStyle()}
 `;
 
 const MainNavbar = ({ title }) => {
@@ -125,18 +168,20 @@ const MainNavbar = ({ title }) => {
     const userLinks = (
         <Fragment>
             <NavItem>
-                <NavLink href='#!' className={location.pathname.match(/notebook(?!\/)/g) ? 'nat-link-active' : null} onClick={loadNotebook}>
+                <NavLink href='#!' className={location.pathname.match(/notebook(?!\/)/g) ? 'nav-link-active' : null} onClick={loadNotebook}>
                     筆記本
                 </NavLink>
             </NavItem>
-            <span className="right-nav-items">
-                <NavText>
-                    {user && user.name}
-                </NavText>
+            <ul className="right-nav-items">
+                <MediumAndAbove>
+                    <li className='nav-text'>
+                        {user && user.name}
+                    </li>
+                </MediumAndAbove>
                 <NavItem>
                     <NavLink href='#!' onClick={onLogout}>登出</NavLink>
                 </NavItem>
-            </span>
+            </ul>
         </Fragment>
     );
 

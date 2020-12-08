@@ -5,6 +5,10 @@ import axios from 'axios';
 import { decrypt } from '../../utils/crypto';
 import styled from 'styled-components';
 import { NotePencil, Browser, FileX, Trash, ArrowsLeftRight } from "phosphor-react";
+import makeResponsiveCSS from '../../utils/make-responsive-css'
+import {
+    MediumAndBelow
+} from '../../utils/breakpoints.jsx';
 
 import ImgSrcParser from '../../utils/imgSrcParser';
 import Notedirs from '../notedirs/NoteDirs';
@@ -29,113 +33,178 @@ import {
     DISABLESAVE
 } from '../../saveState';
 
-const { orange, darkOrange, gray, darkGray } = theme;
+const { orange, lightOrange, darkOrange, gray, darkGray } = theme;
 
 // grid-template-columns: 50px 1.2fr 1.5fr 3.5fr;
 // "side-bar notedir-list note-list editor-area";
 // .recycle-bin {
     //     grid-area: recycle-bin;
     // }
-const NoteContainer = styled.div`
-    display: grid;
-    grid-template-columns: ${props => props.notedirCollapse || props.noteCollapse ? '30px' : ''} ${props => props.notedirCollapse ? '' : '1.2fr'} ${props => props.noteCollapse ? '' : '1.5fr'} ${props => props.notedirCollapse ? props.noteCollapse ? '6.2fr' : '4.7fr' : props.noteCollapse ? '5fr' : '3.5fr'};
-    grid-template-rows: 100%;
-    grid-template-areas:
-        "${props => props.notedirCollapse || props.noteCollapse ? 'side-bar' : ''} ${props => props.notedirCollapse ? '' : 'notedir-list'} ${props => props.noteCollapse ? '' : 'note-list'} editor-area";
-    width: 100%;
-    height: 100%;
-
-    .note-title-container {
-        display: flex;
-        flex-flow: row nowrap;
-        margin-top: 10px;
+const NoteContainerBaseStyle = props => {
+    return `
         width: 100%;
-    }
+        height: 100%;
 
-        .note-title-container .note-title {
-            flex: 1 1 auto;
-            border: none;
-            outline: none;
-            padding: 10px;
+        .note-title-container {
+            display: flex;
+            flex-flow: row nowrap;
+            margin-top: 10px;
+            width: 100%;
         }
 
-            .note-title-container .note-title:disabled {
-                color: #000;
-                font-size: 1.2rem;
-                background: none;
+            .note-title-container .note-title {
+                flex: 1 1 auto;
+                border: none;
+                outline: none;
+                padding: 10px;
             }
 
-        .note-title-container .note-save-btn {
-            flex: 0 1 15%;
+                .note-title-container .note-title:disabled {
+                    color: #000;
+                    font-size: 1.2rem;
+                    background: none;
+                }
+
+            .note-title-container .note-save-btn {
+                flex: 0 1 15%;
+            }
+
+        
+
+        .side-bar {
+            grid-area: side-bar;
+            background: ${orange};
+            display: flex;
+            flex-flow: column nowrap;
+            padding: 0;
+
+            .notedir-item,
+            .note-item {
+                cursor: pointer;
+                background: ${lightOrange};
+                border-radius: 0 10px 10px 0;
+                margin: 1px 0;
+                padding: .5rem 0;
+                text-align: center;
+                overflow: hidden;
+            }
+
+            .notedir-item {
+                display: ${props.notedirCollapse ? 'inline-block' : 'none'};
+            }
+
+            .note-item {
+                display: ${props.noteCollapse ? 'inline-block' : 'none'};
+            }
         }
+    `;
+}
 
-    
-
-    .side-bar {
-        grid-area: side-bar;
-        background: ${orange};
-
-        .notedir-item,
-        .note-item {
-            background: ${darkOrange};
+const NoteContainerResponsiveStyle = props => {
+    return makeResponsiveCSS([
+        {
+            constraint: 'min',
+            width: '0px',
+            rules: `
+                .rwd-nav-bar {
+                    display: flex;
+                    flex-flow: row nowrap;
+                }
+        
+                    .rwd-nav-bar button {
+                        flex: 1 1 25%;
+                    }
+            `
+        }, {
+            constraint: 'min',
+            width: '768px',
+            rules: `
+                display: grid;
+                grid-template-columns: ${props.notedirCollapse || props.noteCollapse ? '30px' : ''} ${props.notedirCollapse ? '' : '1.2fr'} ${props.noteCollapse ? '' : '1.5fr'} ${props.notedirCollapse ? props.noteCollapse ? '6.2fr' : '4.7fr' : props.noteCollapse ? '5fr' : '3.5fr'};
+                grid-template-rows: 100%;
+                grid-template-areas:
+                    "${props.notedirCollapse || props.noteCollapse ? 'side-bar' : ''} ${props.notedirCollapse ? '' : 'notedir-list'} ${props.noteCollapse ? '' : 'note-list'} editor-area";
+            `
         }
+      ])
+}
 
-        .notedir-item {
-            display: ${props => props.notedirCollapse ? 'inline-block' : 'none'};
-        }
-
-        .note-item {
-            display: ${props => props.noteCollapse ? 'inline-block' : 'none'};
-        }
-    }
+const NoteContainer = styled.div`
+    ${props => NoteContainerBaseStyle(props)}
+    ${props => NoteContainerResponsiveStyle(props)}
 `;
 
+const EditorAreaBaseStyle = props => {
+    return `
+        display: flex;
+        border-left: 1px solid rgba(255,120,0,1);
+        flex-flow: column nowrap;
+        height: 100%;
+        overflow-y: auto;
+
+        .note-header {
+            flex: 0 1 50px;
+        }
+
+        .editor {
+            flex: 1 1 auto;
+            overflow-x: hidden;
+        }
+
+        .ck-sticky-panel {
+            display: ${props.showToolPanel ? 'block' : 'none'};
+        }
+
+        .ck-editor__editable {
+            border: none;
+        }
+
+        button {
+            margin: 0 5px;
+            padding: 0;
+            border: none;
+            background: none;
+        }
+
+        &.note-discard-btn {
+            cursor: ${props.cacheCurrent ? 'pointer' : 'default'};
+        }
+
+        &.note-edit-btn,
+        &.note-move-btn {
+            cursor: ${props.current && props.cacheCurrent ? 'pointer' : 'default'};
+        }
+
+        button&:not(&.note-discard-btn),
+        button&:not(&.note-move-btn),
+        button&:not(&.note-edit-btn) {
+            cursor: pointer;
+        }
+    `;
+}
+
+const EditorAreaResponsiveStyle = () => {
+    return makeResponsiveCSS([
+        {
+            constraint: 'min',
+            width: '0px',
+            rules: `
+                display: flex;
+            `
+        }, {
+            constraint: 'min',
+            width: '768px',
+            rules: `
+                grid-area: editor-area;
+                display: block;
+            `
+        }
+      ])
+}
+
 const EditorArea = styled.div`
-    grid-area: editor-area;
-    display: flex;
-    border-left: 1px solid rgba(255,120,0,1);
-    flex-flow: column nowrap;
-    height: 100%;
-    overflow-y: auto;
-
-    .note-header {
-        flex: 0 1 50px;
-    }
-
-    .editor {
-        flex: 1 1 auto;
-        overflow-x: hidden;
-    }
-
-    .ck-sticky-panel {
-        display: ${props => props.showToolPanel ? 'block' : 'none'};
-    }
-
-    .ck-editor__editable {
-        border: none;
-    }
-
-    button {
-        margin: 0 5px;
-        padding: 0;
-        border: none;
-        background: none;
-    }
-
-    &.note-discard-btn {
-        cursor: ${props => props.cacheCurrent ? 'pointer' : 'default'};
-    }
-
-    &.note-edit-btn,
-    &.note-move-btn {
-        cursor: ${props => props.current && props.cacheCurrent ? 'pointer' : 'default'};
-    }
-
-    button&:not(&.note-discard-btn),
-    button&:not(&.note-move-btn),
-    button&:not(&.note-edit-btn) {
-        cursor: pointer;
-    }
+    ${props => EditorAreaBaseStyle(props)}
+    ${EditorAreaResponsiveStyle()}
 `;
 
 const NotedirContainer = styled.li`
@@ -677,6 +746,14 @@ const Note = ({ match }) => {
                 <Models.ConfirmBtn enable={destNotedir !== null}>移動</Models.ConfirmBtn>
                 <Models.CancelBtn>取消</Models.CancelBtn>
             </Models>
+            <MediumAndBelow>
+                <div className='rwd-nav-bar'>
+                    <button>目錄</button>
+                    <button>筆記</button>
+                    <button>編輯器</button>
+                    <button>回收站</button>
+                </div>
+            </MediumAndBelow>
         </NoteContainer>
     )
 }

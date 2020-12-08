@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import { FunnelSimple } from "phosphor-react";
 import styled from 'styled-components';
 import Sorter from '../layout/Sorter';
+import makeResponsiveCSS from '../../utils/make-responsive-css'
 
 // Import Style
 import { theme } from '../../style/themes';
@@ -9,10 +10,35 @@ import { theme } from '../../style/themes';
 import NotebookContext from '../../context/notebooks/notebookContext'
 
 const { defaultColor, orange, gray } = theme;
-const SorterContainer = styled.span`
+
+const SorterContainerBaseStyle = `
     cursor: pointer;
-    float: right;
     margin: 0 10px;
+    height: 2.5rem;
+`;
+
+const SorterContainerResponsiveStyle = () => {
+    return makeResponsiveCSS([
+        {
+            constraint: 'min',
+            width: '0px',
+            rules: `
+                display: flex;
+                align-items: center;
+            `
+        }, {
+            constraint: 'min',
+            width: '768px',
+            rules: `
+                display: inline-block;
+            `
+        }
+    ]);
+}
+
+const SorterContainer = styled.span`
+    ${SorterContainerBaseStyle}
+    ${SorterContainerResponsiveStyle()}
 `;
 
 const NotebookSorter = () => {
