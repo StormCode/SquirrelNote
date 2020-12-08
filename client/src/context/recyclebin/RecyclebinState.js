@@ -7,9 +7,11 @@ import recyclebinReducer from './recyclebinReducer';
 import {
     GET_DELETED_ITEMS,
     FILTER_RECYCLELIST,
+    CLEAR_FILTER_RECYCLELIST,
     SORT_RECYCLELIST,
     RESTORE_RECYCLEBIN,
     PERMANENTLY_DELETE,
+    CLEAR_RECYCLEBIN,
     RECYCLEBIN_ERROR
 } from '../types';
 
@@ -25,6 +27,7 @@ const RecycleBinState = props => {
 
     const [state, dispatch] = useReducer(recyclebinReducer, initialState);
 
+    // 取得回收站項目
     const getDeletedItems = async () => {
         try {
             const res = await axios.get('/api/recyclebin');
@@ -45,6 +48,7 @@ const RecycleBinState = props => {
         }
     }
 
+    // 復原回收站項目
     const restore = async id => {
         try {
             await axios.put(`/api/recyclebin/${id}`);
@@ -60,6 +64,7 @@ const RecycleBinState = props => {
         }
     }
 
+    // 永久刪除回收站項目
     const permanentlyDelete = async id => {
         try {
             await axios.delete(`/api/recyclebin/${id}`);
@@ -75,6 +80,7 @@ const RecycleBinState = props => {
         }
     }
 
+    // 排序回收站項目
     const sortRecycleList = (orderBy, sortBy) => {
         dispatch({
             type: SORT_RECYCLELIST,
@@ -82,8 +88,46 @@ const RecycleBinState = props => {
         });
     }
 
-    const filterRecycleList = () => {
+    // 篩選回收站項目
+    const filterRecycleList = text => {
+        try{
+            dispatch({
+                type: FILTER_RECYCLELIST,
+                payload: text
+            });
+        } catch(err) {
+            dispatch({ 
+                type: RECYCLEBIN_ERROR,
+                payload: err.msg || 'Server Error'
+            });
+        }
+    }
 
+    // 清除篩選回收站項目
+    const clearFilterRecycleList = text => {
+        try{
+            dispatch({
+                type: CLEAR_FILTER_RECYCLELIST,
+                payload: text
+            });
+        } catch(err) {
+            dispatch({ 
+                type: RECYCLEBIN_ERROR,
+                payload: err.msg || 'Server Error'
+            });
+        }
+    }
+
+    // 清除回收站資料
+    const clearRecyclebin = () => {
+        try {
+            dispatch({ type: CLEAR_RECYCLEBIN });
+        } catch (err) {
+            dispatch({ 
+                type: RECYCLEBIN_ERROR,
+                payload: err.msg || 'Server Error'
+            });
+        }
     }
 
     return (
@@ -98,8 +142,10 @@ const RecycleBinState = props => {
                 getDeletedItems,
                 sortRecycleList,
                 filterRecycleList,
+                clearFilterRecycleList,
                 restore,
-                permanentlyDelete
+                permanentlyDelete,
+                clearRecyclebin
             }}>
                 {props.children}
         </recyclebinContext.Provider>

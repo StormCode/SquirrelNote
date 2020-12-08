@@ -11,7 +11,7 @@ import { deleteStyle } from '../../style/model/delete';
 const RecycleItem = ({item}) => {
     const recyclebinContext = useContext(RecyclebinContext);
     
-    const { restore, permanentlyDelete } = recyclebinContext;
+    const { getDeletedItems, restore, permanentlyDelete } = recyclebinContext;
     const {id, type, title, date, isRestoreable} = item;
     const [deleteVisible, setDeleteVisible] = useState(false);
 
@@ -45,9 +45,10 @@ const RecycleItem = ({item}) => {
         setDeleteVisible(false);
     }
 
-    const onRestore = e => {
+    const onRestore = async e => {
         e.preventDefault();
-        restore(id);
+        await restore(id);
+        await getDeletedItems();
     };
 
     const onPermanentlyDelete = e => {

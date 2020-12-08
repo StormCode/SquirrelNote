@@ -10,11 +10,18 @@ const RecycleList = () => {
 
     const {
         deletedItems,
+        filtered, 
         loading,
-        getDeletedItems
+        getDeletedItems,
+        clearRecyclebin
     } = recyclebinContext;
+    
     useEffect(() => {
         getDeletedItems();
+
+        return () => {
+            clearRecyclebin();
+        }
 
         // eslint-disable-next-line
     },[]);
@@ -32,9 +39,14 @@ const RecycleList = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {deletedItems.map(deletedItem =>
+                            { filtered !== null ? 
+                            (filtered.map(deletedItem => 
+                                <RecycleItem key={deletedItem._id} 
+                                    item={deletedItem} />
+                            )) :
+                            (deletedItems.map(deletedItem =>
                                 <RecycleItem key={uuidv4()} item ={deletedItem} />
-                            )}
+                            ))}
                         </tbody>
                     </Table>
                 : <p>目前回收站查無資料</p>

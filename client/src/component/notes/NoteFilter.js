@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { MagnifyingGlass, X } from "phosphor-react";
 import IconInput from '../layout/IconInput';
 import styled from 'styled-components';
@@ -15,7 +15,7 @@ const HeadIcon = styled.span`
     transform: translate(3px,-120%);
 `;
 
-const ClearIconStyled = styled.span`
+const ClearIconStyle = styled.span`
     cursor: pointer;
     float: right;
     transform: translate(-150%, -120%);
@@ -67,7 +67,7 @@ const NoteFilter = () => {
                 <HeadIcon>
                     <MagnifyingGlass size={16} color={color} weight='bold'/>
                 </HeadIcon>
-                <IconInput.ClearIcon iconStyle={ClearIconStyled}>
+                <IconInput.ClearIcon iconStyle={ClearIconStyle}>
                     <X size={14} color={color} weight='bold'/>
                 </IconInput.ClearIcon>
         </IconInput>
