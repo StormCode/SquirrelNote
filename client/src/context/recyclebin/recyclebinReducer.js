@@ -3,7 +3,6 @@ import {
     FILTER_RECYCLELIST,
     CLEAR_FILTER_RECYCLELIST,
     SORT_RECYCLELIST,
-    RESTORE_RECYCLEBIN,
     PERMANENTLY_DELETE,
     CLEAR_RECYCLEBIN,
     RECYCLEBIN_ERROR
@@ -51,7 +50,6 @@ export default (state,action) => {
                     return deletedItem.title.match(regex);
                 })
             }
-        case RESTORE_RECYCLEBIN:
         case PERMANENTLY_DELETE:
             return {
                 ...state,

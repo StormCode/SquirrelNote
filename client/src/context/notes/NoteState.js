@@ -47,7 +47,36 @@ const NoteState = props => {
 
     const [state, dispatch] = useReducer(NoteReducer, initialState);
 
-    //查詢全部筆記清單
+    //查詢筆記本裡全部筆記清單
+    const getAllNotes = async notebookId => {
+        const config = {
+            headers: {
+                'x-notebook': encrypt(notebookId, process.env.REACT_APP_SECRET_KEY, false)
+            }
+        };
+
+        try {
+            //todo: 動態load N筆資料
+            const res = await axios.get('/api/notes',config);
+            // 解密Server回傳的note資料
+            const decryptedDatas = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
+            decryptedDatas.map(decryptedData => {
+                decryptedData.title = decrypt(decryptedData.title, process.env.REACT_APP_SECRET_KEY, false);
+                decryptedData.summary = decrypt(decryptedData.summary, process.env.REACT_APP_SECRET_KEY, false);
+            });
+            dispatch({
+                type: GET_NOTES,
+                payload: decryptedDatas
+            });
+        } catch (err) {
+            dispatch({
+                type: NOTE_ERROR,
+                payload: err.msg || 'Server Error'
+            })
+        }
+    }
+
+    //查詢單一目錄全部筆記清單
     const getNotes = async notedirId => {
         const config = {
             headers: {
@@ -325,6 +354,7 @@ const NoteState = props => {
             orderBy: state.orderBy,
             sortBy: state.sortBy,
             error: state.error,
+            getAllNotes,
             getNotes,
             getNoteDetail,
             setCurrentNote,

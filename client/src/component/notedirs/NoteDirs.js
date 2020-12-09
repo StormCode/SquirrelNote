@@ -6,6 +6,7 @@ import Spinner from '../../component/layout/Spinner'
 import TextInput from '../../component/layout/TextInput'
 import NotedirSorter from './NotedirSorter';
 import Notedir from './NoteDir';
+import AllNotedir from './AllNotedir';
 import makeResponsiveCSS from '../../utils/make-responsive-css'
 
 // Import Style
@@ -227,15 +228,18 @@ const Notedirs = ({notebookId, toggleCollapse}) => {
                         </TextInput>
                     </div>
                     <ul>
-                        {notedirs.map(notedir => {
-                            return !notedir.default 
-                            && (<Notedir 
-                                key={notedir._id} 
-                                notedir={notedir} 
-                                toolPanel={currentToolPanel}
-                                setCurrent={setCurrent}
-                                setToolPanel={setToolPanel} />)
-                        })}
+                        <Fragment>
+                            <AllNotedir setCurrent={setCurrent} />
+                            {notedirs.map(notedir => {
+                                return !notedir.default 
+                                && (<Notedir 
+                                    key={notedir._id} 
+                                    notedir={notedir} 
+                                    toolPanel={currentToolPanel}
+                                    setCurrent={setCurrent}
+                                    setToolPanel={setToolPanel} />)
+                            })}
+                        </Fragment>
                     </ul>
                 </NotedirList>)
             : <Spinner /> }

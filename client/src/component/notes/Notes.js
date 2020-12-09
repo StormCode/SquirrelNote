@@ -82,7 +82,7 @@ const NoteList = styled.div`
     ${NoteListResponsiveStyle()}
 `;
 
-const Notes = ({ addEvent, setCacheNoteContent, setNoteContent, toggleCollapse }) => {
+const Notes = ({ notebookId, addEvent, setCacheNoteContent, setNoteContent, toggleCollapse }) => {
     const notedirContext = useContext(NotedirContext);
     const noteContext = useContext(NoteContext);
 
@@ -92,6 +92,7 @@ const Notes = ({ addEvent, setCacheNoteContent, setNoteContent, toggleCollapse }
         filtered,
         cacheNotes, 
         getNotes,
+        getAllNotes,
         clearNote, 
         loading 
     } = noteContext;
@@ -111,8 +112,12 @@ const Notes = ({ addEvent, setCacheNoteContent, setNoteContent, toggleCollapse }
     }, []);
 
     useEffect(() => {
-        notedirId && getNotes(notedirId);
-    }, [notedirId]);
+        if(notedirId) {
+            getNotes(notedirId);
+        } else if (notedirId === '' && notebookId) {
+            getAllNotes(notebookId);
+        }
+    }, [notebookId, notedirId]);
 
     const appendDot = data => {
         return data.length >= 10 ? 

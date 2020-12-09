@@ -13,7 +13,7 @@ import Models from '../layout/Models';
 // Import Style
 import { theme } from '../../style/themes';
 import NotebookContainer from '../../style/components/Notebook';
-import { deleteStyle } from '../../style/model/delete';
+import deleteStyle from '../../style/model/delete';
 
 import NotebookContext from '../../context/notebooks/notebookContext';
 

@@ -17,38 +17,65 @@ const Note = require('../models/Note');
 const Recyclebin = require('../models/Recyclebin');
 const crypto = require('../utils/crypto');
 const auth = require('../middleware/auth');
+const e = require('express');
 
 // route            Get /api/notes
 // desc             取得所有筆記
 // access           Private
 router.get('/', auth, async(req, res) => {
+    let notebook, notedir, notes = [];
+
     try {
         const newCrypto = crypto(process.env.SECRET_KEY);
 
-        //從header取得notedir
-        const notedirId = newCrypto.decrypt(req.header('x-notedir'), false);
+        if(!(req.header('x-notedir') || req.header('x-notebook'))) 
+            return res.status(400).json({msg: '缺少參數', status: MISSING_PARAM});
 
-        if(!notedirId) return res.status(400).json({msg: '缺少參數', status: MISSING_PARAM});
+        //判斷取得單一目錄的筆記/筆記本裡全部的筆記
+        if(req.header('x-notedir')) {
+            //從header取得notedir
+            const notedirId = newCrypto.decrypt(req.header('x-notedir'), false);
 
-        // 取得此筆記的筆記目錄
-        const notedir = await Notedir.findById(notedirId);
+            // 取得此筆記的筆記目錄
+            notedir = await Notedir.findById(notedirId);
+    
+            if(!notedir) return res.status(404).json({msg: '找不到此筆記的存放目錄', status: NOT_FOUND});
+    
+            // 取得筆記本資料
+            notebook = await Notebook.findById(notedir.notebook);
+    
+            if(!notebook) return res.status(404).json({msg: '找不到此筆記的筆記本', status: NOT_FOUND});
+    
+            // 確認使用者是否真的擁有這個筆記本
+            if(notebook.author.toString() !== req.user.id) return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
+    
+            // 取得所有筆記
+            notes = notedir.notes;
+        } else {
+            //從header取得notebook
+            const notebookId = newCrypto.decrypt(req.header('x-notebook'), false);
 
-        if(!notedir) return res.status(404).json({msg: '找不到此筆記的存放目錄', status: NOT_FOUND});
+            // 取得此筆記的筆記本
+            notebook = await Notebook.findById(notebookId);
 
-        // 取得筆記本資料
-        const notebook = await Notebook.findById(notedir.notebook);
+            if(!notebook) return res.status(404).json({msg: '找不到筆記本', status: NOT_FOUND});
 
-        if(!notebook) return res.status(404).json({msg: '找不到此筆記的筆記本', status: NOT_FOUND});
-
-        // 確認使用者是否真的擁有這個筆記本
-        if(notebook.author.toString() !== req.user.id) return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
-
-        // 取得所有筆記
-        const notes = notedir.notes;
-
+            // 確認使用者是否真的擁有這個筆記本
+            if(notebook.author.toString() !== req.user.id) return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
+    
+            // 筆記本中的所有目錄
+            const allNotedirs = notebook.notedirs;
+            
+            // 取得所有筆記
+            for(let idx = 0; idx < allNotedirs.length; idx++) {
+                notedir = await Notedir.findById(allNotedirs[idx]._id);
+                notes.concat(notedir.notes);
+            }
+        }
         // 加密note資料
         const encryptedNote = newCrypto.encrypt(notes);
         res.json(encryptedNote);
+        
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');

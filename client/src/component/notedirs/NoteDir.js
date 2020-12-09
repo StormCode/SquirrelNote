@@ -7,7 +7,8 @@ import Models from '../layout/Models';
 
 // Import Style
 import { theme } from '../../style/themes';
-import { deleteStyle } from '../../style/model/delete';
+import deleteStyle from '../../style/model/delete';
+import NoteDirContainer from '../../style/components/Notedir';
 
 import NotebookContext from '../../context/notebooks/notebookContext';
 import NotedirContext from '../../context/notedirs/notedirContext';
@@ -15,39 +16,39 @@ import NotedirContext from '../../context/notedirs/notedirContext';
 const { orange, darkOrange, gray } = theme;
 const currentFontColor = '#FFF';
 
-const NoteDirContainer = styled.li`
-    cursor: pointer;
-    background: ${props => props.isCurrent ? orange : 'none'};
-    color: ${props => props.isCurrent ? '#FFF' : gray};
-    padding: .5rem 0 .5rem .5rem;
-    font-size: 1rem;
-    height: auto;
-    &:hover {
-        background: ${props => props.isCurrent ? darkOrange : 'none'};
-        color: ${props => props.isCurrent ? '#FFF' : orange};
-    };
+// const NoteDirContainer = styled.li`
+//     cursor: pointer;
+//     background: ${props => props.isCurrent ? orange : 'none'};
+//     color: ${props => props.isCurrent ? '#FFF' : gray};
+//     padding: .5rem 0 .5rem .5rem;
+//     font-size: 1rem;
+//     height: auto;
+//     &:hover {
+//         background: ${props => props.isCurrent ? darkOrange : 'none'};
+//         color: ${props => props.isCurrent ? '#FFF' : orange};
+//     };
 
-        .text-container,
-        .toolpanel-container {
-            position: relative;
-        }
+//         .text-container,
+//         .toolpanel-container {
+//             position: relative;
+//         }
 
-        .text-container {
-            width: 20ch;
-            max-width: 100%;
-        }
+//         .text-container {
+//             width: 20ch;
+//             max-width: 100%;
+//         }
 
-            .text-container p {
-                white-space: nowrap;
-                text-overflow: ellipsis;
-                overflow: hidden;
-            }
+//             .text-container p {
+//                 white-space: nowrap;
+//                 text-overflow: ellipsis;
+//                 overflow: hidden;
+//             }
 
-        .toolpanel-container {
-            width: 100%;
-            z-index: 1;
-        }
-`;
+//         .toolpanel-container {
+//             width: 100%;
+//             z-index: 1;
+//         }
+// `;
 
 const Input = styled.input`
     background: none;

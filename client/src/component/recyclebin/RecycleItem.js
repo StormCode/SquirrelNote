@@ -6,7 +6,7 @@ import Models from '../layout/Models';
 import RecyclebinContext from '../../context/recyclebin/recyclebinContext';
 
 // Import Style
-import { deleteStyle } from '../../style/model/delete';
+import deleteStyle from '../../style/model/delete';
 
 const RecycleItem = ({item}) => {
     const recyclebinContext = useContext(RecyclebinContext);

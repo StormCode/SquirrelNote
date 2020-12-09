@@ -3,7 +3,7 @@ import { theme } from '../themes';
 
 const { orange, darkOrange, gray, darkGray } = theme;
 
-export const deleteStyle = `
+const deleteStyle = `
     width: 100%;
 
     .modal-body {
@@ -49,3 +49,5 @@ export const deleteStyle = `
         }
     }
 `;
+
+export default deleteStyle;

@@ -15,7 +15,7 @@ import Models from '../layout/Models';
 
 // Import Style
 import { theme } from '../../style/themes';
-import { deleteStyle } from '../../style/model/delete';
+import deleteStyle from '../../style/model/delete';
 
 import AuthContext from '../../context/auth/authContext';
 import NotebookContext from '../../context/notebooks/notebookContext';
@@ -410,6 +410,8 @@ const Note = ({ match }) => {
         // eslint-disable-next-line
     }, []);
 
+    const notedirId = notedirContext.current !== null && notedirContext.current !== '' ? notedirContext.current._id : '';
+
     const {
         notes,
         current,
@@ -455,6 +457,7 @@ const Note = ({ match }) => {
     const host = `${window.location.protocol}//${window.location.host}`;
 
     const notebooks = notebookContext.notebooks;
+    const notedirs = notedirContext.notedirs;
 
     useEffect(() => {
         notebooks && notebooks.length > 0 && notebookContext.setCurrentNotebook(match.params.id);
@@ -598,7 +601,14 @@ const Note = ({ match }) => {
 
     const onDelete = e => {
         e.preventDefault();
-        current && deleteNote(notedirContext.current._id, current._id);
+        // 若目前的目錄是在「(全部)」則用筆記ID抓出Notes的筆記目錄
+        let saveNotedirId;
+        if(notedirId === '') {
+            saveNotedirId = notes.find(note => note._id === current._id).notedir;
+        } else {
+            saveNotedirId = notedirId;
+        }
+        current && deleteNote(saveNotedirId, current._id);
         setDeleteNoteVisible(false);
     }
 
@@ -668,19 +678,46 @@ const Note = ({ match }) => {
 
                 let newContent = await ReplaceImage(current.content);
 
-                // 儲存筆記
-                let saveNote = {
-                    title: current.title,
-                    content: newContent,
-                    notedir: notedirContext.current._id
-                };
+                // 判斷筆記儲存的目錄
+                // 若目前的目錄是在「(全部)」則用筆記ID抓出Notes的筆記目錄
+                let saveNotedirId;
 
-                //判斷要做Add還是Update
+                // 1. 判斷要做Add還是Update
+                // 2. 判斷筆記儲存的目錄
                 if(notes.map(note => note._id).indexOf(current._id) === -1) {
-                    //新增筆記到資料庫
+                    // 若目前的目錄是在「(全部)」則把筆記存入預設的目錄
+                    if(notedirId === '') {
+                        let currentNotebook = notebooks.find(notebook => notebook._id === match.params.id);
+                        saveNotedirId = currentNotebook.notedirs.find(notedir => notedir.default === true)._id;
+                    } else {
+                        saveNotedirId = notedirId;
+                    }
+
+                    // 儲存筆記
+                    let saveNote = {
+                        title: current.title,
+                        content: newContent,
+                        notedir: saveNotedirId
+                    };
+                    
+                    // 新增筆記
                     await addNote(saveNote);
                 } else {
-                    //更新筆記到資料庫
+                    // 若目前的目錄是在「(全部)」則用筆記ID抓出Notes的筆記目錄
+                    if(notedirId === '') {
+                        saveNotedirId = notes.find(note => note._id === current._id).notedir;
+                    } else {
+                        saveNotedirId = notedirId;
+                    }
+    
+                    // 儲存筆記
+                    let saveNote = {
+                        title: current.title,
+                        content: newContent,
+                        notedir: saveNotedirId
+                    };
+
+                    // 更新筆記
                     await updateNote(current._id, saveNote);
                 }
 
@@ -830,6 +867,7 @@ const Note = ({ match }) => {
             </NotedirContainer>
             <NoteContainer visible={panelVisible.NOTE}>
                 <Notes
+                    notebookId={match.params.id}
                     addEvent={onAdd}
                     setCacheNoteContent={setCacheNoteContent}
                     setNoteContent = {setNoteContent}
@@ -903,7 +941,7 @@ const Note = ({ match }) => {
                     <p className='title'>移動筆記</p>
                     <p className='tip'>請選擇要存放此筆記的目錄</p>
                     <ul>
-                        {notedirContext.notedirs && notedirContext.notedirs.map(notedir => {
+                        {notedirs && notedirs.map(notedir => {
                             return !notedir.default
                             && (<Notedir
                                 key={notedir._id}

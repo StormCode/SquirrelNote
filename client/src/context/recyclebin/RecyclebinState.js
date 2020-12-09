@@ -52,10 +52,6 @@ const RecycleBinState = props => {
     const restore = async id => {
         try {
             await axios.put(`/api/recyclebin/${id}`);
-            dispatch({ 
-                type: RESTORE_RECYCLEBIN,
-                payload: id
-            });
         } catch (err) {
             dispatch({ 
                 type: RECYCLEBIN_ERROR,
