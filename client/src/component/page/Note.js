@@ -6,9 +6,6 @@ import { decrypt } from '../../utils/crypto';
 import styled from 'styled-components';
 import { NotePencil, Browser, FileX, Trash, ArrowsLeftRight } from "phosphor-react";
 import makeResponsiveCSS from '../../utils/make-responsive-css'
-import {
-    MediumAndBelow
-} from '../../utils/breakpoints.jsx';
 
 import ImgSrcParser from '../../utils/imgSrcParser';
 import Notedirs from '../notedirs/NoteDirs';
@@ -37,26 +34,24 @@ const { orange, lightOrange, darkOrange, gray, darkGray } = theme;
 
 // grid-template-columns: 50px 1.2fr 1.5fr 3.5fr;
 // "side-bar notedir-list note-list editor-area";
-// .recycle-bin {
-    //     grid-area: recycle-bin;
-    // }
-const NoteContainerBaseStyle = props => {
+const MainContainerBaseStyle = props => {
     return `
         width: 100%;
         height: 100%;
 
         .note-title-container {
+            flex: 1 1 100%;
             display: flex;
             flex-flow: row nowrap;
-            margin-top: 10px;
+            margin: .5rem;
             width: 100%;
         }
 
             .note-title-container .note-title {
                 flex: 1 1 auto;
-                border: none;
+                border: 1px solid ${orange};
                 outline: none;
-                padding: 10px;
+                padding: .5rem;
             }
 
                 .note-title-container .note-title:disabled {
@@ -65,11 +60,19 @@ const NoteContainerBaseStyle = props => {
                     background: none;
                 }
 
-            .note-title-container .note-save-btn {
-                flex: 0 1 15%;
-            }
+        .recycle-bin {
+            position: absolute;
+            left: 0;
+            bottom: .5rem;
+            height: 2rem;
+        }
 
-        
+            .recycle-bin > button {
+                border: none;
+                padding: 0 1rem;
+                color: ${orange};
+                height: 100%;
+            }
 
         .side-bar {
             grid-area: side-bar;
@@ -97,16 +100,42 @@ const NoteContainerBaseStyle = props => {
                 display: ${props.noteCollapse ? 'inline-block' : 'none'};
             }
         }
+
+        .rwd-nav-bar > button {
+            background: linear-gradient(${orange}, ${darkOrange});
+            position: relative;
+            border: 1px solid ${darkOrange};
+            padding: .5rem 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #000;
+        
+            &:after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                background: linear-gradient(rgba(255, 255, 255, .75), rgba(255, 255, 255, .1));
+                width: 100%;
+                height: 40%;
+            }
+        }
     `;
 }
 
-const NoteContainerResponsiveStyle = props => {
+const MainContainerResponsiveStyle = props => {
     return makeResponsiveCSS([
         {
             constraint: 'min',
             width: '0px',
             rules: `
+                display: flex;
+                flex-flow: column nowrap;
+
                 .rwd-nav-bar {
+                    position: sticky;
+                    bottom: 0;
+                    z-index: 1;
                     display: flex;
                     flex-flow: row nowrap;
                 }
@@ -114,6 +143,10 @@ const NoteContainerResponsiveStyle = props => {
                     .rwd-nav-bar button {
                         flex: 1 1 25%;
                     }
+                
+                .recycle-bin {
+                    display: none;
+                }
             `
         }, {
             constraint: 'min',
@@ -124,14 +157,168 @@ const NoteContainerResponsiveStyle = props => {
                 grid-template-rows: 100%;
                 grid-template-areas:
                     "${props.notedirCollapse || props.noteCollapse ? 'side-bar' : ''} ${props.notedirCollapse ? '' : 'notedir-list'} ${props.noteCollapse ? '' : 'note-list'} editor-area";
+            
+                .rwd-nav-bar {
+                    display: none;
+                }
             `
         }
       ])
 }
 
+const MainContainer = styled.div`
+    ${props => MainContainerBaseStyle(props)}
+    ${props => MainContainerResponsiveStyle(props)}
+`;
+
+const NotedirModel = styled.li`
+    cursor: pointer;
+    background: ${props => props.isCurrent ? orange : 'none'};
+    color: ${props => props.isCurrent ? '#FFF' : gray};
+    padding: .5rem;
+    font-size: 1rem;
+    height: auto;
+    &:hover {
+        background: ${props => props.isCurrent ? darkOrange : 'none'};
+        color: ${props => props.isCurrent ? '#FFF' : orange};
+    };
+`;
+
+const modelStyle = `
+    width: 100%;
+
+    .modal-body {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-around;
+        border-radius: 20px;
+        background: #FFF;
+        padding: 2rem 1.5rem;
+        box-shadow: 5px 5px 10px #000;
+    }
+
+        .modal-body > div {
+            flex: 1 0 100%;
+        }
+
+    p {
+        text-align: center;
+    }
+
+    .title {
+        font-size: 1.5rem;
+        text-align: center;
+        padding: 1rem 0;
+    }
+
+    .tip {
+        margin-bottom: 10px;
+        font-size: .75rem;
+        color: ${gray};
+    }
+
+    ul {
+        border: 1px solid ${orange};
+        border-left-width: .5rem;
+        margin: 1.5rem auto;
+        padding: 1rem;
+    }
+
+    .confirm-btn {
+        background: ${orange};
+
+        &:hover {
+            background: ${darkOrange};
+        }
+    }
+
+    .confirm-btn:disabled {
+        background: ${gray};
+
+        &:hover {
+            background: ${gray};
+        }
+    }
+
+    .cancel-btn {
+        background: ${gray};
+
+        &:hover {
+            background: ${darkGray};
+        }
+    }
+`;
+
+const NotedirContainerResponsiveStyle = props => {
+    return makeResponsiveCSS([
+        {
+            constraint: 'min',
+            width: '0px',
+            rules: `
+                display: ${props.visible ? 'block' : 'none'};
+                flex: 1 1 auto;
+            `
+        }, {
+            constraint: 'min',
+            width: '768px',
+            rules: `
+                grid-area: notedir-list;
+                display: block;
+            `
+        }
+    ])
+}
+
+const NotedirContainer = styled.div`
+    ${props => NotedirContainerResponsiveStyle(props)}
+`;
+
+const NoteContainerResponsiveStyle = props => {
+    return makeResponsiveCSS([
+        {
+            constraint: 'min',
+            width: '0px',
+            rules: `
+                display: ${props.visible ? 'block' : 'none'};
+                flex: 1 1 auto;
+            `
+        }, {
+            constraint: 'min',
+            width: '768px',
+            rules: `
+                grid-area: note-list;
+                display: block;
+            `
+        }
+    ])
+}
+
 const NoteContainer = styled.div`
-    ${props => NoteContainerBaseStyle(props)}
     ${props => NoteContainerResponsiveStyle(props)}
+`;
+
+const EditorAreaContainerResponsiveStyle = props => {
+    return makeResponsiveCSS([
+        {
+            constraint: 'min',
+            width: '0px',
+            rules: `
+                display: ${props.visible ? 'block' : 'none'};
+                flex: 1 1 auto;
+            `
+        }, {
+            constraint: 'min',
+            width: '768px',
+            rules: `
+                grid-area: editor-area;
+                display: block;
+            `
+        }
+    ])
+}
+
+const EditorAreaContainer = styled.div`
+    ${props => EditorAreaContainerResponsiveStyle(props)}
 `;
 
 const EditorAreaBaseStyle = props => {
@@ -144,6 +331,9 @@ const EditorAreaBaseStyle = props => {
 
         .note-header {
             flex: 0 1 50px;
+            display: flex;
+            flex-flow: row wrap;
+            justify-content: flex-end;
         }
 
         .editor {
@@ -159,7 +349,7 @@ const EditorAreaBaseStyle = props => {
             border: none;
         }
 
-        button {
+        .tiny-btn {
             margin: 0 5px;
             padding: 0;
             border: none;
@@ -202,86 +392,9 @@ const EditorAreaResponsiveStyle = () => {
       ])
 }
 
+// ${EditorAreaResponsiveStyle()}
 const EditorArea = styled.div`
     ${props => EditorAreaBaseStyle(props)}
-    ${EditorAreaResponsiveStyle()}
-`;
-
-const NotedirContainer = styled.li`
-    cursor: pointer;
-    background: ${props => props.isCurrent ? orange : 'none'};
-    color: ${props => props.isCurrent ? '#FFF' : gray};
-    padding: .5rem;
-    font-size: 1rem;
-    height: auto;
-    &:hover {
-        background: ${props => props.isCurrent ? darkOrange : 'none'};
-        color: ${props => props.isCurrent ? '#FFF' : orange};
-    };
-`;
-
-const modelStyle = `
-    width: 100%;
-
-    .modal-body {
-        display: flex;
-        flex-flow: row wrap;
-        justify-content: space-around;
-        border-radius: 20px;
-        background: #FFF;
-        padding: 30px 50px;
-        box-shadow: 5px 5px 10px #000;
-    }
-
-        .modal-body > div {
-            flex: 1 0 100%;
-        }
-
-    p {
-        text-align: center;
-    }
-
-    .title {
-        font-size: 1.5rem;
-        text-align: center;
-        padding: 1rem 0;
-    }
-
-    .tip {
-        margin-bottom: 10px;
-        font-size: .75rem;
-        color: ${gray};
-    }
-
-    ul {
-        border: 1px solid ${orange};
-        border-left-width: .5rem;
-        margin: 1.5rem auto;
-    }
-
-    .confirm-btn {
-        background: ${orange};
-
-        &:hover {
-            background: ${darkOrange};
-        }
-    }
-
-    .confirm-btn:disabled {
-        background: ${gray};
-
-        &:hover {
-            background: ${gray};
-        }
-    }
-
-    .cancel-btn {
-        background: ${gray};
-
-        &:hover {
-            background: ${darkGray};
-        }
-    }
 `;
 
 const Note = ({ match }) => {
@@ -384,6 +497,30 @@ const Note = ({ match }) => {
         current && notes.map(note => note._id).indexOf(current._id) !== -1 ? enableDelete() : disableDelete();
     },[current, notes]);
 
+    useEffect(() => {
+        // for 行動版:點擊目錄項目切換到筆記列表
+        notedirContext.current !== null 
+            && setPanelVisible({
+                [PANEL.NOTEDIR]: false,
+                [PANEL.NOTE]: true,
+                [PANEL.EDITANDVIEW]: false
+            });
+    }, [notedirContext.current]);
+
+    const PANEL = {
+        NOTEDIR: 'NOTEDIR',
+        NOTE: 'NOTE',
+        EDITANDVIEW: 'EDITANDVIEW'
+    }
+
+    const defaultPanelState = {
+        [PANEL.NOTEDIR]: false,
+        [PANEL.NOTE]: true,
+        [PANEL.EDITANDVIEW]: false
+    };
+
+    const [panelVisible, setPanelVisible] = useState(defaultPanelState);
+
     const titleChange = useCallback(e => {
         e.preventDefault();
 
@@ -426,6 +563,13 @@ const Note = ({ match }) => {
     const setNoteContent = note => {
         //取得筆記內容
         getNoteDetail(note._id);
+
+        // for 行動版: 切換到編輯/檢視panel
+        setPanelVisible({
+            [PANEL.NOTEDIR]: false,
+            [PANEL.NOTE]: false,
+            [PANEL.EDITANDVIEW]: true
+        });
     };
 
     const onAdd = e => {
@@ -438,6 +582,13 @@ const Note = ({ match }) => {
         };
         appendCacheNote(newNote);
         setNoteMode(NOTEMODE.EDIT);
+
+        // for 行動版: 切換到編輯/檢視panel
+        setPanelVisible({
+            [PANEL.NOTEDIR]: false,
+            [PANEL.NOTE]: false,
+            [PANEL.EDITANDVIEW]: true
+        });
     };
 
     const onEdit = e => {
@@ -641,11 +792,11 @@ const Note = ({ match }) => {
             onSelect(notedir._id);
         }
 
-        return <NotedirContainer
+        return <NotedirModel
                     isCurrent={destNotedir === notedir._id}
                     onClick={notedirSelect}>
                     {notedir.title}
-                </NotedirContainer>;
+                </NotedirModel>;
     };
 
     const BtnContent = ({onChange, children}) => {
@@ -656,62 +807,80 @@ const Note = ({ match }) => {
                 </span>;
     };
 
+    // 行動版切換目錄列表/筆記列表/編輯及檢視
+    const togglePanel = e => {
+        e.preventDefault();
+        let panelState = {
+            [PANEL.NOTEDIR]: false,
+            [PANEL.NOTE]: false,
+            [PANEL.EDITANDVIEW]: false
+        };
+        panelState = {...panelState, [e.target.name]: true};
+        setPanelVisible(panelState);
+    }
+
     return (
-        <NoteContainer notedirCollapse={listCollapse.notedir} noteCollapse={listCollapse.note}>
+        <MainContainer notedirCollapse={listCollapse.notedir} noteCollapse={listCollapse.note}>
             <ul className='side-bar'>
                 <li className='notedir-item' onClick={toggleNotedirCollapse}>目 錄</li>
                 <li className='note-item' onClick={toggleNoteCollapse}>筆 記</li>
             </ul>
-            <Notedirs notebookId={match.params.id} toggleCollapse={toggleNotedirCollapse}/>
-            <Notes
-                addEvent={onAdd}
-                setCacheNoteContent={setCacheNoteContent}
-                setNoteContent = {setNoteContent}
-                toggleCollapse={toggleNoteCollapse} />
-            <EditorArea className='editor-area'
-                showToolPanel={noteMode === NOTEMODE.EDIT}
-                current={current}
-                cacheCurrent={cacheCurrent}>
-                <div className='note-header'>
-                    {deleteEnable ? (<button className='note-delete-btn right-align' onClick={toggleDeleteOpen}>
-                        <BtnContent onChange={iconChange.delete} children={<Trash size={20} color={color.delete} />} />
-                    </button>)
-                    : (<button className='note-discard-btn right-align' onClick={onDiscard} disabled={!cacheCurrent}>
-                            <BtnContent onChange={iconChange.discard} children={<FileX size={20} color={color.discard} />} />
+            <NotedirContainer visible={panelVisible.NOTEDIR}>
+                <Notedirs notebookId={match.params.id} toggleCollapse={toggleNotedirCollapse}/>
+            </NotedirContainer>
+            <NoteContainer visible={panelVisible.NOTE}>
+                <Notes
+                    addEvent={onAdd}
+                    setCacheNoteContent={setCacheNoteContent}
+                    setNoteContent = {setNoteContent}
+                    toggleCollapse={toggleNoteCollapse} />
+            </NoteContainer>
+            <EditorAreaContainer visible={panelVisible.EDITANDVIEW}>
+                <EditorArea className='editor-area'
+                    showToolPanel={noteMode === NOTEMODE.EDIT}
+                    current={current}
+                    cacheCurrent={cacheCurrent}>
+                    <div className='note-header'>
+                        {deleteEnable ? (<button className='note-delete-btn tiny-btn' onClick={toggleDeleteOpen}>
+                            <BtnContent onChange={iconChange.delete} children={<Trash size={20} color={color.delete} />} />
+                        </button>)
+                        : (<button className='note-discard-btn tiny-btn' onClick={onDiscard} disabled={!cacheCurrent}>
+                                <BtnContent onChange={iconChange.discard} children={<FileX size={20} color={color.discard} />} />
+                            </button>)}
+                        {noteMode === NOTEMODE.EDIT ?
+                        (<button
+                            className='note-view-btn tiny-btn'
+                            onClick={onView}
+                            disabled={!(cacheCurrent && current && cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) === -1)}>
+                            <BtnContent onChange={iconChange.view} children={<Browser size={20} color={color.view} />} />
+                        </button>)
+                        : (<button className='note-edit-btn tiny-btn' onClick={onEdit} disabled={!(current && cacheCurrent)}>
+                            <BtnContent onChange={iconChange.edit} children={<NotePencil size={20} color={color.edit} />} />
                         </button>)}
-                    {noteMode === NOTEMODE.EDIT ?
-                    (<button
-                        className='note-view-btn right-align'
-                        onClick={onView}
-                        disabled={!(cacheCurrent && current && cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) === -1)}>
-                        <BtnContent onChange={iconChange.view} children={<Browser size={20} color={color.view} />} />
-                    </button>)
-                    : (<button className='note-edit-btn right-align' onClick={onEdit} disabled={!(current && cacheCurrent)}>
-                        <BtnContent onChange={iconChange.edit} children={<NotePencil size={20} color={color.edit} />} />
-                    </button>)}
-                    <button className='note-move-btn right-align' onClick={openMoveNoteModel} disabled={!(current && cacheCurrent)}>
-                        <BtnContent onChange={iconChange.move} children={<ArrowsLeftRight size={20} color={color.move} />} />
-                    </button>
-                    <div className='note-title-container'>
-                        <input type='text' placeholder='新筆記' className='note-title' value={current ? current.title || '' : ''} onChange={titleChange} disabled={noteMode !== NOTEMODE.EDIT}/>
-                        <SaveButton
-                            visible={noteMode === NOTEMODE.EDIT}
-                            state={save.state}
-                            onSave={onSave}
-                            showUpdateTime={save.showUpdateTime}
-                            updateTime={current && current._id ? current.date : null}
-                            updateInterval={saveTextUpdateInterval} />
+                        <button className='note-move-btn tiny-btn' onClick={openMoveNoteModel} disabled={!(current && cacheCurrent)}>
+                            <BtnContent onChange={iconChange.move} children={<ArrowsLeftRight size={20} color={color.move} />} />
+                        </button>
+                        <div className='note-title-container'>
+                            <input type='text' placeholder='新筆記' className='note-title' value={current ? current.title || '' : ''} onChange={titleChange} disabled={noteMode !== NOTEMODE.EDIT}/>
+                            <SaveButton
+                                visible={noteMode === NOTEMODE.EDIT}
+                                state={save.state}
+                                onSave={onSave}
+                                showUpdateTime={save.showUpdateTime}
+                                updateTime={current && current._id ? current.date : null}
+                                updateInterval={saveTextUpdateInterval} />
+                        </div>
                     </div>
-                </div>
-                <Editor
-                    enable={noteMode === NOTEMODE.EDIT}
-                    content={current && current.content ? current.content : ''}
-                    loading={loading}
-                    contentChange={contentChange} />
-            </EditorArea>
-            {/* <div className='recycle-bin'>
+                    <Editor
+                        enable={noteMode === NOTEMODE.EDIT}
+                        content={current && current.content ? current.content : ''}
+                        loading={loading}
+                        contentChange={contentChange} />
+                </EditorArea>
+            </EditorAreaContainer>
+            <div className='recycle-bin'>
                 <button className='recycle-bin-btn' onClick={LoadRecycleBin}>回收站</button>
-            </div> */}
+            </div>
             <Models
                 isOpen={deleteNoteVisible}
                 toggleOpen={toggleDeleteOpen}
@@ -746,15 +915,13 @@ const Note = ({ match }) => {
                 <Models.ConfirmBtn enable={destNotedir !== null}>移動</Models.ConfirmBtn>
                 <Models.CancelBtn>取消</Models.CancelBtn>
             </Models>
-            <MediumAndBelow>
-                <div className='rwd-nav-bar'>
-                    <button>目錄</button>
-                    <button>筆記</button>
-                    <button>編輯器</button>
-                    <button>回收站</button>
-                </div>
-            </MediumAndBelow>
-        </NoteContainer>
+            <div className='rwd-nav-bar'>
+                <button name={PANEL.NOTEDIR} onClick={togglePanel}>目錄</button>
+                <button name={PANEL.NOTE} onClick={togglePanel}>筆記</button>
+                <button name={PANEL.EDITANDVIEW} onClick={togglePanel}>編輯/檢視</button>
+                <button onClick={LoadRecycleBin}>回收站</button>
+            </div>
+        </MainContainer>
     )
 }
 

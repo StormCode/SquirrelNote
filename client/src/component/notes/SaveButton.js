@@ -9,8 +9,24 @@ import {
 } from '../../saveState';
 
 const Button = styled.button`
-    text-align: center;
+    flex: 0 1 15%;
+    background: ${props => props.state !== DISABLESAVE ? 'rgb(190, 255, 180)' : 'rgb(222, 222, 222)'};
     display: ${props => props.visible ? 'block' : 'none'};
+    border: none;
+    border-radius: 5px;
+    margin-left: .5rem;
+    padding: .1rem;
+    text-align: center;
+    color: ${({theme}) => props => props.state !== DISABLESAVE ? theme.green : theme.gray};
+    box-shadow: 2px 2px 3px rgba(0, 0, 0, .5);
+
+    ${props => props.state === UNSAVE &&
+        `&:hover {
+            background: rgb(145, 255, 120);
+            color: ${({theme}) => theme.darkGreen};
+            font-weight: bold;
+        }`
+    }
 
     p {
         display: ${props => props.state !== SAVED ? 'none' : 'inherit'};

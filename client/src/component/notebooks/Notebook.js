@@ -4,7 +4,9 @@ import {
     Card, CardImg, CardText, CardBody,
     CardTitle, CardSubtitle, Button, UncontrolledTooltip 
   } from 'reactstrap';
-import { Pencil, Trash, Check, X } from "phosphor-react";
+  import { Pencil, Trash, Check, X } from "phosphor-react";
+  import styled from 'styled-components';
+  import makeResponsiveCSS from '../../utils/make-responsive-css'
 import EDToolPanel from '../layout/EDToolPanel';
 import Models from '../layout/Models';
 
@@ -16,6 +18,28 @@ import { deleteStyle } from '../../style/model/delete';
 import NotebookContext from '../../context/notebooks/notebookContext';
 
 const { orange, gray } = theme;
+
+const ToolPanelContainerResponsiveStyle = props => {
+    return makeResponsiveCSS([
+        {
+            constraint: 'min',
+            width: '320px',
+            rules: `
+                display: block;
+            `
+        }, {
+            constraint: 'min',
+            width: '768px',
+            rules: `
+                display: ${props.visible ? 'block' : 'none'};
+            `
+        }
+    ]);
+}
+
+const ToolPanelContainer = styled.div`
+    ${props => ToolPanelContainerResponsiveStyle(props)}
+`;
 
 const Notebook = props => {
     const notebookContext = useContext(NotebookContext);
@@ -172,26 +196,27 @@ const Notebook = props => {
             <Card
                 onMouseEnter={cardHoverOn}
                 onMouseLeave={cardHoverOff}>
-                <EDToolPanel 
-                    isEnter={props.toolPanel === _id}
-                    visible={visible} 
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                    onEnter={onEnter}
-                    onCancel={onCancelEdit}>
-                    <EDToolPanel.ConfirmBtn>
-                        <BtnContent onChange={iconChange.confirm} children={<Check size={20} color={color.confirm} weight='bold' />} />
-                    </EDToolPanel.ConfirmBtn>
-                    <EDToolPanel.CancelBtn>
-                        <BtnContent onChange={iconChange.cancel} children={<X size={20} color={color.cancel} weight='bold' />} />
-                    </EDToolPanel.CancelBtn>
-                    <EDToolPanel.EditBtn>
-                        <BtnContent onChange={iconChange.edit} children={<Pencil size={20} color={color.edit} weight='bold' />} />
-                    </EDToolPanel.EditBtn>
-                    <EDToolPanel.DeleteBtn>
-                        <BtnContent onChange={iconChange.delete} children={<Trash size={20} color={color.delete} weight='bold' />} />
-                    </EDToolPanel.DeleteBtn>
-                </EDToolPanel>
+                <ToolPanelContainer visible={visible}>
+                    <EDToolPanel 
+                        isEnter={props.toolPanel === _id}
+                        onEdit={onEdit}
+                        onDelete={onDelete}
+                        onEnter={onEnter}
+                        onCancel={onCancelEdit}>
+                        <EDToolPanel.ConfirmBtn>
+                            <BtnContent onChange={iconChange.confirm} children={<Check size={20} color={color.confirm} weight='bold' />} />
+                        </EDToolPanel.ConfirmBtn>
+                        <EDToolPanel.CancelBtn>
+                            <BtnContent onChange={iconChange.cancel} children={<X size={20} color={color.cancel} weight='bold' />} />
+                        </EDToolPanel.CancelBtn>
+                        <EDToolPanel.EditBtn>
+                            <BtnContent onChange={iconChange.edit} children={<Pencil size={20} color={color.edit} weight='bold' />} />
+                        </EDToolPanel.EditBtn>
+                        <EDToolPanel.DeleteBtn>
+                            <BtnContent onChange={iconChange.delete} children={<Trash size={20} color={color.delete} weight='bold' />} />
+                        </EDToolPanel.DeleteBtn>
+                    </EDToolPanel>
+                </ToolPanelContainer>
                 {/* { editNotebookVisible ? 
                     (<div className='tool-panel' style={toolPanelStyle}>
                         <button id='edit-confirm-btn' onClick={onEdit}><img src={confirmImg} alt='完成編輯' /></button>

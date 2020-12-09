@@ -21,58 +21,61 @@ import AuthContext from '../../context/auth/authContext';
 
 import { LOGIN, REGISTER } from '../../modelTypes';
 
-const NavContainerBaseStyle = `
-    background: linear-gradient(180deg, rgba(255,140,40,1) 0%, rgba(255,149,56,1) 20%, rgba(255,119,0,1) 75%);
-    box-shadow: 3px 3px 18px 0px rgba(0,0,0,0.75);
+const NavContainerBaseStyle = theme => {
+    return `
+        background: linear-gradient(180deg, rgba(255,140,40,1) 0%, rgba(255,149,56,1) 20%, rgba(255,119,0,1) 75%);
+        box-shadow: 3px 3px 18px 0px rgba(0,0,0,0.75);
 
-    .navbar-nav {
-        flex: 1 1 auto;
-    }
-
-    .nav-link-active {
-        color: #FDFF6F !important;
-    }
-
-    .nav-link:not(.nav-link-active) {
-        color: #FFF;
-    }
-        
-        .nav-link:hover {
-            color: #EBED68 !important;
+        .navbar-nav {
+            flex: 1 1 auto;
         }
 
-        .nav-item:not(.nav-link-active):after {
-            background: #FFF;
+        .nav-link-active {
+            color: #FDFF6F !important;
         }
 
-        .nav-link:after {
-            content: '';
-            display: block;
-            height: 3px;
+        .nav-link:not(.nav-link-active) {
+            color: #FFF;
+        }
+            
+            .nav-link:active,
+            .nav-link:hover {
+                color: ${theme.yellow} !important;
+            }
+
+            .nav-item:not(.nav-link-active):after {
+                background: #FFF;
+            }
+
+            .nav-link:after {
+                content: '';
+                display: block;
+                height: 3px;
+            }
+
+        .right-nav-items {
+            display: flex;
         }
 
-    .right-nav-items {
-        display: flex;
-    }
+            .right-nav-items > div:after {
+                content: '';
+                width: 0;
+                height: 100%;
+            }
 
-        .right-nav-items > div:after {
-            content: '';
-            width: 0;
-            height: 100%;
+        .nav-text {
+            display: inline-block;
+            height: 1.15rem;
+            font-size: 1.15rem;
+            font-weight: 400;
+            color: #FFF;
+            margin-right: .5rem;
+            vertical-align: middle;
         }
+    `;
+}
 
-    .nav-text {
-        display: inline-block;
-        height: 1.15rem;
-        font-size: 1.15rem;
-        font-weight: 400;
-        color: #FFF;
-        margin-right: .5rem;
-        vertical-align: middle;
-    }
-`;
-
-const NavContainerResponsiveStyle = () => {
+const NavContainerResponsiveStyle = theme => {
     return makeResponsiveCSS([
         {
             constraint: 'min',
@@ -100,8 +103,9 @@ const NavContainerResponsiveStyle = () => {
                     background: #FDFF6F;
                 }
         
+                .nav-link:active:after,
                 .nav-link:hover:after {
-                    background: #EBED68;
+                    background: ${theme.yellow};
                 }
 
                 .right-nav-items {
@@ -114,8 +118,8 @@ const NavContainerResponsiveStyle = () => {
 }
 
 const NavContainer = styled.div`
-    ${NavContainerBaseStyle}
-    ${NavContainerResponsiveStyle()}
+    ${({theme}) => NavContainerBaseStyle(theme)}
+    ${({theme}) => NavContainerResponsiveStyle(theme)}
 `;
 
 const MainNavbar = ({ title }) => {

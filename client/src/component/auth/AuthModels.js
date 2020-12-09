@@ -18,7 +18,7 @@ const AuthPanel = styled.div`
     .modal-body {
         border-radius: 20px;
         background: #FFF;
-        padding: 30px 50px;
+        padding: 2rem 1.5rem;
         box-shadow: inset 0 0 25px ${({theme}) => theme.orange}, 5px 5px 10px;
     }
 

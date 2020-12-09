@@ -2,6 +2,7 @@ import React, { Fragment, useCallback, useState, useContext, useEffect } from 'r
 import styled from 'styled-components';
 import { Pencil, Trash, Check, X } from "phosphor-react";
 import EDToolPanel from '../layout/EDToolPanel';
+import makeResponsiveCSS from '../../utils/make-responsive-css'
 import Models from '../layout/Models';
 
 // Import Style
@@ -55,6 +56,28 @@ const Input = styled.input`
     &:focus {
         outline: none;
     }
+`;
+
+const ToolPanelContainerResponsiveStyle = props => {
+    return makeResponsiveCSS([
+        {
+            constraint: 'min',
+            width: '320px',
+            rules: `
+                display: block;
+            `
+        }, {
+            constraint: 'min',
+            width: '768px',
+            rules: `
+                display: ${props.visible ? 'block' : 'none'};
+            `
+        }
+    ]);
+}
+
+const ToolPanelContainer = styled.div`
+    ${props => ToolPanelContainerResponsiveStyle(props)}
 `;
 
 const Notedir = props => {
@@ -243,26 +266,27 @@ const Notedir = props => {
             { notedir !== null ?
             <Fragment>
                 <div className='toolpanel-container'>
-                    <EDToolPanel 
-                        isEnter={props.toolPanel === _id} 
-                        visible={visible} 
-                        onEdit={onEdit}
-                        onDelete={onDelete}
-                        onEnter={onEnter}
-                        onCancel={onCancelEdit}>
-                        <EDToolPanel.ConfirmBtn>
-                            <BtnContent onChange={iconChange.confirm} children={<Check size={20} color={color.confirm} />} />
-                        </EDToolPanel.ConfirmBtn>
-                        <EDToolPanel.CancelBtn>
-                            <BtnContent onChange={iconChange.cancel} children={<X size={20} color={color.cancel} />} />
-                        </EDToolPanel.CancelBtn>
-                        <EDToolPanel.EditBtn>
-                            <BtnContent onChange={iconChange.edit} children={<Pencil size={20} color={color.edit} />} />
-                        </EDToolPanel.EditBtn>
-                        <EDToolPanel.DeleteBtn>
-                            <BtnContent onChange={iconChange.delete} children={<Trash size={20} color={color.delete} />} />
-                        </EDToolPanel.DeleteBtn>
-                    </EDToolPanel>
+                    <ToolPanelContainer visible={visible}>
+                        <EDToolPanel 
+                            isEnter={props.toolPanel === _id} 
+                            onEdit={onEdit}
+                            onDelete={onDelete}
+                            onEnter={onEnter}
+                            onCancel={onCancelEdit}>
+                            <EDToolPanel.ConfirmBtn>
+                                <BtnContent onChange={iconChange.confirm} children={<Check size={20} color={color.confirm} />} />
+                            </EDToolPanel.ConfirmBtn>
+                            <EDToolPanel.CancelBtn>
+                                <BtnContent onChange={iconChange.cancel} children={<X size={20} color={color.cancel} />} />
+                            </EDToolPanel.CancelBtn>
+                            <EDToolPanel.EditBtn>
+                                <BtnContent onChange={iconChange.edit} children={<Pencil size={20} color={color.edit} />} />
+                            </EDToolPanel.EditBtn>
+                            <EDToolPanel.DeleteBtn>
+                                <BtnContent onChange={iconChange.delete} children={<Trash size={20} color={color.delete} />} />
+                            </EDToolPanel.DeleteBtn>
+                        </EDToolPanel>
+                    </ToolPanelContainer>
                 </div>
                 <div className='text-container'
                     onClick={onClick}>

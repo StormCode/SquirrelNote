@@ -16,11 +16,11 @@ const { orange, gray } = theme;
 
 const NoteListBaseStyle = theme => {
     return `
+        display: flex;
+        flex-flow: column nowrap;
         border-left: 1px solid rgba(255,120,0,1);
         padding: .5rem;
         height: 100%;
-        overflow-x: hidden;
-        overflow-y: auto;
 
         > .header {
             display: flex;
@@ -45,8 +45,11 @@ const NoteListBaseStyle = theme => {
             }
 
         > ul {
+            flex: 1 1 auto;
             margin: 0;
             padding: 0;
+            height: 0;
+            overflow-y: auto;
         }
 
         .parlgrm {
@@ -66,17 +69,12 @@ const NoteListResponsiveStyle = () => {
             constraint: 'min',
             width: '0px',
             rules: `
-                display: flex;
-            `
-        }, {
-            constraint: 'min',
-            width: '768px',
-            rules: `
-                grid-area: note-list;
-                display: block;
+                .collapse-btn {
+                    display: none;
+                }
             `
         }
-      ])
+    ])
 }
 
 const NoteList = styled.div`
@@ -160,10 +158,10 @@ const Notes = ({ addEvent, setCacheNoteContent, setNoteContent, toggleCollapse }
                 <i className='parlgrm'></i>
                 <span className='title'>筆記</span>
                 <NoteFilter />
-                <button alt='add note' onClick={addEvent}>
+                <button alt='add note' className='tiny-btn' onClick={addEvent}>
                     <BtnContent onChange={iconChange.note} children={<FilePlus size={20} color={color.note} />} />
                 </button>
-                <button alt='collapse/expand note' onClick={onToggleCollapse}>
+                <button alt='collapse/expand note' className='tiny-btn collapse-btn' onClick={onToggleCollapse}>
                     <BtnContent onChange={iconChange.collapse} children={<ArrowLineLeft size={20} color={color.collapse} />} />
                 </button>
             </div>

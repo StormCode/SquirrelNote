@@ -167,7 +167,7 @@ router.put('/:id', auth, async(req, res) => {
         const data = newCrypto.decrypt(req.body.data);
 
         // 判斷要做修改還是移動
-        if(note.notedir !== data.notedir) {
+        if(note.notedir.toString() !== data.notedir.toString()) {
             //
             // 移動筆記
             //
@@ -277,7 +277,7 @@ router.put('/:id', auth, async(req, res) => {
             };
 
             // 修改筆記
-            note = await Note.findByIdAndUpdate(id,
+            await Note.findByIdAndUpdate(id,
                 { $set: noteField },
                 { new: true });
 

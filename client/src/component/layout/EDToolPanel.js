@@ -4,7 +4,8 @@ import ToolPanel from './ToolPanel';
 import styled from 'styled-components';
 
 // Import Style
-import ToolPanelStyled from '../../style/components/ToolPanel';
+import ToolPanelStyle from '../../style/components/ToolPanel';
+
 
 const Button = styled.button`
     ${props => props.btnStyle}
@@ -16,7 +17,6 @@ const Button = styled.button`
 // 當編輯或刪除按鈕被按下後切換成完成、取消按鈕
 // 傳入的屬性：
 // 判斷目前是否正在使用此ToolPanel內部的功能(boolean)
-// 可見性(boolean)
 // 執行編輯事件(function)
 // 執行刪除事件(function)
 // 取消事件(function)
@@ -95,18 +95,16 @@ const EDToolPanel = props => {
                 btnStyle: btnStyle
             }}>
             <Fragment>
-                {visible?
-                    isEnter ? 
+                {isEnter ? 
                     <ToolPanel 
                         onConfirm={onClick.confirm}
                         onCancel={onClick.cancel}
                         btnStyle={btnStyle}>
                         {children}
                     </ToolPanel>
-                    : <ToolPanelStyled>
+                    : <ToolPanelStyle>
                         {children}
-                    </ToolPanelStyled>
-                : null}
+                    </ToolPanelStyle>}
             </Fragment>
         </EDToolPanelContext.Provider>
     )
@@ -162,7 +160,6 @@ EDToolPanel.DeleteBtn = (props) =>
 
 EDToolPanel.defaultProps = {
     isEnter: null,
-    visible: false,
     onEdit: () => {},
     onDelete: () => {},
     onEnter: () => {},
@@ -177,7 +174,6 @@ EDToolPanel.defaultProps = {
 
 EDToolPanel.propTypes = {
     isEnter: PropTypes.bool,
-    visible: PropTypes.bool,
     onEdit: PropTypes.func.isRequired,
     onDelete: PropTypes.func.isRequired,
     onEnter: PropTypes.func.isRequired,

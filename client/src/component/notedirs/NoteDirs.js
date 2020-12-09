@@ -18,10 +18,9 @@ const { orange, gray } = theme;
 
 const NotedirListBaseStyle = theme => {
     return `
-        padding: .5rem;
+        display: flex;
+        flex-flow: column nowrap;
         height: 100%;
-        overflow-x: hidden;
-        overflow-y: auto;
 
             > .header {
                 border-bottom: 1px solid ${theme.orange};
@@ -42,8 +41,11 @@ const NotedirListBaseStyle = theme => {
                 }
 
             ul {
+                flex: 1 1 auto;
                 margin: 0;
                 padding: 0;
+                height: 0;
+                overflow-y: auto;
             }
 
             .parlgrm {
@@ -61,19 +63,22 @@ const NotedirListResponsiveStyle = () => {
     return makeResponsiveCSS([
         {
             constraint: 'min',
-            width: '0px',
+            width: '320px',
             rules: `
-                display: flex;
+                padding: .5rem;
+                
+                .collapse-btn {
+                    display: none;
+                }
             `
         }, {
             constraint: 'min',
             width: '768px',
             rules: `
-                grid-area: notedir-list;
-                display: block;
+                padding: .5rem .5rem 3rem .5rem;
             `
         }
-      ])
+    ])
 }
 
 
@@ -201,11 +206,11 @@ const Notedirs = ({notebookId, toggleCollapse}) => {
                     <div className='header'>
                         <i className='parlgrm'></i>
                         <span className='title'>目錄</span>
-                        <button alt='collapse/expand notedir' onClick={onToggleCollapse}>
+                        <button alt='collapse/expand notedir' className='tiny-btn collapse-btn' onClick={onToggleCollapse}>
                             <BtnContent onChange={iconChange.collapse} children={<ArrowLineLeft size={20} color={color.collapse} />} />
                         </button>
                         <NotedirSorter />
-                        <button alt='add notedir' onClick={onEnableAddNotedir}>
+                        <button alt='add notedir' className='tiny-btn' onClick={onEnableAddNotedir}>
                             <BtnContent onChange={iconChange.notedir} children={<FolderSimplePlus size={20} color={color.notedir} />} />
                         </button>
                         <TextInput  

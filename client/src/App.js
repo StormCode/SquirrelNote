@@ -37,7 +37,7 @@ const AppStyle = styled.div`
     }
 
     .main {
-        flex: 1 0 80%;
+        flex: 1 1 80%;
         display: flex;
         flex-flow: wrap row;
         justify-content: center;
