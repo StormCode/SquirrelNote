@@ -22,27 +22,32 @@ const NoteListBaseStyle = theme => {
         padding: .5rem;
         height: 100%;
 
-        > .header {
+        > .note-header {
             display: flex;
             flex-flow: row nowarp;
             border-bottom: 1px solid ${theme.orange};
             padding: .3rem;
             align-items: baseline;
+            min-height: 2.5rem;
         }
 
-            > .header > .title {
+            > .note-header > .title {
                 flex: 1 0 auto;
                 color: ${theme.gray};
                 font-size: 1rem;
                 font-weight: bold;
             }
             
-            > .header > button {
+            > .note-header > button {
                 flex: 0 1 auto;
                 position: relative;
                 background: none;
                 border: none;
             }
+
+                > .note-header > button:first-child {
+                    margin-left: auto;
+                }
 
         > ul {
             flex: 1 1 auto;
@@ -55,7 +60,7 @@ const NoteListBaseStyle = theme => {
         .parlgrm {
             background: ${theme.orange};
             display: inline-block;
-            width: .5rem;
+            min-width: .5rem;
             height: 1rem;
             margin-right: .5rem;
             transform: skew(-30deg);
@@ -71,6 +76,14 @@ const NoteListResponsiveStyle = () => {
             rules: `
                 .collapse-btn {
                     display: none;
+                }
+            `
+        }, {
+            constraint: 'min',
+            width: '768px',
+            rules: `
+                .collapse-btn {
+                    display: block;
                 }
             `
         }
@@ -159,15 +172,15 @@ const Notes = ({ notebookId, addEvent, setCacheNoteContent, setNoteContent, togg
 
     return (
         <NoteList>
-            <div className='header'>
+            <div className='note-header'>
                 <i className='parlgrm'></i>
                 <span className='title'>筆記</span>
                 <NoteFilter />
                 <button alt='add note' className='tiny-btn' onClick={addEvent}>
-                    <BtnContent onChange={iconChange.note} children={<FilePlus size={20} color={color.note} />} />
+                    <BtnContent onChange={iconChange.note} children={<FilePlus size={22} color={color.note} />} />
                 </button>
                 <button alt='collapse/expand note' className='tiny-btn collapse-btn' onClick={onToggleCollapse}>
-                    <BtnContent onChange={iconChange.collapse} children={<ArrowLineLeft size={20} color={color.collapse} />} />
+                    <BtnContent onChange={iconChange.collapse} children={<ArrowLineLeft size={22} color={color.collapse} />} />
                 </button>
             </div>
             {notes && !loading ?

@@ -11,6 +11,9 @@ const NotedirStyle = styled.li`
     color: ${props => props.isCurrent ? '#FFF' : gray};
     padding: .5rem 0 .5rem .5rem;
     font-size: 1rem;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
     height: auto;
     &:hover {
         background: ${props => props.isCurrent ? darkOrange : 'none'};

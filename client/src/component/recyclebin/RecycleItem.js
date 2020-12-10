@@ -59,9 +59,9 @@ const RecycleItem = ({item}) => {
     return (
         <Fragment>
             <tr>
-                <th scope="row">{iconHelper(type)}</th>
-                <td>{title}</td>
-                <td>{CustomShortDate(new Date(date))}</td>
+                <th data-th='類型' scope="row">{iconHelper(type)}</th>
+                <td data-th='名稱'>{title}</td>
+                <td data-th='刪除日期'>{CustomShortDate(new Date(date))}</td>
                 <td>{isRestoreable ? 
                         <button onClick={onRestore}>復原</button> 
                     : <button>!</button>}

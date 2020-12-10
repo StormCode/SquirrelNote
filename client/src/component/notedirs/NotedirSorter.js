@@ -12,8 +12,8 @@ const { orange, gray } = theme;
 
 const SorterContainer = styled.span`
     cursor: pointer;
-    float: right;
-    margin: 0 10px;
+    margin-left: auto;
+    margin-right: 10px;
 `;
 
 const NotedirSorter = () => {

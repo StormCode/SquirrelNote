@@ -13,12 +13,12 @@ const Button = styled.button`
     background: ${props => props.state !== DISABLESAVE ? 'rgb(190, 255, 180)' : 'rgb(222, 222, 222)'};
     display: ${props => props.visible ? 'block' : 'none'};
     border: none;
-    border-radius: 5px;
+    border-radius: ${props => props.state === UNSAVE ? '5px' : 'none'};
     margin-left: .5rem;
     padding: .1rem;
     text-align: center;
     color: ${({theme}) => props => props.state !== DISABLESAVE ? theme.green : theme.gray};
-    box-shadow: 2px 2px 3px rgba(0, 0, 0, .5);
+    box-shadow: ${props => props.state === UNSAVE ? 'inset' : ''} 2px 2px 3px rgba(0, 0, 0, .3);
 
     ${props => props.state === UNSAVE &&
         `&:hover {

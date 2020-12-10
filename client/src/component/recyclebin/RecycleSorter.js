@@ -9,7 +9,7 @@ import { theme } from '../../style/themes';
 
 import RecyclebinContext from '../../context/recyclebin/recyclebinContext';
 
-const { defaultColor, orange, gray } = theme;
+const { orange, gray } = theme;
 
 const SorterContainerBaseStyle = `
     cursor: pointer;
@@ -71,7 +71,7 @@ const RecycleSorter = () => {
     };
 
     const hoverOn = () => {
-        setColor(defaultColor);
+        setColor(orange);
     };
 
     const hoverOff = () => {

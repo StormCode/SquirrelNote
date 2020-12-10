@@ -204,16 +204,16 @@ const Notebook = props => {
                         onEnter={onEnter}
                         onCancel={onCancelEdit}>
                         <EDToolPanel.ConfirmBtn>
-                            <BtnContent onChange={iconChange.confirm} children={<Check size={20} color={color.confirm} weight='bold' />} />
+                            <BtnContent onChange={iconChange.confirm} children={<Check size={22} color={color.confirm} weight='bold' />} />
                         </EDToolPanel.ConfirmBtn>
                         <EDToolPanel.CancelBtn>
-                            <BtnContent onChange={iconChange.cancel} children={<X size={20} color={color.cancel} weight='bold' />} />
+                            <BtnContent onChange={iconChange.cancel} children={<X size={22} color={color.cancel} weight='bold' />} />
                         </EDToolPanel.CancelBtn>
                         <EDToolPanel.EditBtn>
-                            <BtnContent onChange={iconChange.edit} children={<Pencil size={20} color={color.edit} weight='bold' />} />
+                            <BtnContent onChange={iconChange.edit} children={<Pencil size={22} color={color.edit} weight='bold' />} />
                         </EDToolPanel.EditBtn>
                         <EDToolPanel.DeleteBtn>
-                            <BtnContent onChange={iconChange.delete} children={<Trash size={20} color={color.delete} weight='bold' />} />
+                            <BtnContent onChange={iconChange.delete} children={<Trash size={22} color={color.delete} weight='bold' />} />
                         </EDToolPanel.DeleteBtn>
                     </EDToolPanel>
                 </ToolPanelContainer>

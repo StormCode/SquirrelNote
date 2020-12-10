@@ -19,23 +19,28 @@ const { orange, gray } = theme;
 
 const NotedirListBaseStyle = theme => {
     return `
+        flex: 1 1 100%;
         display: flex;
         flex-flow: column nowrap;
-        height: 100%;
+        padding: .5rem;
 
-            > .header {
+            > .notedir-header {
+                display: flex;
+                flex-flow: row nowrap;
                 border-bottom: 1px solid ${theme.orange};
                 padding: .3rem;
+                align-items: center;
+                min-height: 2.5rem;
             }
         
-                > .header > .title {
+                > .notedir-header > .title {
                     color: ${theme.gray};
                     font-size: 1rem;
                     font-weight: bold;
                 }
                 
-                > .header > button {
-                    float: right;
+                > .notedir-header > button {
+                    flex: 0 1 auto;
                     position: relative;
                     background: none;
                     border: none;
@@ -45,6 +50,7 @@ const NotedirListBaseStyle = theme => {
                 flex: 1 1 auto;
                 margin: 0;
                 padding: 0;
+                width: 100%;
                 height: 0;
                 overflow-y: auto;
             }
@@ -52,7 +58,7 @@ const NotedirListBaseStyle = theme => {
             .parlgrm {
                 background: ${theme.orange};
                 display: inline-block;
-                width: .5rem;
+                min-width: .5rem;
                 height: 1rem;
                 margin-right: .5rem;
                 transform: skew(-30deg);
@@ -65,9 +71,7 @@ const NotedirListResponsiveStyle = () => {
         {
             constraint: 'min',
             width: '320px',
-            rules: `
-                padding: .5rem;
-                
+            rules: `                
                 .collapse-btn {
                     display: none;
                 }
@@ -76,7 +80,9 @@ const NotedirListResponsiveStyle = () => {
             constraint: 'min',
             width: '768px',
             rules: `
-                padding: .5rem .5rem 3rem .5rem;
+                .collapse-btn {
+                    display: block;
+                }
             `
         }
     ])
@@ -204,15 +210,15 @@ const Notedirs = ({notebookId, toggleCollapse}) => {
         <Fragment>
             { notedirs && !loading ?
                 (<NotedirList className='notedir-list'>
-                    <div className='header'>
+                    <div className='notedir-header'>
                         <i className='parlgrm'></i>
                         <span className='title'>目錄</span>
-                        <button alt='collapse/expand notedir' className='tiny-btn collapse-btn' onClick={onToggleCollapse}>
-                            <BtnContent onChange={iconChange.collapse} children={<ArrowLineLeft size={20} color={color.collapse} />} />
-                        </button>
                         <NotedirSorter />
                         <button alt='add notedir' className='tiny-btn' onClick={onEnableAddNotedir}>
-                            <BtnContent onChange={iconChange.notedir} children={<FolderSimplePlus size={20} color={color.notedir} />} />
+                            <BtnContent onChange={iconChange.notedir} children={<FolderSimplePlus size={22} color={color.notedir} />} />
+                        </button>
+                        <button alt='collapse/expand notedir' className='tiny-btn collapse-btn' onClick={onToggleCollapse}>
+                            <BtnContent onChange={iconChange.collapse} children={<ArrowLineLeft size={22} color={color.collapse} />} />
                         </button>
                         <TextInput  
                             visible={addNotedirVisible}
@@ -220,10 +226,10 @@ const Notedirs = ({notebookId, toggleCollapse}) => {
                             onConfirm={onConfirm}
                             onCancel={onCancel}>
                             <TextInput.ConfirmBtn>
-                                <BtnContent onChange={iconChange.confirm} children={<Check size={20} color={color.confirm} weight='bold' />} />
+                                <BtnContent onChange={iconChange.confirm} children={<Check size={22} color={color.confirm} weight='bold' />} />
                             </TextInput.ConfirmBtn>
                             <TextInput.CancelBtn>
-                                <BtnContent onChange={iconChange.cancel} children={<X size={20} color={color.cancel} weight='bold' />} />
+                                <BtnContent onChange={iconChange.cancel} children={<X size={22} color={color.cancel} weight='bold' />} />
                             </TextInput.CancelBtn>
                         </TextInput>
                     </div>

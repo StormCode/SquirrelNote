@@ -115,7 +115,7 @@ Sorter.OrderBy = props =>
     </SorterContext.Consumer>;
 
 Sorter.DropdownMenu = ({children}) => 
-    <DropdownMenu>
+    <DropdownMenu right>
         {children}
     </DropdownMenu>;
 

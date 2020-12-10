@@ -31,18 +31,24 @@ const Notebook = styled.div`
             background: rgba(255, 245, 237, .8);
             box-shadow: 3px 3px 8px 0px rgba(0,0,0,0.5);
         }
-
+        
         .card .card-title {
             font-size: 2rem;
             font-weight: bold;
             text-align: center;
+            width: 100%;
         }
+        
+            .card .card-text,
+            .card .card-title p {
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                width: 100%;
+            }
 
         .card .card-text {
             font-size: 1rem;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            overflow: hidden;
         }
 
     &:hover > .card {

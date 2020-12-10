@@ -9,11 +9,10 @@ import { theme } from '../../style/themes';
 
 import RecyclebinContext from '../../context/recyclebin/recyclebinContext';
 
-const { defaultColor, orange, gray } = theme;
+const { orange, gray } = theme;
 
 const HeadIconBaseStyle = `
     float: left;
-    transform: translate(3px,-125%);
 `;
 
 const HeadIconResponsiveStyle = () => {
@@ -28,7 +27,7 @@ const HeadIconResponsiveStyle = () => {
             constraint: 'min',
             width: '768px',
             rules: `
-                transform: translate(3px,-125%);
+                transform: translate(120%, 2px);
             `
         }
     ]);
@@ -67,6 +66,7 @@ const ClearIconResponsiveStyle = () => {
 const ClearIconStyle = ClearIconBaseStyle.concat(ClearIconResponsiveStyle());
 
 const IconInputContainerBaseStyle = `
+    width: 100%;
     height: 2.5rem;
 `;
 
@@ -91,8 +91,6 @@ const IconInputContainerResponsiveStyle = () => {
             rules: `
                 flex: none;
                 margin-left: auto;
-                width: 40%;
-                max-width: 200px;
             `
         }
     ]);
@@ -122,23 +120,42 @@ const RecycleFilter = () => {
         setColor(gray);
     }
 
+    const IconInputBaseStyle = `
+        border: 1px solid ${color};
+        text-indent: 24px;
+        color: ${color};
+
+        ::placeholder{
+            color: ${color};
+        }
+    `;
+
+    const IconInputResponsiveStyle = () => {
+        return makeResponsiveCSS([
+            {
+                constraint: 'min',
+                width: '0px',
+                rules: `
+                    width: 100%;
+                    height: 100%;
+                `
+            }, {
+                constraint: 'min',
+                width: '768px',
+                rules: `
+                    width: auto;
+                    height: auto;
+                `
+            }
+        ]);
+    }
+
+    const IconInputStyle = IconInputBaseStyle.concat(IconInputResponsiveStyle());
+
     return (
         <IconInput 
-            containerStyle={`
-                flex: 1 1 auto;
-                height: 0;`
-            }
-            inputStyle={`
-                border: none;
-                background: none;
-                text-indent: 20px;
-                color: ${color};
-                width: 100%;
-                ::placeholder{
-                    color: ${color};
-                    font-size: 16px;
-                }`
-            }
+            containerStyle={IconInputContainerStyle}
+            inputStyle={IconInputStyle}
             placeholder='搜尋標題...' 
             onChange={onChange}
             hoverOn={hoverOn}

@@ -275,16 +275,16 @@ const Notedir = props => {
                             onEnter={onEnter}
                             onCancel={onCancelEdit}>
                             <EDToolPanel.ConfirmBtn>
-                                <BtnContent onChange={iconChange.confirm} children={<Check size={20} color={color.confirm} />} />
+                                <BtnContent onChange={iconChange.confirm} children={<Check size={22} color={color.confirm} />} />
                             </EDToolPanel.ConfirmBtn>
                             <EDToolPanel.CancelBtn>
-                                <BtnContent onChange={iconChange.cancel} children={<X size={20} color={color.cancel} />} />
+                                <BtnContent onChange={iconChange.cancel} children={<X size={22} color={color.cancel} />} />
                             </EDToolPanel.CancelBtn>
                             <EDToolPanel.EditBtn>
-                                <BtnContent onChange={iconChange.edit} children={<Pencil size={20} color={color.edit} />} />
+                                <BtnContent onChange={iconChange.edit} children={<Pencil size={22} color={color.edit} />} />
                             </EDToolPanel.EditBtn>
                             <EDToolPanel.DeleteBtn>
-                                <BtnContent onChange={iconChange.delete} children={<Trash size={20} color={color.delete} />} />
+                                <BtnContent onChange={iconChange.delete} children={<Trash size={22} color={color.delete} />} />
                             </EDToolPanel.DeleteBtn>
                         </EDToolPanel>
                     </ToolPanelContainer>

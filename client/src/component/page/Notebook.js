@@ -1,7 +1,6 @@
 import React, { useContext, useEffect } from 'react';
 import { ReactComponent as AddNotebook } from  '../../assets/general/add_notebook.svg';
 import styled from 'styled-components';
-import makeResponsiveCSS from '../../utils/make-responsive-css'
 import {
     MediumAndAbove
 } from '../../utils/breakpoints.jsx';
@@ -27,7 +26,7 @@ const AddNotebookBtn = styled.button`
     flex-wrap: nowrap;
     border: none;
     border-radius: 5px;
-    padding: 5px 10px;
+    padding: .2rem 1rem;
     color: #FFF;
     height: 2.5rem;
     box-shadow: 3px 3px 5px rgba(0,0,0,.5);
@@ -55,22 +54,6 @@ const NotebookBaseStyle = `
         flex-flow: row nowrap;
     }
 `;
-
-const NotebookResponsiveStyle = () => {
-    return makeResponsiveCSS([
-        {
-            constraint: 'min',
-            width: '320px',
-            rules: `
-            `
-        }, {
-            constraint: 'min',
-            width: '768px',
-            rules: `
-            `
-        }
-      ])
-}
 
 const NotebookContainer = styled.div`
     ${NotebookBaseStyle}
