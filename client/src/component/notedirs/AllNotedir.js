@@ -3,10 +3,10 @@ import NoteDirContainer from '../../style/components/Notedir';
 
 import NotedirContext from '../../context/notedirs/notedirContext';
 
-const AllNotedir = setCurrent => {
+const AllNotedir = ({setCurrent}) => {
     const notedirContext = useContext(NotedirContext);
 
-    const currentNotedirId = notedirContext.current ? notedirContext.current._id : null;
+    const currentNotedirId = notedirContext.current !== '' ? notedirContext.current ? notedirContext.current._id : null : '';
 
     const onClick = e => {
         e.preventDefault();

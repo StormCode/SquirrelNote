@@ -33,7 +33,7 @@ router.get('/', auth, async(req, res) => {
 
         //判斷取得單一目錄的筆記/筆記本裡全部的筆記
         if(req.header('x-notedir')) {
-            //從header取得notedir
+            // 從header取得notedir
             const notedirId = newCrypto.decrypt(req.header('x-notedir'), false);
 
             // 取得此筆記的筆記目錄
@@ -52,7 +52,7 @@ router.get('/', auth, async(req, res) => {
             // 取得所有筆記
             notes = notedir.notes;
         } else {
-            //從header取得notebook
+            // 從header取得notebook
             const notebookId = newCrypto.decrypt(req.header('x-notebook'), false);
 
             // 取得此筆記的筆記本
@@ -65,11 +65,11 @@ router.get('/', auth, async(req, res) => {
     
             // 筆記本中的所有目錄
             const allNotedirs = notebook.notedirs;
-            
+
             // 取得所有筆記
             for(let idx = 0; idx < allNotedirs.length; idx++) {
                 notedir = await Notedir.findById(allNotedirs[idx]._id);
-                notes.concat(notedir.notes);
+                notes = notes.concat(notedir.notes);
             }
         }
         // 加密note資料

@@ -667,10 +667,10 @@ const Note = ({ match }) => {
 
     const onDelete = e => {
         e.preventDefault();
-        // 若目前的目錄是在「(全部)」則用筆記ID抓出Notes的筆記目錄
+        // 若目前的目錄是在「(全部)」則把筆記存入預設的目錄
         let saveNotedirId;
         if(notedirId === '') {
-            saveNotedirId = notes.find(note => note._id === current._id).notedir;
+            saveNotedirId = cacheCurrent.notedir;
         } else {
             saveNotedirId = notedirId;
         }
@@ -745,7 +745,6 @@ const Note = ({ match }) => {
                 let newContent = await ReplaceImage(current.content);
 
                 // 判斷筆記儲存的目錄
-                // 若目前的目錄是在「(全部)」則用筆記ID抓出Notes的筆記目錄
                 let saveNotedirId;
 
                 // 1. 判斷要做Add還是Update
@@ -769,9 +768,9 @@ const Note = ({ match }) => {
                     // 新增筆記
                     await addNote(saveNote);
                 } else {
-                    // 若目前的目錄是在「(全部)」則用筆記ID抓出Notes的筆記目錄
+                    // 若目前的目錄是在「(全部)」則用快取筆記裡的目錄ID
                     if(notedirId === '') {
-                        saveNotedirId = notes.find(note => note._id === current._id).notedir;
+                        saveNotedirId = cacheCurrent.notedir;
                     } else {
                         saveNotedirId = notedirId;
                     }

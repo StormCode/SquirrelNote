@@ -166,7 +166,7 @@ const NoteState = props => {
             decryptedData.summary = decrypt(decryptedData.summary, process.env.REACT_APP_SECRET_KEY, false);
             dispatch({
                 type: ADD_NOTE,
-                payload: {...decryptedData, content: note.content}
+                payload: {...decryptedData, content: note.content, notedir: note.notedir}
             });
         } catch (err) {
             dispatch({
@@ -194,7 +194,7 @@ const NoteState = props => {
             decryptedData.summary = decrypt(decryptedData.summary, process.env.REACT_APP_SECRET_KEY, false);
             dispatch({
                 type: UPDATE_NOTE,
-                payload: {...decryptedData, content: note.content}
+                payload: {...decryptedData, content: note.content, notedir: note.notedir}
             });
         } catch (err) {
             dispatch({ type: NOTE_ERROR});

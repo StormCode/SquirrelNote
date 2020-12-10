@@ -99,7 +99,7 @@ const Notes = ({ notebookId, addEvent, setCacheNoteContent, setNoteContent, togg
     const notedirContext = useContext(NotedirContext);
     const noteContext = useContext(NoteContext);
 
-    const notedirId = notedirContext.current ? notedirContext.current._id : null;
+    const notedirId = notedirContext.current !== '' ? notedirContext.current ? notedirContext.current._id : null : '';
 
     const { notes, 
         filtered,

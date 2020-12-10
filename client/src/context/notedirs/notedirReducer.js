@@ -45,8 +45,10 @@ export default (state, action) => {
         case SET_CURRENT_NOTEDIR:
             return {
                 ...state,
-                current: state.notedirs && state.notedirs.find(notedir => action.payload ? 
-                    notedir._id == action.payload : notedir.default == true)
+                current: action.payload !== '' ?
+                            state.notedirs && state.notedirs.find(notedir => action.payload ? 
+                                notedir._id == action.payload : notedir.default == true)
+                            : ''
             }
         case CLEAR_CURRENT_NOTEDIR:
             return {

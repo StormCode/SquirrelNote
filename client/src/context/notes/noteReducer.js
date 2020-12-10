@@ -36,7 +36,8 @@ export default (state, action) => {
                 current: action.payload,
                 cacheCurrent: {
                     title: action.payload.title,
-                    content: action.payload.content
+                    content: action.payload.content,
+                    notedir: action.payload.notedir
                 }
             }
         case SET_CURRENT_NOTE:
@@ -58,10 +59,12 @@ export default (state, action) => {
                         content: action.payload.content, 
                         date: action.payload.date
                     }),
-                cacheCurrent: {
-                    title: state.current.title,
-                    content: action.payload.content
-                },
+                cacheCurrent: Object.assign({}, state.cacheCurrent, 
+                    {
+                        title: state.current.title,
+                        content: action.payload.content,
+                        notedir: action.payload.notedir
+                    }),
                 notes: [...state.notes, action.payload]
             }
         case UPDATE_NOTE:
@@ -70,12 +73,14 @@ export default (state, action) => {
                 current: Object.assign({}, state.current, 
                     {
                         content: action.payload.content, 
-                        date: action.payload.date
+                        date: action.payload.date,
+                        notedir: action.payload.notedir
                     }),
-                cacheCurrent: {
-                    title: action.payload.title,
-                    content: action.payload.content
-                },
+                cacheCurrent: Object.assign({}, state.cacheCurrent, 
+                    {
+                        title: state.current.title,
+                        content: action.payload.content
+                    }),
                 notes: state.notes.map(note => 
                     note._id === action.payload._id ? action.payload : note
                 )
@@ -125,9 +130,7 @@ export default (state, action) => {
                 ...state,
                 cacheNotes: state.cacheNotes.filter(cacheNote => {
                     return cacheNote._id !== action.payload;
-                }),
-                current: null,
-                cacheCurrent: null
+                })
             }
         case SET_SAVE:
             return {

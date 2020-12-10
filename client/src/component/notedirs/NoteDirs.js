@@ -129,11 +129,8 @@ const Notedirs = ({notebookId, toggleCollapse}) => {
 
     useEffect(() => {
         if(notebooks && notedirs) {
-            // 設定預設的筆記目錄
-            let currentNotebook = notebooks.find(notebook => notebook._id === notebookId);
-            let defaultNotedir = currentNotebook.notedirs.find(notedir => notedir.default === true);
-            
-            setCurrentNotedir(defaultNotedir._id);
+            // 筆記目錄設定為全部
+            setCurrentNotedir('');
         }
     }, [notebooks, notedirs]);
 
