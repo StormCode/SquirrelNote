@@ -70,7 +70,7 @@ const NotedirListResponsiveStyle = () => {
     return makeResponsiveCSS([
         {
             constraint: 'min',
-            width: '320px',
+            width: '0px',
             rules: `                
                 .collapse-btn {
                     display: none;

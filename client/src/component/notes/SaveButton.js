@@ -30,7 +30,7 @@ const Button = styled.button`
 
     p {
         display: ${props => props.state !== SAVED ? 'none' : 'inherit'};
-        font-size: 8px;
+        font-size: .3rem;
     }
 `;
 
