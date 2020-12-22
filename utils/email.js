@@ -22,13 +22,8 @@ module.exports = function(credentials) {
           from: from,
           to: to,
           subject: subj,
-          html: body,
-        },
-        function(err) {
-          if (err) {
-            console.log('Unable to send email: ' + err);
-          }
-        },
+          html: body
+        }
       );
     },
     emailError: function(message, filename, exception) {
@@ -42,13 +37,8 @@ module.exports = function(credentials) {
           to: errorRecipient,
           subject: 'Send Mail Error',
           html: body,
-          generateTextFromHtml: true,
-        },
-        function(err) {
-          if (err) {
-            console.log('Unable to send email: ' + err);
-          }
-        },
+          generateTextFromHtml: true
+        }
       );
     },
   };

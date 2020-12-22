@@ -7,7 +7,7 @@ const Footer = ({title}) => {
 
     return (
         //當路徑在筆記頁面的時候要隱藏Footer
-        location.pathname.match(/notebook(#!)?/gi) ? null :
+        location.pathname.match(/(notebook(#!)?)|(recyclebin)/gi) ? null :
         (<div className='footer'>
             <p>Copyright © 2020 {title}</p>
         </div>)

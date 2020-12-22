@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
-const config = require('config');
 const fs = require('fs');
-const { v4: uuidv4 } = require('uuid');
+require('dotenv').config();
 const {
     NOT_FOUND,
     MISSING_PARAM
@@ -14,6 +13,7 @@ const User = require('../models/User');
 const Notebook = require('../models/Notebook');
 const Notedir = require('../models/Notedir');
 const Note = require('../models/Note');
+const getDeletedChild = require('../general/getDeletedChild');
 const crypto = require('../utils/crypto');
 const auth = require('../middleware/auth');
 
@@ -37,88 +37,107 @@ router.get('/', auth, async(req, res) => {
         if(!deletedGroup) 
             res.status(200).send();
         else {
+            const getDeletedParent = (type, data, id) => {
+                switch(type) {
+                    case 'notebook':
+                        const deletedNotebookInRecyclebin = data.find(deletedNotebook => deletedNotebook._id.toString() === id.toString());
+                        const deletedNotebookParentTitle = deletedNotebookInRecyclebin ? deletedNotebookInRecyclebin.title : null;
+                        return {
+                            type: 'notebook',
+                            id,
+                            title: deletedNotebookParentTitle
+                        }
+                    case 'notedir':
+                        const deletedNotedirInRecyclebin = data.find(deletedNotedir => deletedNotedir._id.toString() === id.toString());
+                        const deletedNotedirParentTitle = deletedNotedirInRecyclebin ? deletedNotedirInRecyclebin.title : null;
+                        return {
+                            type: 'notedir',
+                            id,
+                            title: deletedNotedirParentTitle
+                        }
+                }
+            }
+
+            const deletedNotebooks = deletedGroup.items.filter(item => item.type === 'notebook').map(deleteItem => deleteItem.notebook);
+            const deletedNotedirs = deletedGroup.items.filter(item => item.type === 'notedir').map(deleteItem => deleteItem.notedirs);
+            const deletedNotedirsMap = new Map();
+            const deletedNotebookOfNotesMap = new Map();
+            const deletedNotesMap = new Map();
+            deletedGroup.items.filter(item => item.type === 'notedir')
+                .forEach(deletedItem => {
+                    deletedNotedirsMap.set(deletedItem.id, deletedItem.notedirs);
+                });
+            deletedGroup.items.filter(item => item.type === 'note')
+                .forEach(deletedItem => {
+                    deletedNotebookOfNotesMap.set(deletedItem.id, deletedItem.parent.notebook);
+                    deletedNotesMap.set(deletedItem.id, deletedItem.notes);
+                });
+            
             // 判斷每個項目是否可以還原
-            deletedGroup.items.forEach(deletedItem => {
+            for(let idx = 0; idx < deletedGroup.items.length; idx++) {
+                let deletedItem = deletedGroup.items[idx];
                 switch(deletedItem.type) {
                     case 'notebook':
                         deletedItem.isRestoreable = true;
                         break;
                     case 'notedir':
-                        const notebook = Notebook.findById(deletedItem.notedirs.notebook);
-                        deletedItem.isRestoreable = notebook ? true : false;
+                        const notebook = await Notebook.findById(deletedItem.notedirs.notebook);
+                        if(!notebook) {
+                            deletedItem.isRestoreable = false;
+                            deletedItem.parent_info = getDeletedParent('notebook', deletedNotebooks, deletedItem.notedirs.notebook);
+                        } else {
+                            deletedItem.isRestoreable = true;
+                        }
                         break;
                     case 'note':
-                        const notedir = Notedir.findById(deletedItem.notes.notedir);
-                        deletedItem.isRestoreable = notedir ? true : false;
+                        const notedir = await Notedir.findById(deletedItem.notes.notedir);
+                        if(notedir) {
+                            deletedItem.isRestoreable = true;
+                        } else {
+                            deletedItem.isRestoreable = false;
+
+                            // 確認筆記目錄是否為某個被刪除筆記本的預設目錄，若是則表示整個筆記本已經被刪除，其上層資訊設定為筆記本資訊
+                            let isDefaultNotedir = false;
+                            for(let notebookIdx = 0; notebookIdx < deletedNotebooks.length; notebookIdx++) {
+                                const deletedNotebook = deletedNotebooks[notebookIdx];
+                                for(let notedirIdx = 0; notedirIdx < deletedNotebook.notedirs.length; notedirIdx++) {
+                                    const deletedNotedir = deletedNotebook.notedirs[notedirIdx];
+                                    if(deletedNotedir._id.toString() === deletedItem.notes.notedir.toString() && deletedNotedir.default === true) {
+                                        isDefaultNotedir = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if(isDefaultNotedir) {
+                                deletedItem.parent_info = getDeletedParent('notebook', deletedNotebooks, deletedItem.parent.notebook);
+                            } else {
+                                deletedItem.parent_info = getDeletedParent('notedir', deletedNotedirs, deletedItem.notes.notedir);
+                            }
+                        }
                         break;
                 }
-            });
+            }
 
-            const encryptedDeletedItems = crypto(process.env.SECRET_KEY).encrypt(deletedGroup.items);
+            // 判斷是否有已被刪除的子層級(目錄/筆記)
+            for(let idx = 0; idx < deletedGroup.items.length; idx++) {
+                let deletedItem = deletedGroup.items[idx];
+                switch(deletedItem.type) {
+                    case 'notebook':
+                        deletedItem.child_count = getDeletedChild('notebook', deletedNotebookOfNotesMap, deletedNotedirsMap, null, deletedItem.notebook._id).size;
+                        break;
+                    case 'notedir':
+                        deletedItem.child_count = getDeletedChild('notedir', null, null, deletedNotesMap, deletedItem.notedirs._id).size;
+                        break;
+                }
+            }
+
+            const deletedItemsClone = JSON.parse(JSON.stringify(deletedGroup.items));
+            deletedItemsClone.map(deletedItem => delete deletedItem.parent);
+
+            const encryptedDeletedItems = crypto(process.env.SECRET_KEY).encrypt(deletedItemsClone);
     
             res.json(encryptedDeletedItems);
         }
-
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
-    }
-});
-
-// route            Post /api/recyclebin
-// desc             新增刪除項目
-// access           Private
-router.post('/', auth, async(req, res) => {
-    const { type, id } = req.body;
-    const userId = req.user.id;
-    let notebook, notedirs, notes;
-    
-    try {
-        let deleteItems = {
-            id: uuidv4(),
-            type,
-            date: new Date()
-        };
-
-        switch(type){
-            case 'notebook':
-                notebook = await Notebook.findById(id);
-                notedirs = await Notedir.find({ notebook: notebook._id });
-                notes = await require('../common/getNotes')(notedirs);
-                deleteItems.title = notebook.title;
-                deleteItems.notebook = notebook;
-                deleteItems.notedirs = notedirs;
-                deleteItems.notes = notes;
-                break;
-            case 'notedir':
-                notedirs = await Notedir.findById(id);
-                notes = await require('../common/getNotes')(notedirs);
-                deleteItems.title = notedirs.title;
-                deleteItems.notedirs = notedirs;
-                deleteItems.notes = notes;
-                break;
-            case 'note':
-                notes = await Note.findById(id);
-                deleteItems.title = notes.title;
-                deleteItems.notes = notes;
-                break;
-        }
-
-        // 取得刪除的項目
-        const deletedGroup = await Recyclebin.findOne({userId});
-
-        if(!deletedGroup) {
-            const newDeletedGroup = new Recyclebin({
-                userId: userId,
-                items: [deleteItems]
-            });
-            await newDeletedGroup.save(); 
-        } else {
-            deletedGroup.items.push(deleteItems);
-            await deletedGroup.save();
-        }
-
-        res.json({msg: deletedItems.title + ' 已刪除'});
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
@@ -186,7 +205,7 @@ router.put('/:id', auth, async(req, res) => {
 
                 const newCrypto = crypto(process.env.SECRET_KEY);
                 const decryptedContent = newCrypto.decrypt(deletedItem.notes.content, false);
-                const encryptedSummary = newCrypto.encrypt(require('../common/summary')(decryptedContent), false);
+                const encryptedSummary = newCrypto.encrypt(require('../general/summary')(decryptedContent), false);
 
                 const newNotedirNote = {
                     _id: deletedItem.notes._id,
@@ -235,8 +254,23 @@ router.delete('/:id', auth, async(req, res) => {
 
         // 取得刪除的項目
         const deletedGroup = await Recyclebin.findOne({userId});
+        let deletedNotedirsMap = new Map();
+        let deletedNotebookOfNotesMap = new Map();
+        let deletedNotesMap = new Map();
+        deletedGroup.items.filter(item => item.type === 'notedir')
+            .forEach(deletedItem => {
+                deletedNotedirsMap.set(deletedItem.id, deletedItem.notedirs);
+            });
+        deletedGroup.items.filter(item => item.type === 'note')
+            .forEach(deletedItem => {
+                deletedNotebookOfNotesMap.set(deletedItem.id, deletedItem.parent.notebook);
+                deletedNotesMap.set(deletedItem.id, deletedItem.notes);
+            });
         const deletedItem = deletedGroup.items.find(item => item.id === id);
-        
+        // const deletedNotedirs = deletedGroup.items.filter(item => item.type === 'notedir').map(deleteItem => deleteItem.notedirs);
+        // const deletedNotebookOfNotes = deletedGroup.items.filter(item => item.type === 'note').map(deleteItem => deleteItem.parent.notebook);
+        let deletedNotes = deletedGroup.items.filter(item => item.type === 'note').map(deleteItem => deleteItem.notes);
+            
         if(!deletedItem) return res.status(400).json({status: NOT_FOUND});
 
         // 執行刪除
@@ -244,30 +278,47 @@ router.delete('/:id', auth, async(req, res) => {
         deletedGroup.items.splice(deleteIdx,1);
         await deletedGroup.save();
 
+        // 連帶刪除子層級(目錄/筆記)
+        let deletedChildMap = new Map();
+        switch(deletedItem.type) {
+            case 'notebook':
+                deletedChildMap = getDeletedChild('notebook', deletedNotebookOfNotesMap, deletedNotedirsMap, null, deletedItem.notebook._id);
+                break;
+            case 'notedir':
+                deletedChildMap = getDeletedChild('notedir', null, null, deletedNotesMap, deletedItem.notedirs._id);
+                break;
+        }
+
+        for(let deletedItemId of deletedChildMap.keys()) {
+            deleteIdx = deletedGroup.items.findIndex((el) => el.id == deletedItemId);
+            deletedGroup.items.splice(deleteIdx,1);
+            await deletedGroup.save();
+        }
+
         //
         // server上的照片也一併刪除
         //
-        let deleteImgs = [], deletedNotes = [];
+        let deleteImgs = [];
 
         if(deletedItem.type === 'note') {
-            deletedNotes.push(deletedItem.notes);
+            deletedNotes = [].concat(deletedItem.notes);
         } else {
             deletedNotes = deletedItem.notes;
         }
         deletedNotes.forEach(deletedNote => {
             let decryptedContent = newCrypto.decrypt(deletedNote.content, false); 
-            let deleteImgItems = require('../common/filterDeleteImgs')(decryptedContent);
+            let deleteImgItems = require('../general/filterDeleteImgs')(decryptedContent);
             deleteImgs = [].concat(deleteImgs, deleteImgItems);
         });
         
         // 刪除在Server上的所有檔案 
         if(deleteImgs.length > 0) {
             deleteImgs.forEach((imgName) => {
-                let deletedImgPath = path.join(__dirname, '..', config.get('imageDirectory'), imgName);
+                let deletedImgPath = path.join(__dirname, '..', process.env.IMAGE_DIRECTORY, imgName);
                 
                 fs.unlink(deletedImgPath, (err) => {
-                      return;
-                    });
+                    return;
+                });
             })
         }
 

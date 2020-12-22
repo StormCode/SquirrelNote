@@ -1,6 +1,5 @@
 const express = require('express');
 const path = require('path');
-const config = require('config')
 const { v4: uuidv4 } = require('uuid');
 require('dotenv').config();
 const fs = require('fs');
@@ -17,7 +16,6 @@ const Note = require('../models/Note');
 const Recyclebin = require('../models/Recyclebin');
 const crypto = require('../utils/crypto');
 const auth = require('../middleware/auth');
-const e = require('express');
 
 // route            Get /api/notes
 // desc             取得所有筆記
@@ -30,7 +28,7 @@ router.get('/', auth, async(req, res) => {
 
         if(!(req.header('x-notedir') || req.header('x-notebook'))) 
             return res.status(400).json({msg: '缺少參數', status: MISSING_PARAM});
-
+            
         //判斷取得單一目錄的筆記/筆記本裡全部的筆記
         if(req.header('x-notedir')) {
             // 從header取得notedir
@@ -138,7 +136,7 @@ router.post('/', auth, async(req, res) => {
         if(notebook.author.toString() !== req.user.id) return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
 
         const encryptedTitle = newCrypto.encrypt(title, false);
-        const encryptedSummary = newCrypto.encrypt(require('../common/summary')(content), false);
+        const encryptedSummary = newCrypto.encrypt(require('../general/summary')(content), false);
         const encryptedContent = newCrypto.encrypt(content, false);
 
         // 新增筆記到notes
@@ -265,7 +263,7 @@ router.put('/:id', auth, async(req, res) => {
             const updateDateTime = new Date();
 
             const encryptedTitle = newCrypto.encrypt(title, false);
-            const encryptedSummary = newCrypto.encrypt(require('../common/summary')(content), false);
+            const encryptedSummary = newCrypto.encrypt(require('../general/summary')(content), false);
             const encryptedContent = newCrypto.encrypt(content, false);
 
             let checkRes = await checkNoteDir(data.notedir);
@@ -282,12 +280,12 @@ router.put('/:id', auth, async(req, res) => {
             }
 
             const decryptedNote = newCrypto.decrypt(note.content, false);
-            const deleteImgs = require('../common/filterDeleteImgs')(decryptedNote, content);
+            const deleteImgs = require('../general/filterDeleteImgs')(decryptedNote, content);
 
             //確認新的筆記內容是否有刪掉圖片，有則刪除Server上的檔案
             if(deleteImgs.length > 0) {
                 deleteImgs.forEach((imgName) => {
-                    let deletedImgPath = path.join(__dirname, '..', config.get('imageDirectory'), imgName);
+                    let deletedImgPath = path.join(__dirname, '..', process.env.IMAGE_DIRECTORY, imgName);
 
                     fs.unlink(deletedImgPath, (err) => {
                           return;
@@ -357,7 +355,7 @@ router.delete('/:id', auth, async(req, res) => {
             date: new Date()
         };
 
-        //從header取得notebook
+        //從header取得notedir
         const notedirId = crypto(process.env.SECRET_KEY).decrypt(req.header('x-notedir'), false);
 
         const note = await Note.findById(id);
@@ -381,6 +379,9 @@ router.delete('/:id', auth, async(req, res) => {
         // 移動至回收站
         //
         deleteItems.title = note.title;
+        deleteItems.parent = {
+            notebook: notedir.notebook
+        };
         deleteItems.notes = note;
 
         // 取得刪除的項目

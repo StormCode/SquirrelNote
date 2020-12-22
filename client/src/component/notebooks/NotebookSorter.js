@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { FunnelSimple } from "phosphor-react";
 import styled from 'styled-components';
-import Sorter from '../layout/Sorter';
+import Sorter from '../general/Sorter';
 import makeResponsiveCSS from '../../utils/make-responsive-css'
 
 // Import Style
@@ -52,7 +52,7 @@ const NotebookSorter = () => {
     const [color, setColor] = useState(gray);
 
     useEffect(() => {
-        setColor(dropdownOpen ? orange : color);
+        dropdownOpen ? setColor(orange) : setColor(gray);
     }, [dropdownOpen]);
 
     const toggleDropdownOpen = () => {

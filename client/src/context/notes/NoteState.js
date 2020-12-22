@@ -17,15 +17,29 @@ import {
     APPEND_CACHE_NOTE,
     MODIFY_CACHE_NOTE,
     REMOVE_CACHE_NOTE,
+    SET_CACHE_NOTE,
     SET_SAVE,
     ENABLE_DELETE,
     DISABLE_DELETE,
     CLEAR_NOTE,
-    NOTE_ERROR
+    NOTE_ERROR,
+    NOTE_SAVE_ERROR
 } from '../types.js';
 import {
     DISABLESAVE
 } from '../../saveState';
+import {
+    DELETE_NOTE_SUCCESS,
+    MOVE_NOTE_SUCCESS
+} from '../../success';
+import {
+    DELETE_NOTE_ERROR,
+    MOVE_NOTE_ERROR,
+    GET_NOTE_ERROR,
+    GET_NOTE_DETAIL_ERROR,
+    SERVER_ERROR,
+    UNKNOW_ERROR
+} from '../../error';
 
 const NoteState = props => {
     const initialState = {
@@ -36,12 +50,15 @@ const NoteState = props => {
             state: DISABLESAVE,
             showUpdateTime: false
         },
+        cacheMap: new Map(),    //對應筆記目錄裡的快取筆記
         cacheNotes: [],
         deleteEnable: false,
         filtered: null,
         orderBy: 'asc',
         sortBy: 'title',
+        success: null,
         error: null,
+        saveResult: null,
         loading: true
     };
 
@@ -60,7 +77,7 @@ const NoteState = props => {
             const res = await axios.get('/api/notes',config);
             // 解密Server回傳的note資料
             const decryptedDatas = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
-            decryptedDatas.map(decryptedData => {
+            decryptedDatas.forEach(decryptedData => {
                 decryptedData.title = decrypt(decryptedData.title, process.env.REACT_APP_SECRET_KEY, false);
                 decryptedData.summary = decrypt(decryptedData.summary, process.env.REACT_APP_SECRET_KEY, false);
             });
@@ -71,8 +88,8 @@ const NoteState = props => {
         } catch (err) {
             dispatch({
                 type: NOTE_ERROR,
-                payload: err.msg || 'Server Error'
-            })
+                payload: `${GET_NOTE_ERROR}: ${err.msg || SERVER_ERROR}`
+            });
         }
     }
 
@@ -89,7 +106,7 @@ const NoteState = props => {
             const res = await axios.get('/api/notes',config);
             // 解密Server回傳的note資料
             const decryptedDatas = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
-            decryptedDatas.map(decryptedData => {
+            decryptedDatas.forEach(decryptedData => {
                 decryptedData.title = decrypt(decryptedData.title, process.env.REACT_APP_SECRET_KEY, false);
                 decryptedData.summary = decrypt(decryptedData.summary, process.env.REACT_APP_SECRET_KEY, false);
             });
@@ -100,7 +117,7 @@ const NoteState = props => {
         } catch (err) {
             dispatch({
                 type: NOTE_ERROR,
-                payload: err.msg || 'Server Error'
+                payload: `${GET_NOTE_ERROR}: ${err.msg || SERVER_ERROR}`
             })
         }
     }
@@ -118,38 +135,28 @@ const NoteState = props => {
                 payload: decryptedData
             });
         } catch (err) {
-            console.log('err: ' + err);
-            
             dispatch({
                 type: NOTE_ERROR,
-                payload: err.msg || 'Server Error'
+                payload: `${GET_NOTE_DETAIL_ERROR}: ${err.msg || SERVER_ERROR}`
             });
         }
     }
 
     //設定目前的筆記內容
     const setCurrentNote = note => {
-        try {
-            dispatch({
-                type: SET_CURRENT_NOTE,
-                payload: note
-            })
-        } catch (err) {
-            dispatch({type: NOTE_ERROR})
-        }
+        dispatch({
+            type: SET_CURRENT_NOTE,
+            payload: note
+        });
     }
 
     //清除目前的筆記內容
     const clearCurrentNote = () => {
-        try {
-            dispatch({ type: CLEAR_CURRENT_NOTE })
-        } catch (err) {
-            dispatch({type: NOTE_ERROR})
-        }
+        dispatch({ type: CLEAR_CURRENT_NOTE });
     }
 
     //新增筆記
-    const addNote = async note => {
+    const addNote = async (notedir, id, note, keyword) => {
         const config = {
             headers: {
                 'Content-Type': 'application/json'
@@ -166,18 +173,20 @@ const NoteState = props => {
             decryptedData.summary = decrypt(decryptedData.summary, process.env.REACT_APP_SECRET_KEY, false);
             dispatch({
                 type: ADD_NOTE,
-                payload: {...decryptedData, content: note.content, notedir: note.notedir}
+                payload: {
+                    notedir,
+                    id,
+                    note: {...decryptedData, content: note.content, notedir: note.notedir},
+                    keyword
+                }
             });
-        } catch (err) {
-            dispatch({
-                type: NOTE_ERROR,
-                payload: err.msg || 'Server Error'
-            });
+        } catch {
+            dispatch({ type: NOTE_SAVE_ERROR });
         }
     }
 
     //修改筆記
-    const updateNote = async (id, note) => {
+    const updateNote = async (notedir, id, note, keyword) => {
         const config = {
             headers: {
                 'Content-Type': 'application/json'
@@ -194,10 +203,15 @@ const NoteState = props => {
             decryptedData.summary = decrypt(decryptedData.summary, process.env.REACT_APP_SECRET_KEY, false);
             dispatch({
                 type: UPDATE_NOTE,
-                payload: {...decryptedData, content: note.content, notedir: note.notedir}
+                payload: {
+                    notedir,
+                    id,
+                    note: {...decryptedData, content: note.content, notedir: note.notedir}, 
+                    keyword
+                }
             });
-        } catch (err) {
-            dispatch({ type: NOTE_ERROR});
+        } catch {
+            dispatch({ type: NOTE_SAVE_ERROR });
         }
     }
 
@@ -213,15 +227,18 @@ const NoteState = props => {
             await axios.delete(`/api/notes/${noteId}`,config);
             dispatch({
                 type: DELETE_NOTE,
-                payload: noteId
+                payload: {id: noteId, success: DELETE_NOTE_SUCCESS}
             });
         } catch (err) {
-            dispatch({ type: NOTE_ERROR});
+            dispatch({ 
+                type: NOTE_ERROR,
+                payload: `${DELETE_NOTE_ERROR}: ${err.msg || SERVER_ERROR}`
+            });
         }
     }
 
     //移動筆記
-    const moveNote = async (id, note) => {
+    const moveNote = async (id, note, destNotedirTitle, delItemCallback) => {
         const config = {
             headers: {
                 'Content-Type': 'application/json'
@@ -232,12 +249,20 @@ const NoteState = props => {
             // 加密傳至Server的note資料
             const encryptedData = {data: encrypt(note, process.env.REACT_APP_SECRET_KEY)};
             await axios.put(`/api/notes/${id}`, encryptedData, config);
-            dispatch({
-                type: MOVE_NOTE,
-                payload: id
-            });
+            delItemCallback() ? 
+                dispatch({
+                    type: MOVE_NOTE,
+                    payload: {id, note, success: `${MOVE_NOTE_SUCCESS}到${destNotedirTitle}`}
+                })
+            : dispatch({ 
+                type: CLEAR_CURRENT_NOTE,
+                payload: {success: `${MOVE_NOTE_SUCCESS}到${destNotedirTitle}`}
+             });
         } catch (err) {
-            dispatch({ type: NOTE_ERROR});
+            dispatch({ 
+                type: NOTE_ERROR,
+                payload: `${MOVE_NOTE_ERROR}: ${err.msg || SERVER_ERROR}`
+            });
         }
     }
 
@@ -250,50 +275,62 @@ const NoteState = props => {
     }
 
     //新增暫存的筆記
-    const appendCacheNote = note => {
+    const appendCacheNote = (notedir, cacheNote) => {
         try {
             dispatch({
                 type: APPEND_CACHE_NOTE,
-                payload: note
-            })
-        } catch (err) {
-            dispatch({type: NOTE_ERROR})
+                payload: {notedir, cacheNote}
+            });
+        } catch {
+            dispatch({ 
+                type: NOTE_ERROR,
+                payload: UNKNOW_ERROR
+            });
         }
     }
 
     //編輯暫存的筆記
-    const modifyCacheNote = note => {
+    const modifyCacheNote = (notedir, cacheNote) => {
         try {
             dispatch({
                 type: MODIFY_CACHE_NOTE,
-                payload: note
-            })
-        } catch (err) {
-            dispatch({type: NOTE_ERROR})
+                payload: {notedir, cacheNote}
+            });
+        } catch {
+            dispatch({ 
+                type: NOTE_ERROR,
+                payload: UNKNOW_ERROR
+            });
         }
     }
 
     //刪除暫存的筆記
-    const removeCacheNote = id => {
+    const removeCacheNote = (notedir, id) => {
         try {
             dispatch({
                 type: REMOVE_CACHE_NOTE,
-                payload: id
+                payload: {notedir, id}
             });
-        } catch (err) {
-            dispatch({type: NOTE_ERROR})
+        } catch {
+            dispatch({ 
+                type: NOTE_ERROR,
+                payload: UNKNOW_ERROR
+            });
         }
     }
 
-    //捨棄暫存筆記
-    const discardCacheNote = id => {
+    //設定快取筆記
+    const setCacheNote = note => {
         try {
             dispatch({
-                type: REMOVE_CACHE_NOTE,
-                payload: id
+                type: SET_CACHE_NOTE,
+                payload: note
             });
-        } catch (err) {
-            dispatch({ type: NOTE_ERROR});
+        } catch {
+            dispatch({ 
+                type: NOTE_ERROR,
+                payload: UNKNOW_ERROR
+            });
         }
     }
 
@@ -304,27 +341,22 @@ const NoteState = props => {
                 type: SET_SAVE,
                 payload: saveState
             });
-        } catch (err) {
-            dispatch({type: NOTE_ERROR});
+        } catch {
+            dispatch({ 
+                type: NOTE_ERROR,
+                payload: UNKNOW_ERROR
+            });
         }
     }
 
     //啟用刪除功能
     const enableDelete = () => {
-        try {
-            dispatch({ type: ENABLE_DELETE });
-        } catch (err) {
-            dispatch({type: NOTE_ERROR});
-        }
+        dispatch({ type: ENABLE_DELETE });
     }
 
     //停用刪除功能
     const disableDelete = () => {
-        try {
-            dispatch({ type: DISABLE_DELETE });
-        } catch (err) {
-            dispatch({type: NOTE_ERROR});
-        }
+        dispatch({ type: DISABLE_DELETE });
     }
 
     //清除篩選筆記
@@ -334,11 +366,7 @@ const NoteState = props => {
 
     //清除筆記資料
     const clearNote = () => {
-        try {
-            dispatch({ type: CLEAR_NOTE });
-        } catch (err) {
-            dispatch({type: NOTE_ERROR});
-        }
+        dispatch({ type: CLEAR_NOTE });
     }
 
     return (
@@ -346,6 +374,7 @@ const NoteState = props => {
         value={{
             notes: state.notes,
             current: state.current,
+            cacheMap: state.cacheMap,
             cacheNotes: state.cacheNotes,
             cacheCurrent: state.cacheCurrent,
             deleteEnable: state.deleteEnable,
@@ -353,7 +382,10 @@ const NoteState = props => {
             filtered: state.filtered,
             orderBy: state.orderBy,
             sortBy: state.sortBy,
+            success: state.success,
             error: state.error,
+            saveResult: state.saveResult,
+            loading: state.loading,
             getAllNotes,
             getNotes,
             getNoteDetail,
@@ -368,7 +400,7 @@ const NoteState = props => {
             appendCacheNote,
             modifyCacheNote,
             removeCacheNote,
-            discardCacheNote,
+            setCacheNote,
             setSave,
             enableDelete,
             disableDelete,

@@ -1,14 +1,11 @@
-import React, { Fragment, useState, useContext, useEffect } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
-import {
-    Card, CardImg, CardText, CardBody,
-    CardTitle, CardSubtitle, Button, UncontrolledTooltip 
-  } from 'reactstrap';
-  import { Pencil, Trash, Check, X } from "phosphor-react";
-  import styled from 'styled-components';
-  import makeResponsiveCSS from '../../utils/make-responsive-css'
-import EDToolPanel from '../layout/EDToolPanel';
-import Models from '../layout/Models';
+import { Card, CardText, CardBody, CardTitle } from 'reactstrap';
+import { Pencil, Trash, Check, X } from "phosphor-react";
+import styled from 'styled-components';
+import makeResponsiveCSS from '../../utils/make-responsive-css'
+import EDToolPanel from '../general/EDToolPanel';
+import Models from '../general/Models';
 
 // Import Style
 import { theme } from '../../style/themes';
@@ -19,17 +16,23 @@ import NotebookContext from '../../context/notebooks/notebookContext';
 
 const { orange, gray } = theme;
 
+const ToolPanelContainerBaseStyle = `
+      position: absolute;
+      top: 1.5rem;
+      right: 0;
+`;
+
 const ToolPanelContainerResponsiveStyle = props => {
     return makeResponsiveCSS([
         {
             constraint: 'min',
-            width: '320px',
+            width: '0px',
             rules: `
                 display: block;
             `
         }, {
             constraint: 'min',
-            width: '768px',
+            width: '1280px',
             rules: `
                 display: ${props.visible ? 'block' : 'none'};
             `
@@ -38,20 +41,20 @@ const ToolPanelContainerResponsiveStyle = props => {
 }
 
 const ToolPanelContainer = styled.div`
+    ${ToolPanelContainerBaseStyle}
     ${props => ToolPanelContainerResponsiveStyle(props)}
 `;
 
 const Notebook = props => {
     const notebookContext = useContext(NotebookContext);
 
-    const { currentEditNotebook,
+    const { 
+        currentEditNotebook,
         currentDeleteNotebook,
         enableEditNotebook,
         disableEditNotebook,
         enableDeleteNotebook,
-        disableDeleteNotebook,
-        updateNotebook, 
-        deleteNotebook
+        disableDeleteNotebook
     } = notebookContext;
 
     const [notebook, setNotebook] = useState({
@@ -66,7 +69,7 @@ const Notebook = props => {
 
         //依目前刪除的狀態切換是否顯示刪除
         currentDeleteNotebook === _id ? setDeleteNotebookVisible(true) : setDeleteNotebookVisible(false);
-    },[currentEditNotebook, currentDeleteNotebook]);
+    },[currentEditNotebook, currentDeleteNotebook, _id]);
 
     const [editNotebookVisible, setEditNotebookVisible] = useState(false);
     const [deleteNotebookVisible, setDeleteNotebookVisible] = useState(false);
@@ -97,16 +100,16 @@ const Notebook = props => {
 
     const iconChange = {
         'confirm': () => {
-            setColor({...defaultColor, ['confirm']: orange});
+            setColor({...defaultColor, 'confirm': orange});
         },
         'cancel': () => {
-            setColor({...defaultColor, ['cancel']: orange});
+            setColor({...defaultColor, 'cancel': orange});
         },
         'edit': () => { 
-            setColor({...defaultColor, ['edit']: orange});
+            setColor({...defaultColor, 'edit': orange});
         },
         'delete': () => {
-            setColor({...defaultColor, ['delete']: orange});
+            setColor({...defaultColor, 'delete': orange});
         },
         'default': () => {
             setColor(defaultColor);
@@ -125,7 +128,7 @@ const Notebook = props => {
         if(currentEditNotebook === _id 
             && (title !== props.notebook.title 
             || desc !== props.notebook.desc)) {
-                updateNotebook(_id, notebook);
+                props.updateNotebook(_id, notebook);
         }
 
         disableEditNotebook();
@@ -136,7 +139,7 @@ const Notebook = props => {
     const onDelete = () => {
         //對點擊刪除的那一個筆記本執行delete
         if(currentDeleteNotebook === _id){
-            deleteNotebook(_id);
+            props.deleteNotebook(_id);
         }
 
         disableDeleteNotebook();
@@ -165,8 +168,8 @@ const Notebook = props => {
 
         //設回原本筆記本內容
         setNotebook({...notebook,
-            ['title']: props.notebook.title,
-            ['desc']: props.notebook.desc
+            'title': props.notebook.title,
+            'desc': props.notebook.desc
         });
 
         //取消目前正在使用的ToolPanel
@@ -184,10 +187,11 @@ const Notebook = props => {
         deleteNotebookVisible ? disableDeleteNotebook() : enableDeleteNotebook();
     }
 
-    const BtnContent = ({onChange, children}) => {
+    const BtnContent = ({onChange, children, tooltip}) => {
         return <span
                 onMouseEnter={onChange}
-                onMouseLeave={iconChange.default}>
+                onMouseLeave={iconChange.default}
+                data-tip data-for={tooltip}>
                     {children}
                 </span>};
     
@@ -204,78 +208,30 @@ const Notebook = props => {
                         onEnter={onEnter}
                         onCancel={onCancelEdit}>
                         <EDToolPanel.ConfirmBtn>
-                            <BtnContent onChange={iconChange.confirm} children={<Check size={22} color={color.confirm} weight='bold' />} />
+                            <BtnContent onChange={iconChange.confirm} children={<Check size={22} color={color.confirm} />} />
                         </EDToolPanel.ConfirmBtn>
                         <EDToolPanel.CancelBtn>
-                            <BtnContent onChange={iconChange.cancel} children={<X size={22} color={color.cancel} weight='bold' />} />
+                            <BtnContent onChange={iconChange.cancel} children={<X size={22} color={color.cancel} />} />
                         </EDToolPanel.CancelBtn>
                         <EDToolPanel.EditBtn>
-                            <BtnContent onChange={iconChange.edit} children={<Pencil size={22} color={color.edit} weight='bold' />} />
+                            <BtnContent onChange={iconChange.edit} children={<Pencil size={22} color={color.edit} />} />
                         </EDToolPanel.EditBtn>
                         <EDToolPanel.DeleteBtn>
-                            <BtnContent onChange={iconChange.delete} children={<Trash size={22} color={color.delete} weight='bold' />} />
+                            <BtnContent onChange={iconChange.delete} children={<Trash size={22} color={color.delete} />} />
                         </EDToolPanel.DeleteBtn>
                     </EDToolPanel>
                 </ToolPanelContainer>
-                {/* { editNotebookVisible ? 
-                    (<div className='tool-panel' style={toolPanelStyle}>
-                        <button id='edit-confirm-btn' onClick={onEdit}><img src={confirmImg} alt='完成編輯' /></button>
-                        <button id='cancel-btn' onClick={onCancel}><img src={cancelImg} alt='取消' /></button>
-                        <UncontrolledTooltip placement="bottom" target="edit-confirm-btn">
-                            完成編輯
-                        </UncontrolledTooltip>
-                        <UncontrolledTooltip placement="bottom" target="cancel-btn">
-                            取消
-                        </UncontrolledTooltip>
-                    </div>) : 
-                    !deleteNotebookVisible && (
-                    <div className='tool-panel' style={toolPanelStyle}>
-                        <button id='edit-btn' onClick={onEdit}><img src={editImg} alt='編輯' /></button>
-                        <button id='delete-btn' onClick={onDelete}><img src={deleteImg} alt='刪除' /></button>
-                        <UncontrolledTooltip placement="bottom" target="edit-btn">
-                            編輯
-                        </UncontrolledTooltip>
-                        <UncontrolledTooltip placement="bottom" target="delete-btn">
-                            刪除
-                        </UncontrolledTooltip>
-                    </div>)
-                } */}
-                {/* todo: 加入封面 */}
-                {/* <CardImg top width="100%" src="/assets/318x180.svg" alt="Card image cap" /> */}
                 <CardBody onClick={props.toolPanel !== _id ? LoadNotebook : null}>
-                    {/* <CardTitle>{editNotebookVisible ? 
-                        (<input type='text' 
-                            className='form-control' 
-                            name='title' 
-                            placeholder='名稱' 
-                            value={title} 
-                            onChange={onChange} />
-                        ) : props.notebook.title}</CardTitle>
-                    <CardText>{editNotebookVisible ? 
-                        (<textarea className='form-control' 
-                            rows={3} 
-                            name='desc' 
-                            placeholder='描述' 
-                            value={desc} 
-                            onChange={onChange} />
-                        ) : props.notebook.desc}</CardText>
-                    {deleteNotebookVisible && (
-                        <Fragment>
-                            <p>確定要刪除{title}嗎?</p>
-                            <Button outline color="danger" onClick={onDelete}>確定刪除</Button>
-                            <Button outline color="primary" onClick={onCancel}>取消</Button>
-                        </Fragment>
-                    )} */}
                     <CardTitle>
-                        {editNotebookVisible && 
-                            (<input type='text' 
+                        {editNotebookVisible ? 
+                            <input type='text' 
                                 className='form-control' 
                                 name='title' 
                                 placeholder='名稱' 
                                 value={title} 
                                 onChange={onChange} />
-                            )
-                        || (<p>{props.notebook.title}</p>)}
+                            
+                        : <p>{props.notebook.title}</p>}
                     </CardTitle>
                     <CardText>
                         {editNotebookVisible ? 

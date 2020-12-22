@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react'
 import { FunnelSimple } from "phosphor-react";
 import styled from 'styled-components';
-import Sorter from '../layout/Sorter'
+import Sorter from '../general/Sorter'
 import makeResponsiveCSS from '../../utils/make-responsive-css'
 
 // Import Style
@@ -9,7 +9,7 @@ import { theme } from '../../style/themes';
 
 import RecyclebinContext from '../../context/recyclebin/recyclebinContext';
 
-const { orange, gray } = theme;
+const { defaultColor, orange, gray } = theme;
 
 const SorterContainerBaseStyle = `
     cursor: pointer;
@@ -55,7 +55,7 @@ const RecycleSorter = () => {
     const [color, setColor] = useState(gray);
 
     useEffect(() => {
-        setColor(dropdownOpen ? orange : color);
+        dropdownOpen ? setColor(orange) : setColor(gray);
     }, [dropdownOpen]);
 
     const toggleDropdownOpen = () => {
@@ -71,7 +71,7 @@ const RecycleSorter = () => {
     };
 
     const hoverOn = () => {
-        setColor(orange);
+        setColor(defaultColor);
     };
 
     const hoverOff = () => {

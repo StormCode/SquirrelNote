@@ -140,7 +140,7 @@ router.delete('/:id', auth, async(req, res) => {
         deleteItems.title = notebook.title;
         deleteItems.notebook = notebook;
         deleteItems.notedirs = notedirs;
-        deleteItems.notes = await require('../common/getNotes')(notedirs);
+        deleteItems.notes = await require('../general/getNotes')(notedirs);
 
         // 取得刪除的項目
         const deletedGroup = await Recyclebin.findOne({userId});

@@ -39,8 +39,31 @@ export const GlobalStyles = createGlobalStyle`
         float: right;
     }
 
-    .modal-content {
-        border: none;
-        background: none;
+    .modal-dialog {
+        margin: 20rem auto;
+    }
+
+        .modal-content {
+            border: none;
+            background: none;
+        }
+
+    /**************/
+    /* 自訂捲軸樣式 */
+    /**************/
+    
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+     
+    ::-webkit-scrollbar-track {
+        border-radius: 6px;
+        box-shadow: inset 0 0 5px rgba(0,0,0,.5); 
+    }
+     
+    ::-webkit-scrollbar-thumb {
+        border-radius: 6px;
+        background: #ccc;
+        box-shadow: inset 0 0 5px rgba(0,0,0,.5); 
     }
 `;

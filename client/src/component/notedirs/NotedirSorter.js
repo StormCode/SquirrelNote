@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { FunnelSimple } from "phosphor-react";
 import styled from 'styled-components';
-import Sorter from '../layout/Sorter';
+import Sorter from '../general/Sorter';
 
 // Import Style
 import { theme } from '../../style/themes';
@@ -12,8 +12,7 @@ const { orange, gray } = theme;
 
 const SorterContainer = styled.span`
     cursor: pointer;
-    margin-left: auto;
-    margin-right: 10px;
+    margin: 0 5px;
 `;
 
 const NotedirSorter = () => {
@@ -27,7 +26,7 @@ const NotedirSorter = () => {
     const [color, setColor] = useState(gray);
 
     useEffect(() => {
-        setColor(dropdownOpen ? orange : color);
+        dropdownOpen ? setColor(orange) : setColor(gray);
     }, [dropdownOpen]);
 
     const toggleDropdownOpen = () => {

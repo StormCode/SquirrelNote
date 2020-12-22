@@ -1,7 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const config = require('config');
 const router = express.Router();
 const url = require('url');
 const { check, validationResult } = require('express-validator');
@@ -12,6 +11,10 @@ const {
 } = require('../status');
 
 const User = require('../models/User');
+
+const logoLink = process.env.LOGO_URL;
+const brandLink = process.env.BRAND_URL;
+const backgroundLink = process.env.MAIL_BACKGROUND_URL;
 
 // @route           POST /api/users
 // @desc            註冊帳號
@@ -53,7 +56,8 @@ router.post('/', [
         // 產生驗證帳號連結
         let token = await bcrypt.hash(email, salt);
         token = token.replace(/\//g,'');    //把斜線去掉
-        let authUserLink = `${req.protocol}://${url.parse(req.get('origin'), false, true).hostname}:${process.env.PROXY_PORT}/AuthUser/${token}`;
+        const baseUrl = `${req.protocol}://${url.parse(req.get('origin'), false, true).hostname}:${process.env.PROXY_PORT}`;
+        const authUserLink = `${baseUrl}/AuthUser/${token}`;
         
         // 將token存到該名使用者document
         user.activeToken = token;
@@ -66,7 +70,20 @@ router.post('/', [
         //
         
         let title = '松鼠筆記-帳號啟用信件';
-        let content = `<h2>${user.name} 您好,</h2><br />感謝您使用松鼠筆記，請點擊以下連結啟用您的帳號：<br /><a href='${authUserLink}'></a><br /><br />希望您使用愉快~<br />松鼠筆記 敬上`;
+        let content = `<div class='container' 
+                            style='text-align: center;
+                            border-radius: 20px;
+                            background: url("${backgroundLink}");
+                            background-size: 100% 100%;
+                            padding: 50px;
+                            width: 100%;
+                            height: 100%;'>
+            <img src='${logoLink}' />&nbsp;<img src='${brandLink}' />
+            <br /><br /><h2 style='text-align: left;'>${user.name} 您好,</h2><br />
+            <p style='text-align: left;'>感謝您使用松鼠筆記，請點擊以下連結啟用您的帳號：</p>
+            <p style='text-align: left;'><a href='${authUserLink}'>${authUserLink}</a></p>
+            <br /><br /><p style='text-align: left;'>希望您使用愉快~</p><p style='text-align: right;'>松鼠筆記 敬上</p>
+            </div>`;
         
         let mailSender = require('../utils/email.js')({
             username: process.env.GMAIL_USERNAME,
@@ -84,7 +101,7 @@ router.post('/', [
             }
         };
 
-        jwt.sign(payload, config.get('jwtSecret'),{
+        jwt.sign(payload, process.env.JWTSECRET,{
             expiresIn: 360000
         },(err, token) => {
             if(err) throw err;
@@ -122,7 +139,8 @@ router.post('/forgotPassword', [
         const salt = await bcrypt.genSalt(10);
         let token = await bcrypt.hash(email, salt);
         token = token.replace(/\//g,'');    //把斜線去掉
-        let resetPwdLink = `${req.protocol}://${url.parse(req.get('origin'), false, true).hostname}:${process.env.PROXY_PORT}/ResetPassword/${token}`;
+        const baseUrl = `${req.protocol}://${url.parse(req.get('origin'), false, true).hostname}:${process.env.PROXY_PORT}`;
+        const resetPwdLink = `${baseUrl}/ResetPassword/${token}`;
         
         // 將token存到該名使用者document
         await User.findByIdAndUpdate(user._id,
@@ -134,7 +152,19 @@ router.post('/forgotPassword', [
         //
         
         let title = '松鼠筆記-重設密碼信件';
-        let content = `<h2>${user.name} 您好,</h2><br />您收到這封信件是因為您(或他人)對您的帳號做了重設密碼的操作，若非您本人的意願，請忽略這封信件；若您想重設密碼請點擊以下連結：<br /><a href='${resetPwdLink}'></a>`;
+        let content = `<div class='container' 
+                            style='text-align: center;
+                            border-radius: 20px;
+                            background: url("${backgroundLink}");
+                            background-size: 100% 100%;
+                            padding: 50px;
+                            width: 100%;
+                            height: 100%;'>
+                        <img src='${logoLink}' />&nbsp;<img src='${brandLink}' />
+                        <br /><br /><h2 style='text-align: left;'>${user.name} 您好,</h2><br />
+                        <p style='text-align: left;'>您收到這封信件是因為您(或他人)對您的帳號做了重設密碼的操作，若非您本人的意願，請忽略這封信件；若您想重設密碼請點擊以下連結：</p>
+                        <p style='text-align: left;'><a href='${resetPwdLink}'>${resetPwdLink}</a></p>
+                        </div>`;
         
         let mailSender = require('../utils/email.js')({
             username: process.env.GMAIL_USERNAME,

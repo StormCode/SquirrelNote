@@ -1,13 +1,19 @@
 import React, { useState, useContext, useEffect } from 'react';
 import styled from 'styled-components';
+import Tooltip from "@material-ui/core/Tooltip";
 import { FilePlus, ArrowLineLeft } from "phosphor-react";
-import Spinner from '../layout/Spinner';
 import NoteFilter from './NoteFilter';
 import Note from './Note';
-import makeResponsiveCSS from '../../utils/make-responsive-css'
+import makeResponsiveCSS from '../../utils/make-responsive-css';
+
+// Import Resource
+import NoteSmallImage from '../../assets/note/note_300w.png';
+import NoteMediumImage from '../../assets/note/note_1000w.png';
+import NoteLargeImage from '../../assets/note/note_2000w.png';
 
 // Import Style
 import { theme } from '../../style/themes';
+import IntroBox from '../../style/general/IntroBox';
 
 import NotedirContext from '../../context/notedirs/notedirContext';
 import NoteContext from '../../context/notes/noteContext';
@@ -16,6 +22,7 @@ const { orange, gray } = theme;
 
 const NoteListBaseStyle = theme => {
     return `
+        flex: 1 1 100%;
         display: flex;
         flex-flow: column nowrap;
         border-left: 1px solid rgba(255,120,0,1);
@@ -95,25 +102,29 @@ const NoteList = styled.div`
     ${NoteListResponsiveStyle()}
 `;
 
-const Notes = ({ notebookId, addEvent, setCacheNoteContent, setNoteContent, toggleCollapse }) => {
+const Notes = ({ notebookId, addEvent, setCacheNoteContent, setNoteContent, setKeyword, toggleCollapse }) => {
     const notedirContext = useContext(NotedirContext);
     const noteContext = useContext(NoteContext);
 
-    const notedirId = notedirContext.current !== '' ? notedirContext.current ? notedirContext.current._id : null : '';
-
     const { notes, 
         filtered,
-        cacheNotes, 
+        cacheMap,
+        // cacheNotes, 
         getNotes,
         getAllNotes,
         clearNote, 
-        loading 
+        loading,
+        error 
     } = noteContext;
-
+    
     const defaultColor = {
         note: gray,
         collapse: gray
     };
+    const notedirId = notedirContext.current !== '' ? notedirContext.current ? notedirContext.current._id : null : notedirContext.current;
+    const allCacheNotes = [...cacheMap.values()].flat();
+    const currentCacheNotes = cacheMap.get(notedirId) || [];      // 目前目錄裡的快取筆記
+    
     const [color, setColor] = useState(defaultColor);
 
     useEffect(() => {
@@ -130,6 +141,8 @@ const Notes = ({ notebookId, addEvent, setCacheNoteContent, setNoteContent, togg
         } else if (notedirId === '' && notebookId) {
             getAllNotes(notebookId);
         }
+
+        // eslint-disable-next-line
     }, [notebookId, notedirId]);
 
     const appendDot = data => {
@@ -151,11 +164,11 @@ const Notes = ({ notebookId, addEvent, setCacheNoteContent, setNoteContent, togg
 
     const iconChange = {
         'note': () => {
-            setColor({...defaultColor, ['note']: orange});
+            setColor({...defaultColor, 'note': orange});
 
         },
         'collapse': () => {
-            setColor({...defaultColor, ['collapse']: orange});
+            setColor({...defaultColor, 'collapse': orange});
 
         },
         'default': () => {
@@ -163,67 +176,85 @@ const Notes = ({ notebookId, addEvent, setCacheNoteContent, setNoteContent, togg
         }
     }
 
-    const BtnContent = ({onChange, children}) => {
-        return <span
+    const BtnContent = ({onChange, children, tooltip}) => {
+        return <Tooltip
+            title={tooltip}
+            placement='top'
+        >
+            <span
                 onMouseEnter={onChange}
                 onMouseLeave={iconChange.default}>
-                    {children}
-                </span>};
+                {children}
+            </span>
+        </Tooltip>};
 
     return (
         <NoteList>
             <div className='note-header'>
                 <i className='parlgrm'></i>
                 <span className='title'>筆記</span>
-                <NoteFilter />
+                <NoteFilter setKeyword={setKeyword} />
                 <button alt='add note' className='tiny-btn' onClick={addEvent}>
-                    <BtnContent onChange={iconChange.note} children={<FilePlus size={22} color={color.note} />} />
+                    <BtnContent onChange={iconChange.note} children={<FilePlus size={22} color={color.note} />} tooltip='新增筆記' />
                 </button>
                 <button alt='collapse/expand note' className='tiny-btn collapse-btn' onClick={onToggleCollapse}>
-                    <BtnContent onChange={iconChange.collapse} children={<ArrowLineLeft size={22} color={color.collapse} />} />
+                    <BtnContent onChange={iconChange.collapse} children={<ArrowLineLeft size={22} color={color.collapse} />} tooltip='隱藏清單' />
                 </button>
             </div>
-            {notes && !loading ?
-                (notes.length == 0 && cacheNotes.length == 0) ? <p>還沒有東西~趕緊去新增筆記~</p>
-                            : (<ul>
-                                {cacheNotes.map(cacheNote => {
-                                    return <Note 
-                                                key={cacheNote._id} 
-                                                isUnsaved={true}
-                                                note= {{
-                                                    _id: cacheNote._id,
-                                                    title: cacheNote.title,
-                                                    summary: getSummary(cacheNote.content)
-                                                }} 
-                                                setCurrentNote={setCacheNoteContent} 
-                                            />
-                                })}
-                                { filtered != null && !loading ?
-                                    (filtered.map(note => 
-                                        <Note key={note._id} 
-                                            note={{
+            {!loading ?
+                notes && !error ? 
+                    ((notes.length === 0 && allCacheNotes.length === 0) ? 
+                        <IntroBox>
+                            <img alt='note-bg' src={NoteSmallImage}
+                                srcSet={`
+                                    ${NoteSmallImage} 300w, 
+                                    ${NoteMediumImage} 1000w, 
+                                    ${NoteLargeImage} 2000w
+                                `}
+                            />
+                            <p>別猶豫了，開始動手寫下你的第一個筆記吧</p>
+                        </IntroBox>
+                    : (<ul>
+                        {currentCacheNotes
+                            .map(cacheNote => {
+                                return <Note 
+                                        key={cacheNote._id} 
+                                        isUnsaved={true}
+                                        note= {{
+                                            _id: cacheNote._id,
+                                            title: cacheNote.title,
+                                            summary: getSummary(cacheNote.content)
+                                        }} 
+                                        setCurrentNote={setCacheNoteContent} 
+                                    />
+                        })}
+                        {filtered !== null ?
+                            (filtered.map(note => 
+                                <Note key={note._id} 
+                                    note={{
+                                        ...note,
+                                        'summary': appendDot(note.summary)
+                                    }} 
+                                    setCurrentNote={setNoteContent}
+                                />
+                            )) :
+                            notes.filter(note => {
+                                return currentCacheNotes.map(cacheNote => cacheNote._id).indexOf(note._id) === -1;
+                            }).map(note => {
+                                return <Note 
+                                            key={note._id}
+                                            isUnsaved={false}
+                                            note= {{
                                                 ...note,
-                                                ['summary']: appendDot(note.summary)
+                                                'summary': appendDot(note.summary)
                                             }} 
-                                            setCurrentNote={setNoteContent}
+                                            setCurrentNote={setNoteContent} 
                                         />
-                                    )) :
-                                    notes.filter(note => {
-                                        return cacheNotes.map(cacheNote => cacheNote._id).indexOf(note._id) == -1;
-                                    }).map(note => {
-                                        return <Note 
-                                                    key={note._id}
-                                                    isUnsaved={false}
-                                                    note= {{
-                                                        ...note,
-                                                        ['summary']: appendDot(note.summary)
-                                                    }} 
-                                                    setCurrentNote={setNoteContent} 
-                                                />
-                                    })
-                                }
-                            </ul>)
-            : <Spinner /> }
+                            })
+                        }
+                    </ul>))
+                : null
+            : null }
         </NoteList>
     )
 }

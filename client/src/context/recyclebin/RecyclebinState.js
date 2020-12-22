@@ -9,19 +9,30 @@ import {
     FILTER_RECYCLELIST,
     CLEAR_FILTER_RECYCLELIST,
     SORT_RECYCLELIST,
-    RESTORE_RECYCLEBIN,
+    RESTORE_RECYCLELIST,
     PERMANENTLY_DELETE,
     CLEAR_RECYCLEBIN,
     RECYCLEBIN_ERROR
 } from '../types';
+import {
+    RESTORE_DELETED_ITEM_SUCCESS,
+    PERMANENTLY_DELETE_SUCCESS
+} from '../../success';
+import {
+    GET_DELETED_ITEM_ERROR,
+    RESTORE_DELETED_ITEM_ERROR,
+    PERMANENTLY_DELETE_ERROR,
+    SERVER_ERROR
+} from '../../error';
 
 const RecycleBinState = props => {
     const initialState = {
         deletedItems: null,
-        orderBy: 'asc',
-        sortBy: 'title',
+        orderBy: 'desc',
+        sortBy: 'date',
         filtered: null,
         loading: true,
+        success: null,
         error: null
     };
 
@@ -32,10 +43,18 @@ const RecycleBinState = props => {
         try {
             const res = await axios.get('/api/recyclebin');
             // 解密Server回傳的recyclebin資料
-            const decryptedDatas = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
-            decryptedDatas.map(decryptedData => {
+            let decryptedDatas = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
+            
+            decryptedDatas = decryptedDatas || [];
+            decryptedDatas.forEach(decryptedData => {
                 decryptedData.title = decrypt(decryptedData.title, process.env.REACT_APP_SECRET_KEY, false);
+                if(!decryptedData.isRestoreable) {
+                    decryptedData.parent_info.title = decryptedData.parent_info.title ? 
+                    decrypt(decryptedData.parent_info.title, process.env.REACT_APP_SECRET_KEY, false) 
+                    : decryptedData.parent_info.title;
+                }
             });
+
             dispatch({
                 type: GET_DELETED_ITEMS,
                 payload: decryptedDatas
@@ -43,7 +62,7 @@ const RecycleBinState = props => {
         } catch (err) {
             dispatch({ 
                 type: RECYCLEBIN_ERROR,
-                payload: err.msg || 'Server Error'
+                payload: `${GET_DELETED_ITEM_ERROR}: ${err.msg || SERVER_ERROR}`
             });
         }
     }
@@ -52,10 +71,14 @@ const RecycleBinState = props => {
     const restore = async id => {
         try {
             await axios.put(`/api/recyclebin/${id}`);
+            dispatch({
+                type: RESTORE_RECYCLELIST,
+                payload: { id, success: RESTORE_DELETED_ITEM_SUCCESS }
+            });
         } catch (err) {
             dispatch({ 
                 type: RECYCLEBIN_ERROR,
-                payload: err.msg || 'Server Error'
+                payload: `${RESTORE_DELETED_ITEM_ERROR}: ${err.msg || SERVER_ERROR}`
             });
         }
     }
@@ -66,12 +89,12 @@ const RecycleBinState = props => {
             await axios.delete(`/api/recyclebin/${id}`);
             dispatch({ 
                 type: PERMANENTLY_DELETE,
-                payload: id 
+                payload: {id, success: PERMANENTLY_DELETE_SUCCESS}
             });
         } catch (err) {
             dispatch({ 
                 type: RECYCLEBIN_ERROR,
-                payload: err.msg || 'Server Error'
+                payload: `${PERMANENTLY_DELETE_ERROR}: ${err.msg || SERVER_ERROR}`
             });
         }
     }
@@ -86,44 +109,23 @@ const RecycleBinState = props => {
 
     // 篩選回收站項目
     const filterRecycleList = text => {
-        try{
-            dispatch({
-                type: FILTER_RECYCLELIST,
-                payload: text
-            });
-        } catch(err) {
-            dispatch({ 
-                type: RECYCLEBIN_ERROR,
-                payload: err.msg || 'Server Error'
-            });
-        }
+        dispatch({
+            type: FILTER_RECYCLELIST,
+            payload: text
+        });
     }
 
     // 清除篩選回收站項目
     const clearFilterRecycleList = text => {
-        try{
-            dispatch({
-                type: CLEAR_FILTER_RECYCLELIST,
-                payload: text
-            });
-        } catch(err) {
-            dispatch({ 
-                type: RECYCLEBIN_ERROR,
-                payload: err.msg || 'Server Error'
-            });
-        }
+        dispatch({
+            type: CLEAR_FILTER_RECYCLELIST,
+            payload: text
+        });
     }
 
     // 清除回收站資料
     const clearRecyclebin = () => {
-        try {
-            dispatch({ type: CLEAR_RECYCLEBIN });
-        } catch (err) {
-            dispatch({ 
-                type: RECYCLEBIN_ERROR,
-                payload: err.msg || 'Server Error'
-            });
-        }
+        dispatch({ type: CLEAR_RECYCLEBIN });
     }
 
     return (
@@ -134,6 +136,7 @@ const RecycleBinState = props => {
                 sortBy: state.sortBy,
                 filtered: state.filtered,
                 loading: state.loading,
+                success: state.success,
                 error: state.error,
                 getDeletedItems,
                 sortRecycleList,

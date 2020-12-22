@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { MagnifyingGlass, X } from "phosphor-react";
-import IconInput from '../layout/IconInput';
+import IconInput from '../general/IconInput';
 import styled from 'styled-components';
 import makeResponsiveCSS from '../../utils/make-responsive-css'
 
@@ -100,7 +100,7 @@ const IconInputContainerResponsiveStyle = () => {
 
 const IconInputContainerStyle = IconInputContainerBaseStyle.concat(IconInputContainerResponsiveStyle());
 
-const NotebookFilter = () => {
+const NotebookFilter = ({setKeyword}) => {
     const notebookContext = useContext(NotebookContext);
 
     const { filterNotebook, clearFilterNotebook } = notebookContext;
@@ -113,10 +113,14 @@ const NotebookFilter = () => {
     }, [focus]);
 
     const onChange = val => {
-        if(val !== '')
+        if(val !== '') {
+            setKeyword(val);
             filterNotebook(val);
-        else
+        }
+        else {
+            setKeyword(null);
             clearFilterNotebook();
+        }
     }
 
     const hoverOn = () => {
@@ -178,12 +182,6 @@ const NotebookFilter = () => {
             hoverOn={hoverOn}
             hoverOff={hoverOff}
             focusOn={focusOn}>
-                {/* <IconInput.HeadIcon iconStyle={HeadIconStyled}>
-                    <MagnifyingGlass size={20} color={color} weight='bold'/>
-                </IconInput.HeadIcon>
-                <IconInput.ClearIcon iconStyle={ClearIconStyled}>
-                    <X size={14} color={color} weight='bold'/>
-                </IconInput.ClearIcon> */}
                 <HeadIcon>
                     <MagnifyingGlass size={20} color={color} weight='bold'/>
                 </HeadIcon>

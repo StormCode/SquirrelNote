@@ -20,15 +20,15 @@ const auth = require('../middleware/auth');
 // access           Private
 router.get('/', auth, async(req, res) => {
     try {
-        let newCrypto = crypto(process.env.SECRET_KEY);
+        const newCrypto = crypto(process.env.SECRET_KEY);
 
         //從header取得notebook
-        let notebookId = newCrypto.decrypt(req.header('x-notebook'), false);
+        const notebookId = newCrypto.decrypt(req.header('x-notebook'), false);
 
         if(!notebookId) return res.status(400).json({msg: '缺少參數', status: MISSING_PARAM});
 
         // 取得筆記本資料
-        let notebook = await Notebook.findById(notebookId);
+        const notebook = await Notebook.findById(notebookId);
 
         if(!notebook) return res.status(404).json({msg: '找不到此筆記目錄的筆記本', status: NOT_FOUND});
         
@@ -36,10 +36,16 @@ router.get('/', auth, async(req, res) => {
         if(notebook.author.toString() !== req.user.id) return res.status(401).json({msg: '未授權', status: NOT_AUTHORIZED});
 
         // 取得筆記目錄資料
-        let notedirs = notebook.notedirs;
+        const notedirs = JSON.parse(JSON.stringify(notebook.notedirs));
+
+        // 計算每個目錄裡的筆記個數
+        for(let idx = 0; idx < notedirs.length; idx++) {
+            const notedir = await Notedir.findById(notedirs[idx]._id);
+            notedirs[idx].note_count = notedir.notes.length;
+        }
 
         // 加密notedir資料
-        let encryptedNotedir = newCrypto.encrypt(notedirs);
+        const encryptedNotedir = newCrypto.encrypt(notedirs);
         res.json(encryptedNotedir);
     } catch (err) {
         console.error(err.message);
@@ -83,6 +89,9 @@ router.post('/', auth, async(req, res) => {
         notebook.notedirs.push(newNotebookDir);
 
         notebook.save();
+
+        // 加上數量欄位
+        newNotebookDir.note_count = 0;
 
         // 加密新增的notedir資料
         const encryptedNotebookDir = newCrypto.encrypt(newNotebookDir);
@@ -183,7 +192,7 @@ router.delete('/:id', auth, async(req, res) => {
         //
         deleteItems.title = notedir.title;
         deleteItems.notedirs = await Notedir.findById(id);
-        deleteItems.notes = await require('../common/getNotes')(deleteItems.notedirs);
+        deleteItems.notes = await require('../general/getNotes')(deleteItems.notedirs);
 
         // 取得刪除的項目
         const deletedGroup = await Recyclebin.findOne({userId});

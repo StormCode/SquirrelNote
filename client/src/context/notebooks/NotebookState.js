@@ -21,6 +21,19 @@ import {
     CLEAR_NOTEBOOK,
     NOTEBOOK_ERROR
 } from '../types';
+import {
+    ADD_NOTEBOOK_SUCCESS,
+    UPDATE_NOTEBOOK_SUCCESS,
+    DELETE_NOTEBOOK_SUCCESS
+} from '../../success';
+import {
+    GET_NOTEBOOK_ERROR,
+    ADD_NOTEBOOK_ERROR,
+    UPDATE_NOTEBOOK_ERROR,
+    DELETE_NOTEBOOK_ERROR,
+    SERVER_ERROR,
+    UNKNOW_ERROR
+} from '../../error';
 
 const NotebookState = props => {
     const initialState = {
@@ -32,6 +45,7 @@ const NotebookState = props => {
         addNotebookVisible: false,
         currentEditNotebook: null,
         currentDeleteNotebook: null,
+        success: null,
         error: null
     };
 
@@ -44,10 +58,10 @@ const NotebookState = props => {
                 type: SET_CURRENT_NOTEBOOK,
                 payload: id
             })
-        } catch (err) {
+        } catch {
             dispatch({ 
                 type: NOTEBOOK_ERROR,
-                payload: err.msg || 'Server Error'
+                payload: UNKNOW_ERROR
             });
         }
     };
@@ -58,7 +72,7 @@ const NotebookState = props => {
             const res = await axios.get('/api/notebooks');
             // 解密Server回傳的notebook資料
             const decryptedDatas = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
-            decryptedDatas.map(decryptedData => {
+            decryptedDatas.forEach(decryptedData => {
                 decryptedData.title = decrypt(decryptedData.title, process.env.REACT_APP_SECRET_KEY, false);
                 decryptedData.desc = decrypt(decryptedData.desc, process.env.REACT_APP_SECRET_KEY, false);
             });
@@ -69,13 +83,13 @@ const NotebookState = props => {
         } catch (err) {
             dispatch({ 
                 type: NOTEBOOK_ERROR,
-                payload: err.msg || 'Server Error'
+                payload: `${GET_NOTEBOOK_ERROR}: ${err.msg || SERVER_ERROR}`
             });
         }
     };
 
     //新增筆記本
-    const addNotebook = async notebook => {
+    const addNotebook = async (notebook, keyword) => {
         const config = {
             headers: {
                 'Content-Type': 'application/json'
@@ -92,20 +106,18 @@ const NotebookState = props => {
             decryptedData.desc = decrypt(decryptedData.desc, process.env.REACT_APP_SECRET_KEY, false);
             dispatch({
                 type: ADD_NOTEBOOK,
-                payload: decryptedData
+                payload: {notebook: decryptedData, keyword, success: ADD_NOTEBOOK_SUCCESS}
             });
         } catch (err) {
-            console.log('err: ' + err);
-            
             dispatch({ 
                 type: NOTEBOOK_ERROR,
-                payload: err.msg || 'Server Error'
+                payload: `${ADD_NOTEBOOK_ERROR}: ${err.msg || SERVER_ERROR}`
             });
         }
     }
 
     //編輯筆記本
-    const updateNotebook = async (id, notebook) => {
+    const updateNotebook = async (id, notebook, keyword) => {
         const config = {
             headers: {
                 'Content-Type': 'application/json'
@@ -122,12 +134,12 @@ const NotebookState = props => {
             decryptedData.desc = decrypt(decryptedData.desc, process.env.REACT_APP_SECRET_KEY, false);
             dispatch({
                 type: UPDATE_NOTEBOOK,
-                payload: decryptedData
+                payload: {notebook: decryptedData, keyword, success: UPDATE_NOTEBOOK_SUCCESS}
             });
         } catch (err) {
             dispatch({ 
                 type: NOTEBOOK_ERROR,
-                payload: err.msg || 'Server Error'
+                payload: `${UPDATE_NOTEBOOK_ERROR}: ${err.msg || SERVER_ERROR}`
             });
         }
     }
@@ -138,22 +150,29 @@ const NotebookState = props => {
             await axios.delete(`/api/notebooks/${id}`);
             dispatch({
                 type: DELETE_NOTEBOOK,
-                payload: id
+                payload: {id, success: DELETE_NOTEBOOK_SUCCESS}
             });
         } catch (err) {
             dispatch({ 
                 type: NOTEBOOK_ERROR,
-                payload: err.msg || 'Server Error'
+                payload: `${DELETE_NOTEBOOK_ERROR}: ${err.msg || SERVER_ERROR}`
             });
         }
     }
 
     //篩選筆記本
     const filterNotebook = text => {
-        dispatch({
-            type: FILTER_NOTEBOOK,
-            payload: text
-        });
+        try {
+            dispatch({
+                type: FILTER_NOTEBOOK,
+                payload: text
+            });
+        } catch {
+            dispatch({ 
+                type: NOTEBOOK_ERROR,
+                payload: UNKNOW_ERROR
+            });
+        }
     }
 
     //排序筆記本
@@ -207,14 +226,7 @@ const NotebookState = props => {
 
     //清除筆記本資料
     const clearNotebook = () => {
-        try {
-            dispatch({ type: CLEAR_NOTEBOOK });
-        } catch (err) {
-            dispatch({ 
-                type: NOTEBOOK_ERROR,
-                payload: err.msg || 'Server Error'
-            });
-        }
+        dispatch({ type: CLEAR_NOTEBOOK });
     };
 
     return (
@@ -223,6 +235,7 @@ const NotebookState = props => {
                 notebooks: state.notebooks,
                 current: state.current,
                 filtered: state.filtered,
+                success: state.success,
                 error: state.error,
                 orderBy: state.orderBy,
                 sortBy: state.sortBy,

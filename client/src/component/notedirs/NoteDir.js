@@ -1,54 +1,20 @@
 import React, { Fragment, useCallback, useState, useContext, useEffect } from 'react';
 import styled from 'styled-components';
 import { Pencil, Trash, Check, X } from "phosphor-react";
-import EDToolPanel from '../layout/EDToolPanel';
+import EDToolPanel from '../general/EDToolPanel';
 import makeResponsiveCSS from '../../utils/make-responsive-css'
-import Models from '../layout/Models';
+import Models from '../general/Models';
 
 // Import Style
 import { theme } from '../../style/themes';
 import deleteStyle from '../../style/model/delete';
 import NoteDirContainer from '../../style/components/Notedir';
 
-import NotebookContext from '../../context/notebooks/notebookContext';
 import NotedirContext from '../../context/notedirs/notedirContext';
+import NoteContext from '../../context/notes/noteContext';
 
-const { orange, darkOrange, gray } = theme;
+const { orange, gray } = theme;
 const currentFontColor = '#FFF';
-
-// const NoteDirContainer = styled.li`
-//     cursor: pointer;
-//     background: ${props => props.isCurrent ? orange : 'none'};
-//     color: ${props => props.isCurrent ? '#FFF' : gray};
-//     padding: .5rem 0 .5rem .5rem;
-//     font-size: 1rem;
-//     height: auto;
-//     &:hover {
-//         background: ${props => props.isCurrent ? darkOrange : 'none'};
-//         color: ${props => props.isCurrent ? '#FFF' : orange};
-//     };
-
-//         .text-container,
-//         .toolpanel-container {
-//             position: relative;
-//         }
-
-//         .text-container {
-//             width: 20ch;
-//             max-width: 100%;
-//         }
-
-//             .text-container p {
-//                 white-space: nowrap;
-//                 text-overflow: ellipsis;
-//                 overflow: hidden;
-//             }
-
-//         .toolpanel-container {
-//             width: 100%;
-//             z-index: 1;
-//         }
-// `;
 
 const Input = styled.input`
     background: none;
@@ -63,13 +29,13 @@ const ToolPanelContainerResponsiveStyle = props => {
     return makeResponsiveCSS([
         {
             constraint: 'min',
-            width: '320px',
+            width: '0px',
             rules: `
                 display: block;
             `
         }, {
             constraint: 'min',
-            width: '768px',
+            width: '1280px',
             rules: `
                 display: ${props.visible ? 'block' : 'none'};
             `
@@ -82,14 +48,22 @@ const ToolPanelContainer = styled.div`
 `;
 
 const Notedir = props => {
+    const noteContext = useContext(NoteContext);
+    
+    const {
+        // cacheNotes
+        cacheMap
+    } = noteContext;
+
     const [notedir, setNotedir] = useState({
         ...props.notedir
     });
-    
+    const notebookId = props.notebookId;
+
     const { _id, title } = notedir;
     const [editNotedirVisible, setEditNotedirVisible] = useState(false);
     const [deleteNotedirVisible, setDeleteNotedirVisible] = useState(false);
-
+    
     //ToolPanel的可見狀態
     const [visible, setVisible] = useState(false);
     
@@ -99,14 +73,15 @@ const Notedir = props => {
         confirm: gray,
         cancel: gray
     };
-
+    
     const [color, setColor] = useState(defaultColor);
-
-    const notebookContext = useContext(NotebookContext);
+    
+    const currentCacheNotes = cacheMap.get(_id) || [];      // 目前目錄裡的快取筆記
     const notedirContext = useContext(NotedirContext);
 
-    const currentNotebookId = notebookContext.current ? notebookContext.current._id : null;
     const currentNotedirId = notedirContext.current ? notedirContext.current._id : null;
+    const currentCacheNoteLength = currentCacheNotes.length;
+    
     const { 
         currentEditNotedir,
         currentDeleteNotedir,
@@ -133,7 +108,7 @@ const Notedir = props => {
 
         //依目前刪除的狀態切換是否顯示刪除
         currentDeleteNotedir === _id ? setDeleteNotedirVisible(true) : setDeleteNotedirVisible(false);
-    },[currentEditNotedir, currentDeleteNotedir]);
+    },[currentEditNotedir, currentDeleteNotedir, _id]);
     
     const notedirTextRef = useCallback(inputElement => {
         if (inputElement) {
@@ -143,7 +118,7 @@ const Notedir = props => {
 
     const onChange = e => {
         e.preventDefault();
-        setNotedir({...notedir, ['title']:e.target.value});
+        setNotedir({...notedir, 'title':e.target.value});
     }
 
     const onClick = e => {
@@ -154,28 +129,9 @@ const Notedir = props => {
     const onEdit = () => {
         let notedirUpdateData = {
             title,
-            notebook: currentNotebookId
+            notebook: notebookId
         }; 
-        //對點擊編輯的那一個筆記目錄執行update
-        // currentEditNotedir === _id ? 
-        //     //檢查內容是否有被改過，若有被改過才執行update，否則復原到原本的狀態
-        //     title !== props.notedir.title
-        //         ? updateNotedir(_id, notedirUpdateData) : disableEditNotedir()
-        // : enableEditNotedir(_id);
-        // if(currentEditNotedir === _id) {
-        //     //檢查內容是否有被改過，若有被改過才執行update，否則復原到原本的狀態
-        //     if(title !== props.notedir.title) {
-        //         await updateNotedir(_id, notedirUpdateData);
-        //         return error ? false : true;
-        //     }else{
-        //         disableEditNotedir();
-        //         return true;
-        //     }
-        // }else{
-        //     enableEditNotedir(_id);
-        //     return false;
-        // }
-        
+
         if(currentEditNotedir === _id && title !== props.notedir.title) {
             updateNotedir(_id, notedirUpdateData);
         }
@@ -187,9 +143,9 @@ const Notedir = props => {
     const onDelete = () => {
         //對點擊刪除的那一個筆記本執行delete
         if(currentDeleteNotedir === _id){
-            deleteNotedir(_id, currentNotebookId);
+            deleteNotedir(_id, notebookId);
         }
-
+        
         disableDeleteNotedir();
         props.setToolPanel(null);
     };
@@ -208,16 +164,16 @@ const Notedir = props => {
 
     const iconChange = {
         'confirm': () => {
-            setColor({...defaultColor, ['confirm']: currentNotedirId === _id ? currentFontColor : orange});
+            setColor({...defaultColor, 'confirm': currentNotedirId === _id ? currentFontColor : orange});
         },
         'cancel': () => {
-            setColor({...defaultColor, ['cancel']: currentNotedirId === _id ? currentFontColor : orange});
+            setColor({...defaultColor, 'cancel': currentNotedirId === _id ? currentFontColor : orange});
         },
         'edit': () => { 
-            setColor({...defaultColor, ['edit']: currentNotedirId === _id ? currentFontColor : orange});
+            setColor({...defaultColor, 'edit': currentNotedirId === _id ? currentFontColor : orange});
         },
         'delete': () => {
-            setColor({...defaultColor, ['delete']: currentNotedirId === _id ? currentFontColor : orange});
+            setColor({...defaultColor, 'delete': currentNotedirId === _id ? currentFontColor : orange});
         },
         'default': () => {
             setColor(defaultColor);
@@ -238,7 +194,7 @@ const Notedir = props => {
         disableEditNotedir();
 
         //設回原本筆記目錄內容
-        setNotedir({...props.notedir, ['title']: props.notedir.title});
+        setNotedir({...props.notedir, 'title': props.notedir.title});
 
         //取消目前正在使用的ToolPanel
         props.setToolPanel(null);
@@ -291,14 +247,23 @@ const Notedir = props => {
                 </div>
                 <div className='text-container'
                     onClick={onClick}>
-                    {editNotedirVisible && 
-                        (<Input type='text'
+                    {editNotedirVisible ? 
+                        <Input type='text'
                             value={title}
                             ref={notedirTextRef}
                             placeholder='請輸入資料夾名稱'
-                            onChange={onChange} />)
-                    || (<p>{props.notedir.title}</p>)}
+                            onChange={onChange} />
+                    : <Fragment>
+                            <p>
+                                {props.notedir.title}
+                                {currentCacheNoteLength && currentCacheNoteLength > 0 ?
+                                    <b className='unsaved-count-badge'>{currentCacheNoteLength}</b>
+                                    : null
+                                }
+                            </p>
+                        </Fragment>}
                 </div>
+                <p className='note-count-badge'>{props.notedir.note_count}</p>
                 <Models
                     isOpen={deleteNotedirVisible}
                     toggleOpen={toggleDeleteOpen}
@@ -312,34 +277,6 @@ const Notedir = props => {
                     <Models.CancelBtn>取消</Models.CancelBtn>
                 </Models>
             </Fragment>
-                // (<div style={{position: 'relative'}} onClick={props.setCurrent}>
-                //     {editNotedirVisible ? 
-                //         (<Fragment>
-                //             <div className='tool-panel' style={toolPanelStyle}>
-                //                 <button id='edit-confirm-btn' onClick={onEdit}><img src={confirmImgSrc} alt='完成編輯' /></button>
-                //                 <button id='cancel-btn' onClick={onCancel}><img src={cancelImgSrc} alt='取消' /></button>
-                //             </div>
-                //             <input type='text' 
-                //                 name='title' 
-                //                 placeholder='請輸入資料夾名稱' 
-                //                 value={title} 
-                //                 onChange={onChange} />
-                //         </Fragment>) 
-                //     : (deleteNotedirVisible ? 
-                //         (<Fragment>   
-                //             <p className='warning'>確定要刪除{title}嗎?</p>
-                //             <button onClick={onDelete}><img src={confirmImgSrc} alt='確定刪除' /></button>
-                //             <button onClick={onCancel}><img src={cancelImgSrc} alt='取消' /></button>
-                //         </Fragment>)
-                //         : (<Fragment>
-                //             <div className='tool-panel' style={toolPanelStyle}>
-                //                 <button id='edit-btn' onClick={onEdit}><img src={editImgSrc} alt='編輯' /></button>
-                //                 <button id='delete-btn' onClick={onDelete}><img src={deleteImgSrc} alt='刪除' /></button>
-                //             </div>
-                //             <p>{props.notedir.title}</p>
-                //         </Fragment>))}
-                    
-                // </div>)
             : null }
         </NoteDirContainer>
     )

@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useContext } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import {
     Collapse,
@@ -21,10 +21,18 @@ import AuthContext from '../../context/auth/authContext';
 
 import { LOGIN, REGISTER } from '../../modelTypes';
 
+// Import Resource
+import LogoImage from '../../assets/general/logo.png';
+import BrandImage from '../../assets/general/brand.png';
+
 const NavContainerBaseStyle = theme => {
     return `
+        position: ${window.location.pathname.match(/notebook|recyclebin/gi) ? 'sticky' : 'fixed'};
+        top: 0;
         background: linear-gradient(180deg, rgba(255,140,40,1) 0%, rgba(255,149,56,1) 20%, rgba(255,119,0,1) 75%);
         box-shadow: 3px 3px 18px 0px rgba(0,0,0,0.75);
+        width: 100%;
+        z-index: 9999;
 
         .navbar-nav {
             flex: 1 1 auto;
@@ -124,7 +132,6 @@ const NavContainer = styled.div`
 
 const MainNavbar = ({ title }) => {
     const history = useHistory();
-    const location = useLocation();
 
     const authContext = useContext(AuthContext)
 
@@ -172,7 +179,7 @@ const MainNavbar = ({ title }) => {
     const userLinks = (
         <Fragment>
             <NavItem>
-                <NavLink href='#!' className={location.pathname.match(/notebook(?!\/)/g) ? 'nav-link-active' : null} onClick={loadNotebook}>
+                <NavLink href='#!' className={window.location.pathname.match(/notebook(?!\/)/g) ? 'nav-link-active' : null} onClick={loadNotebook}>
                     筆記本
                 </NavLink>
             </NavItem>
@@ -193,7 +200,10 @@ const MainNavbar = ({ title }) => {
         <div className="header">
             <NavContainer>
                 <Navbar expand="md" dark>
-                    <NavbarBrand href='#!' onClick={loadHomePage}>{title}</NavbarBrand>
+                    <NavbarBrand href='#!' onClick={loadHomePage}>
+                        <img alt='logo' src={LogoImage} />&nbsp;
+                        <img alt='brand' src={BrandImage} />
+                    </NavbarBrand>
                     <NavbarToggler onClick={toggleMenu} />
                     <Collapse isOpen={menuOpen} navbar>
                         <Nav navbar>

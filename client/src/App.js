@@ -26,28 +26,24 @@ const AppStyle = styled.div`
     #container {
         display: flex;
         flex-flow: nowrap column;
+        overflow: auto;
         width: 100%;
-        height: 100vh;
-    }
-
-    .header {
-        position: sticky;
-        top: 0;
-        z-index: 999;
+        min-height: 100vh;
     }
 
     .main {
-        flex: 1 1 80%;
+        flex: 1 1 auto;
         display: flex;
-        flex-flow: wrap row;
-        justify-content: center;
-        align-items: center;
+        flex-flow: column nowrap;
+        justify-content: flex-start;
+        overflow: hidden;
+        height: 100%;
     }
 
     .footer {
-        flex: 1 0 auto;
-        background-color: #ffe094;
-        background-image: linear-gradient(0deg, #ffe094 0%, rgba(255,255,255,.9) 100%);
+        flex: 0 1 auto;
+        background-color: ${({theme}) => theme.orange};
+        background-image: linear-gradient(0deg, ${({theme}) => theme.orange} 0%, rgba(255,255,255,.9) 100%);
         text-align: center;
         display: flex;
         flex-flow: column nowrap;

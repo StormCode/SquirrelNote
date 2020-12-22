@@ -1,19 +1,25 @@
 import React, { Fragment, useContext, useState, useEffect } from 'react'
 import styled from 'styled-components';
 import { Check, X, FolderSimplePlus, ArrowLineLeft } from "phosphor-react";
-
-import Spinner from '../../component/layout/Spinner'
-import TextInput from '../../component/layout/TextInput'
+import Tooltip from "@material-ui/core/Tooltip";
+import TextInput from '../general/TextInput';
 import NotedirSorter from './NotedirSorter';
 import Notedir from './NoteDir';
 import AllNotedir from './AllNotedir';
-import makeResponsiveCSS from '../../utils/make-responsive-css'
+import makeResponsiveCSS from '../../utils/make-responsive-css';
+
+// Import Resource
+import NotedirSmallImage from '../../assets/note/notedir_300w.png';
+import NotedirMediumImage from '../../assets/note/notedir_1000w.png';
+import NotedirLargeImage from '../../assets/note/notedir_2000w.png';
 
 // Import Style
 import { theme } from '../../style/themes';
+import IntroBox from '../../style/general/IntroBox';
 
 import NotebookContext from '../../context/notebooks/notebookContext';
 import NotedirContext from '../../context/notedirs/notedirContext';
+import AlertContext from '../../context/alert/alertContext';
 
 const { orange, gray } = theme;
 
@@ -31,20 +37,24 @@ const NotedirListBaseStyle = theme => {
                 padding: .3rem;
                 align-items: center;
                 min-height: 2.5rem;
-            }
         
-                > .notedir-header > .title {
-                    color: ${theme.gray};
-                    font-size: 1rem;
-                    font-weight: bold;
-                }
+                    > .title {
+                        color: ${theme.gray};
+                        font-size: 1rem;
+                        font-weight: bold;
+                    }
+                    
+                    > button {
+                        flex: 0 1 auto;
+                        position: relative;
+                        background: none;
+                        border: none;
+                    }
                 
-                > .notedir-header > button {
-                    flex: 0 1 auto;
-                    position: relative;
-                    background: none;
-                    border: none;
-                }
+                    > button:first-of-type {
+                        margin-left: auto;
+                    }
+            }
 
             ul {
                 flex: 1 1 auto;
@@ -52,7 +62,7 @@ const NotedirListBaseStyle = theme => {
                 padding: 0;
                 width: 100%;
                 height: 0;
-                overflow-y: auto;
+                overflow-y: visible;
             }
 
             .parlgrm {
@@ -97,13 +107,15 @@ const NotedirList = styled.div`
 const Notedirs = ({notebookId, toggleCollapse}) => {
     const notebookContext = useContext(NotebookContext);
     const notedirContext = useContext(NotedirContext);
+    const alertContext = useContext(AlertContext);
+
     const {
-        notebooks,
-        getNotebooks
+        notebooks
      } = notebookContext;
     
     const { 
         notedirs, 
+        current,
         getNotedirs, 
         clearNotedir,
         setCurrentNotedir, 
@@ -111,8 +123,14 @@ const Notedirs = ({notebookId, toggleCollapse}) => {
         enableAddNotedir,
         disableAddNotedir,
         addNotedir, 
-        loading
+        loading,
+        success,
+        error
     } = notedirContext;
+
+    const {
+        setAlert
+    } = alertContext;
 
     useEffect(() => {
         return () => {
@@ -123,50 +141,85 @@ const Notedirs = ({notebookId, toggleCollapse}) => {
     }, []);
     
     useEffect(() => {
-        !notebooks && getNotebooks();
-        notebookId && getNotedirs(notebookId);
-    }, [notebookId]);
+        getNotedirs(notebookId);
+
+        // eslint-disable-next-line
+    }, []);
 
     useEffect(() => {
+        let count = 0;
+
         if(notebooks && notedirs) {
             // 筆記目錄設定為全部
-            setCurrentNotedir('');
-        }
-    }, [notebooks, notedirs]);
+            !current && setCurrentNotedir('');
 
+            // 計算全部筆記數量
+            notedirs.forEach(notedir => {
+                count += notedir.note_count;
+            });
+            setAllNoteCount(count);
+        }
+
+        // eslint-disable-next-line
+    }, [notebooks, notedirs, current]);
+
+    useEffect(() => {
+        current ? setCurrentNotedir(current._id) : setCurrentNotedir('');
+
+        // eslint-disable-next-line
+    }, [current]);
+
+    useEffect(() => {
+        success && setAlert(success, 'success');
+
+        // eslint-disable-next-line
+    }, [success]);
+
+    useEffect(() => {
+        error && setAlert(error, 'danger');
+
+        // eslint-disable-next-line
+    }, [error]);
+    
     const defaultColor = {
         confirm: gray,
         cancel: gray,
         notedir: gray,
         collapse: gray
     };
-
+    
+    const [allNoteCount, setAllNoteCount] = useState(0);
     const [color, setColor] = useState(defaultColor);
 
     const iconChange = {
         'confirm': () => {
-            setColor({...defaultColor, ['confirm']: orange});
+            setColor({...defaultColor, 'confirm': orange});
         },
         'cancel': () => {
-            setColor({...defaultColor, ['cancel']: orange});
+            setColor({...defaultColor, 'cancel': orange});
         },
         'notedir': () => {
-            setColor({...defaultColor, ['notedir']: orange});
+            setColor({...defaultColor, 'notedir': orange});
         },
         'collapse': () => {
-            setColor({...defaultColor, ['collapse']: orange});
+            setColor({...defaultColor, 'collapse': orange});
         },
         'default': () => {
             setColor(defaultColor);
         }
     }
 
-    const BtnContent = ({onChange, children}) => {
-        return <span
+    const BtnContent = ({onChange, children, tooltip}) => {
+        return <Tooltip
+            title={tooltip}
+            placement='top'
+        >
+            <span
                 onMouseEnter={onChange}
                 onMouseLeave={iconChange.default}>
-                    {children}
-                </span>};
+                {children}
+            </span>
+        </Tooltip>};
     
     //目前正在使用的ToolPanel
     const [currentToolPanel, setCurrentToolPanel] = useState(null);
@@ -179,7 +232,7 @@ const Notedirs = ({notebookId, toggleCollapse}) => {
         setCurrentNotedir(id);
     }
 
-    const onConfirm = title => {
+    const onAddNotedir = title => {
         let notedir = {
             title,
             notebook: notebookId
@@ -205,47 +258,62 @@ const Notedirs = ({notebookId, toggleCollapse}) => {
 
     return (
         <Fragment>
-            { notedirs && !loading ?
-                (<NotedirList className='notedir-list'>
+            { !loading ?
+                notedirs && !error ? (<NotedirList className='notedir-list'>
                     <div className='notedir-header'>
                         <i className='parlgrm'></i>
                         <span className='title'>目錄</span>
-                        <NotedirSorter />
                         <button alt='add notedir' className='tiny-btn' onClick={onEnableAddNotedir}>
-                            <BtnContent onChange={iconChange.notedir} children={<FolderSimplePlus size={22} color={color.notedir} />} />
+                            <BtnContent onChange={iconChange.notedir} children={<FolderSimplePlus size={22} color={color.notedir} />} tooltip='新增目錄' />
                         </button>
+                        <NotedirSorter />
                         <button alt='collapse/expand notedir' className='tiny-btn collapse-btn' onClick={onToggleCollapse}>
-                            <BtnContent onChange={iconChange.collapse} children={<ArrowLineLeft size={22} color={color.collapse} />} />
+                            <BtnContent onChange={iconChange.collapse} children={<ArrowLineLeft size={22} color={color.collapse} />} tooltip='隱藏清單' />
                         </button>
-                        <TextInput  
-                            visible={addNotedirVisible}
-                            placeholder={'請輸入筆記目錄名稱'}
-                            onConfirm={onConfirm}
-                            onCancel={onCancel}>
-                            <TextInput.ConfirmBtn>
-                                <BtnContent onChange={iconChange.confirm} children={<Check size={22} color={color.confirm} weight='bold' />} />
-                            </TextInput.ConfirmBtn>
-                            <TextInput.CancelBtn>
-                                <BtnContent onChange={iconChange.cancel} children={<X size={22} color={color.cancel} weight='bold' />} />
-                            </TextInput.CancelBtn>
-                        </TextInput>
                     </div>
-                    <ul>
+                    {notedirs.length >= 1 ?
                         <Fragment>
-                            <AllNotedir setCurrent={setCurrent} />
-                            {notedirs.map(notedir => {
-                                return !notedir.default 
-                                && (<Notedir 
-                                    key={notedir._id} 
-                                    notedir={notedir} 
-                                    toolPanel={currentToolPanel}
-                                    setCurrent={setCurrent}
-                                    setToolPanel={setToolPanel} />)
-                            })}
-                        </Fragment>
-                    </ul>
+                            <ul>
+                                <AllNotedir count={allNoteCount} setCurrent={setCurrent} />
+                                <TextInput  
+                                    visible={addNotedirVisible}
+                                    placeholder={'請輸入筆記目錄名稱'}
+                                    onConfirm={onAddNotedir}
+                                    onCancel={onCancel}>
+                                    <TextInput.ConfirmBtn>
+                                        <BtnContent onChange={iconChange.confirm} children={<Check size={22} color={color.confirm} weight='bold' />} tooltip='完成' />
+                                    </TextInput.ConfirmBtn>
+                                    <TextInput.CancelBtn>
+                                        <BtnContent onChange={iconChange.cancel} children={<X size={22} color={color.cancel} weight='bold' />} tooltip='取消' />
+                                    </TextInput.CancelBtn>
+                                </TextInput>
+                                {notedirs.map(notedir => {
+                                    return !notedir.default 
+                                    && (<Notedir 
+                                        key={notedir._id} 
+                                        notebookId={notebookId}
+                                        notedir={notedir} 
+                                        toolPanel={currentToolPanel}
+                                        setCurrent={setCurrent}
+                                        setToolPanel={setToolPanel} />)
+                                })}
+                            </ul>
+                            {notedirs.length === 1 ?
+                                <IntroBox>
+                                    <img alt='notedir-bg' src={NotedirSmallImage}
+                                        srcSet={`
+                                        ${NotedirSmallImage} 300w, 
+                                        ${NotedirMediumImage} 1000w, 
+                                        ${NotedirLargeImage} 2000w
+                                        `} />
+                                    <p>建立目錄可以幫助你分類筆記</p>
+                                </IntroBox>
+                            : null }
+                        </Fragment> : null
+                    }
                 </NotedirList>)
-            : <Spinner /> }
+                : null
+            : null }
         </Fragment>
     )
 }

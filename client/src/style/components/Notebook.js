@@ -1,19 +1,18 @@
 import styled from 'styled-components';
+import makeResponsiveCSS from '../../utils/make-responsive-css'
 
-const Notebook = styled.div`
-    flex: 1 1 auto;
-    max-width: 15rem;
-    margin: 30px 10px;
+const NotebookBaseStyle = `
+    min-width: 15rem;
+    margin: 1.2rem 1rem;
 
     .card {
         background: rgba(255,227,198,1);
         border: none;
         border-left: 1em solid rgba(255,132,0,1);
         border-radius: 15px 0 0 15px;
-        padding: 20px;
+        padding: 1rem;
         width: 100%;
-        height: 20rem;
-        max-height: 250px;
+        height: 16rem;
         box-shadow: 3px 3px 8px 0px rgba(0,0,0,0.5);
     }
 
@@ -59,5 +58,30 @@ const Notebook = styled.div`
     .danger-alert {
         border: 2px solid #FF0000;
     }`;
+
+const NotebookResponsiveStyle = () => {
+    return makeResponsiveCSS([
+        {
+            constraint: 'min',
+            width: '0px',
+            rules: `
+                flex: 1 0 100%;
+                max-width: 60%;
+            `
+        }, {
+            constraint: 'min',
+            width: '768px',
+            rules: `
+                flex: 0 0 15rem;
+                max-width: none;
+            `
+        }
+    ])
+}
+
+const Notebook = styled.div`
+    ${NotebookBaseStyle}
+    ${NotebookResponsiveStyle()}
+`;
 
 export default Notebook;

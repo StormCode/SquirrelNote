@@ -1,10 +1,7 @@
 import React, { Fragment, useState, useContext, useEffect } from 'react'
-import {
-    Card, CardImg, CardText, CardBody,
-    CardTitle, CardSubtitle, Button, UncontrolledTooltip
-} from 'reactstrap';
+import { Card, CardText, CardBody, CardTitle } from 'reactstrap';
 import { Check, X } from "phosphor-react";
-import ToolPanel from '../layout/ToolPanel';
+import ToolPanel from '../general/ToolPanel';
 
 // Import Style
 import { theme } from '../../style/themes';
@@ -14,12 +11,11 @@ import NotebookContext from '../../context/notebooks/notebookContext';
 
 const { orange, gray } = theme;
 
-const NewNotebook = ({visible}) => {
+const NewNotebook = ({visible, addNotebook}) => {
     const notebookContext = useContext(NotebookContext);
 
     const { 
         disableAddNotebook, 
-        addNotebook 
     } = notebookContext;
 
     const [notebook, setNotebook] = useState({
@@ -45,6 +41,26 @@ const NewNotebook = ({visible}) => {
 
         // eslint-disable-next-line
     }, []);
+
+    useEffect(() => {
+        window.addEventListener("beforeunload", onClose);
+
+        return () => {
+            window.removeEventListener("beforeunload", onClose);
+        }
+
+        // eslint-disable-next-line
+    }, [visible]);
+
+    // 視窗關閉前確認是否有未儲存的暫存筆記本
+    const onClose = e => {
+        if(visible) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    
+        return null;
+    }
 
     const onChange = e => setNotebook({
         ...notebook, [e.target.name]: e.target.value
@@ -76,10 +92,10 @@ const NewNotebook = ({visible}) => {
 
     const iconChange = {
         'confirm': () => {
-            setColor({...defaultColor, ['confirm']: orange});
+            setColor({...defaultColor, 'confirm': orange});
         },
         'cancel': () => {
-            setColor({...defaultColor, ['cancel']: orange});
+            setColor({...defaultColor, 'cancel': orange});
         },
         'default': () => {
             setColor(defaultColor);
@@ -97,13 +113,6 @@ const NewNotebook = ({visible}) => {
         <Fragment>
             {visible ? (<NotebookContainer className='notebook'>
                 <Card>
-                    {/* <div className='tool-panel'> */}
-                        {/* <button id='add-confirm-btn' onClick={onAddNotebook}>
-                            <img src={confirmImg} alt='新增' />
-                        </button>
-                        <button id='cancel-btn' onClick={onDisableAddNotebook}>
-                            <img src={cancelImg} alt='取消' />
-                        </button> */}
                         <ToolPanel 
                             onConfirm={onAddNotebook}
                             onCancel={onDisableAddNotebook}>
@@ -114,15 +123,6 @@ const NewNotebook = ({visible}) => {
                                 <BtnContent onChange={iconChange.cancel} children={<X size={20} color={color.cancel} weight='bold' />} />
                             </ToolPanel.CancelBtn>
                         </ToolPanel>
-                        {/* <UncontrolledTooltip placement="bottom" target="add-confirm-btn">
-                            確定新增
-                        </UncontrolledTooltip>
-                        <UncontrolledTooltip placement="bottom" target="cancel-btn">
-                            取消
-                        </UncontrolledTooltip> */}
-                    {/* </div> */}
-                    {/* todo: 加入封面 */}
-                    {/* <CardImg top width="100%" src="/assets/318x180.svg" alt="Card image cap" /> */}
                     <CardBody>
                         <CardTitle>
                             <input type='text' className='form-control' name='title' placeholder='名稱' value={title} onChange={onChange} />
@@ -138,5 +138,3 @@ const NewNotebook = ({visible}) => {
 }
 
 export default NewNotebook;
-
-//todo: 當焦點離開新增的區域時自動隱藏

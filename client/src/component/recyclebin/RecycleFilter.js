@@ -1,6 +1,6 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { MagnifyingGlass, X } from "phosphor-react";
-import IconInput from '../layout/IconInput';
+import IconInput from '../general/IconInput';
 import styled from 'styled-components';
 import makeResponsiveCSS from '../../utils/make-responsive-css'
 
@@ -9,7 +9,7 @@ import { theme } from '../../style/themes';
 
 import RecyclebinContext from '../../context/recyclebin/recyclebinContext';
 
-const { orange, gray } = theme;
+const { defaultColor, orange, gray } = theme;
 
 const HeadIconBaseStyle = `
     float: left;
@@ -42,7 +42,7 @@ const ClearIconBaseStyle = `
     cursor: pointer;
     float: right;
     height: 2.5rem;
-    transform: translate(-150%, -75%);
+    transform: translate(-150%, 2px);
 `;
 
 const ClearIconResponsiveStyle = () => {
@@ -57,7 +57,7 @@ const ClearIconResponsiveStyle = () => {
             constraint: 'min',
             width: '768px',
             rules: `
-                transform: translate(-150%, -75%);
+                transform: translate(-150%, 2px);
             `
         }
     ]);
@@ -103,7 +103,12 @@ const RecycleFilter = () => {
 
     const { filterRecycleList, clearFilterRecycleList } = recycleContext;
 
+    const [focus, setFocus] = useState(false);
     const [color, setColor] = useState(gray);
+
+    useEffect(() => {
+        !focus && setColor(gray);
+    }, [focus]);
 
     const onChange = val => {
         if(val !== '')
@@ -113,11 +118,16 @@ const RecycleFilter = () => {
     }
 
     const hoverOn = () => {
-        setColor(orange);
+        setColor(focus ? orange : defaultColor);
     }
 
     const hoverOff = () => {
         setColor(gray);
+    }
+
+    const focusOn = state => {
+        setFocus(state);
+        setColor(orange);
     }
 
     const IconInputBaseStyle = `
@@ -127,6 +137,10 @@ const RecycleFilter = () => {
 
         ::placeholder{
             color: ${color};
+        }
+
+        &:focus {
+            border: 1px solid ${color};
         }
     `;
 
@@ -159,7 +173,8 @@ const RecycleFilter = () => {
             placeholder='搜尋標題...' 
             onChange={onChange}
             hoverOn={hoverOn}
-            hoverOff={hoverOff}>
+            hoverOff={hoverOff}
+            focusOn={focusOn}>
                 <HeadIcon>
                     <MagnifyingGlass size={16} color={color} weight='bold'/>
                 </HeadIcon>

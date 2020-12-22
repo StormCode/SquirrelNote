@@ -1,12 +1,15 @@
+export const RwdTableBaseStyle = `
+    display: table;
+    table-layout: fixed;
+    white-space: nowrap;
+    width: 100%;
+`;
+
 export const RwdTableForDestopStyle = `
     /*Table樣式*/
 
     thead > tr > th {
         display: table-cell;
-    }
-
-    tr:nth-of-type(2n) {
-        background: none;
     }
 
     th, td {
@@ -17,7 +20,6 @@ export const RwdTableForDestopStyle = `
     }
 
         th, td:before {
-            color: #000;
             font-weight: normal;
             min-width: inherit;
         }
@@ -45,10 +47,6 @@ export const RwdTableForPhoneStyle = `
         display: none;
     }
 
-    tr:nth-of-type(2n) {
-        background: #ccc;
-    }
-
     th, td {
         margin: 3px 5px;
     }
@@ -59,7 +57,6 @@ export const RwdTableForPhoneStyle = `
     }
 
         th, td:before {
-            color: #D20B2A;
             font-weight: bold;
             min-width: 40%;
         }

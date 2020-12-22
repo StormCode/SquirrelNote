@@ -14,21 +14,24 @@ import RecycleFilter from '../recyclebin/RecycleFilter'
 import RecycleSorter from '../recyclebin/RecycleSorter'
 import RecycleList from '../recyclebin/RecycleList'
 
+// Import Style
+import TopPanelAndContent from '../../style/layout/TopPanelAndContent';
+
 const RecycleBinContainerBaseStyle = theme => {
     return `
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        grid-template-rows: 20% auto;
         width: 100%;
         height: 100%;
+        overflow: hidden;
+
+        .title {
+            border-bottom: 1px solid ${theme.orange};
+            margin-bottom: 2.5rem;
+            font-size: 1.5rem;
+            text-indent: .5rem;
+        }
 
         .tool-header {
-            grid-row: 1;
-            grid-column: 1 / 5;
-            display: flex;
-            flex-flow: row nowrap;
             align-items: center;
-            height: 100%;
 
             > a {
                 position: relative;
@@ -51,21 +54,7 @@ const RecycleBinContainerBaseStyle = theme => {
                 }
             }
         }
-
-        .recycle-content {
-            grid-row: 2;
-            grid-column: 2 / 4;
-            padding: 3rem 0;
-        }
-
-            .recycle-content > h3 {
-                margin: 1.5rem 0;
-            }
-
-        .right-panel {
-            grid-column: 4;
-            padding: 3rem 5rem 0 0;
-        }`;
+    `;
 }
 
 const RecycleBinResponsiveStyle = () => {
@@ -75,7 +64,7 @@ const RecycleBinResponsiveStyle = () => {
             width: '0px',
             rules: `
                 .tool-header {
-                    padding-left: 0;
+                    padding: 0;
                 }
             `
         }, {
@@ -83,7 +72,7 @@ const RecycleBinResponsiveStyle = () => {
             width: '768px',
             rules: `
                 .tool-header {
-                    padding-left: 5rem;
+                    padding: 0 2.5rem;
                 }
             `
         }
@@ -107,21 +96,22 @@ const RecycleBin = () => {
     }, []);
 
     return (
-            <RecycleBinContainer>
-                <div className='tool-header'>
-                    { notebookId !== null ? 
-                        <Link to={`/notebook/${notebookId}`}><ArrowUUpLeft size={22} /><MediumAndAbove><span>回到筆記</span></MediumAndAbove></Link> 
-                        : <Link to='../notebook'><ArrowUUpLeft size={22} /><MediumAndAbove><span>回到筆記本</span></MediumAndAbove></Link>
-                    }
-                    <RecycleFilter />
-                    <RecycleSorter />
-                </div>
-                <div className='recycle-content'>
-                    <RecycleList />
-                </div>
-                <div className='right-panel'>
-                </div>
-            </RecycleBinContainer>
+            <TopPanelAndContent>
+                <RecycleBinContainer>
+                    <p className='title'>回收站</p>
+                    <div className='tool-header'>
+                        { notebookId !== null ? 
+                            <Link to={`/notebook/${notebookId}`}><ArrowUUpLeft size={22} /><MediumAndAbove><span>回到筆記</span></MediumAndAbove></Link> 
+                            : <Link to='../notebook'><ArrowUUpLeft size={22} /><MediumAndAbove><span>回到筆記本</span></MediumAndAbove></Link>
+                        }
+                        <RecycleFilter />
+                        <RecycleSorter />
+                    </div>
+                    <div className='content'>
+                        <RecycleList />
+                    </div>
+                </RecycleBinContainer>
+            </TopPanelAndContent>
     )
 }
 

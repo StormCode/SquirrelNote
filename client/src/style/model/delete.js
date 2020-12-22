@@ -48,6 +48,12 @@ const deleteStyle = `
             background: ${darkGray};
         }
     }
+
+    .danger {
+        color: rgb(255,0,0);
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
 `;
 
 export default deleteStyle;

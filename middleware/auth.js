@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const config = require('config');
+require('dotenv').config();
 
 module.exports = function(req, res, next){
     //從header取得token
@@ -12,7 +12,7 @@ module.exports = function(req, res, next){
 
     try {
         //驗證token
-        const decoded = jwt.verify(token, config.get('jwtSecret'));
+        const decoded = jwt.verify(token, process.env.JWTSECRET);
 
         req.user = decoded.user;
 

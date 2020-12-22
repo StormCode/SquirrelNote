@@ -1,8 +1,8 @@
 const express = require('express');
-const config = require('config');
+require('dotenv').config();
 const multer = require('multer');
 const path = require('path');
-const upload = multer({dest: path.join(__dirname, '..', config.get('imageDirectory'))});
+const upload = multer({dest: path.join(__dirname, '..', process.env.IMAGE_DIRECTORY)});
 const router = express.Router();
 
 const crypto = require('../utils/crypto');

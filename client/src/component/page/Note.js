@@ -1,26 +1,37 @@
-import React, { useState, useContext, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useContext, useEffect, useCallback } from 'react';
+import { Alert } from 'reactstrap';
+import { Notebook } from "phosphor-react";
 import { useHistory } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
 import { decrypt } from '../../utils/crypto';
+import Tooltip from "@material-ui/core/Tooltip";
 import styled from 'styled-components';
 import { NotePencil, Browser, FileX, Trash, ArrowsLeftRight } from "phosphor-react";
 import makeResponsiveCSS from '../../utils/make-responsive-css';
+import Spinner from '../layout/Spinner';
 
-import ImgSrcParser from '../../utils/imgSrcParser';
+import ImgSrcParser from '../../general/imgSrcParser';
 import Notedirs from '../notedirs/NoteDirs';
 import Notes from '../notes/Notes';
-import Editor from '../layout/Editor';
-import Models from '../layout/Models';
+import Editor from '../general/Editor';
+import Models from '../general/Models';
+
+// Import Resource
+import EditorSmallImage from '../../assets/note/editor_300w.png';
+import EditorMediumImage from '../../assets/note/editor_1000w.png';
+import EditorLargeImage from '../../assets/note/editor_2000w.png';
 
 // Import Style
 import { theme } from '../../style/themes';
 import deleteStyle from '../../style/model/delete';
+import IntroBox from '../../style/general/IntroBox';
 
 import AuthContext from '../../context/auth/authContext';
 import NotebookContext from '../../context/notebooks/notebookContext';
 import NotedirContext from '../../context/notedirs/notedirContext';
 import NoteContext from '../../context/notes/noteContext';
+import AlertContext from '../../context/alert/alertContext';
 
 import SaveButton from '../notes/SaveButton';
 import {
@@ -29,15 +40,60 @@ import {
     SAVED,
     DISABLESAVE
 } from '../../saveState';
+import {
+    SAVE_NOTE_ERROR,
+    UPLOAD_IMAGE_ERROR
+} from '../../error';
 
-const { orange, lightOrange, darkOrange, gray, darkGray } = theme;
+const { orange, lightOrange, darkOrange, yellow, gray, lightGrayOpacity3, darkGray } = theme;
 
-// grid-template-columns: 50px 1.2fr 1.5fr 3.5fr;
-// "side-bar notedir-list note-list editor-area";
 const MainContainerBaseStyle = `
+    flex: 1 1 auto;
     display: flex;
+    flex-flow: column nowrap;
     width: 100%;
     height: 100%;
+
+    .header-panel {
+        flex: 0 0 auto;
+        position: relative;
+        background: linear-gradient(90deg,#fff 75%, ${lightGrayOpacity3} 100%);
+        border-bottom: 3px solid;
+        border-image: linear-gradient(45deg, ${orange}, ${yellow}) 1;
+        color: ${darkGray};
+    }
+
+        .header-panel .parlgrm {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: ${orange};
+            display: inline-block;
+            min-width: 3.5rem;
+            margin-left: -.5rem;
+            margin-right: .5rem;
+            height: 100%;
+            transform: skew(-30deg);
+        }
+
+        .header-panel .notebook-icon {
+            position: absolute;
+            top: 0;
+            left: .8rem;
+            color: #FFF;
+        }
+
+        .header-panel .title {
+            text-indent: 4rem;
+            font-size: 1.2rem;
+        }
+
+    .content-panel {
+        flex: 1 1 auto;
+        display: flex;
+        width: 100%;
+        height: 100%;
+    }
 
     .note-title-container {
         flex: 1 1 100%;
@@ -56,6 +112,9 @@ const MainContainerBaseStyle = `
             outline: none;
             padding: .5rem;
             font-size: 1.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
             .note-title-container .note-title:disabled {
@@ -64,19 +123,16 @@ const MainContainerBaseStyle = `
             }
 `;
 
-// display: grid;
-//                 grid-template-columns: ${props.notedirCollapse || props.noteCollapse ? '30px' : ''} ${props.notedirCollapse ? '' : '1.2fr'} ${props.noteCollapse ? '' : '1.5fr'} ${props.notedirCollapse ? props.noteCollapse ? '6.2fr' : '4.7fr' : props.noteCollapse ? '5fr' : '3.5fr'};
-//                 grid-template-rows: 100%;
-//                 grid-template-areas:
-//                     "${props.notedirCollapse || props.noteCollapse ? 'side-bar' : ''} ${props.notedirCollapse ? '' : 'notedir-list'} ${props.noteCollapse ? '' : 'note-list'} editor-area";
 const MainContainerResponsiveStyle = () => {
     return makeResponsiveCSS([
         {
             constraint: 'min',
             width: '0px',
             rules: `
-                flex-flow: column nowrap;
-                
+                .content-panel {
+                    flex-flow: column nowrap;
+                }
+
                 .rwd-nav-bar {
                     position: sticky;
                     bottom: 0;
@@ -89,8 +145,10 @@ const MainContainerResponsiveStyle = () => {
             constraint: 'min',
             width: '768px',
             rules: `
-                flex-flow: row nowrap;
-                
+                .content-panel {
+                    flex-flow: row nowrap;
+                }
+
                 .rwd-nav-bar {
                     display: none;
                 }
@@ -158,18 +216,6 @@ const RwdNavbarBaseStyle = props => {
     `
 };
 
-const RwdNavbarResponsiveStyle = () => {
-    return makeResponsiveCSS([
-        {
-            constraint: 'min',
-            width: '0px',
-            rules: `
-            `
-        }
-    ])
-}
-
-// ${RwdNavbarResponsiveStyle}
 const RwdNavButton = styled.button`
     ${props => RwdNavbarBaseStyle(props)}
 `;
@@ -253,8 +299,6 @@ const modelStyle = `
 `;
 
 const NotedirContainerBaseStyle = `
-    max-width: 25%;     /* 配合flex的設定 */
-
     .recycle-bin {
         height: 2rem;
     }
@@ -278,6 +322,7 @@ const NotedirContainerResponsiveStyle = props => {
             constraint: 'min',
             width: '0px',
             rules: `
+                max-width: none;
                 flex: 1 1 auto;
                 display: ${props.visible ? 'flex' : 'none'};
                 
@@ -290,7 +335,9 @@ const NotedirContainerResponsiveStyle = props => {
             constraint: 'min',
             width: '768px',
             rules: `
-                flex: 0 1 25%;
+                max-width: 20%;     /* 配合下面flex的設定 */
+
+                flex: 0 1 20%;
                 display: ${props.collapse ? 'none' : 'flex'};
                 flex-flow: column nowrap;
                 
@@ -309,7 +356,7 @@ const NotedirContainer = styled.div`
 `;
 
 const NoteContainerBaseStyle = `
-    max-width: 25%;     /* 配合flex的設定 */
+    flex-flow: column nowrap;
 `;
 
 const NoteContainerResponsiveStyle = props => {
@@ -318,15 +365,18 @@ const NoteContainerResponsiveStyle = props => {
             constraint: 'min',
             width: '0px',
             rules: `
+                max-width: none;
                 flex: 1 1 auto;
-                display: ${props.visible ? 'block' : 'none'};
+                display: ${props.visible ? 'flex' : 'none'};
             `
         }, {
             constraint: 'min',
             width: '768px',
             rules: `
-                flex: 0 1 25%;
-                display: ${props.collapse ? 'none' : 'block'};
+                max-width: 20%;     /* 配合下面flex的設定 */
+
+                flex: 0 1 20%;
+                display: ${props.collapse ? 'none' : 'flex'};
             `
         }
     ])
@@ -337,6 +387,10 @@ const NoteContainer = styled.div`
     ${props => NoteContainerResponsiveStyle(props)}
 `;
 
+const EditorAreaContainerBaseStyle = `
+    flex-flow: column nowrap;
+`;
+
 const EditorAreaContainerResponsiveStyle = props => {
     return makeResponsiveCSS([
         {
@@ -344,14 +398,14 @@ const EditorAreaContainerResponsiveStyle = props => {
             width: '0px',
             rules: `
                 flex: 1 1 auto;
-                display: ${props.visible ? 'block' : 'none'};
+                display: ${props.visible ? 'flex' : 'none'};
             `
         }, {
             constraint: 'min',
             width: '768px',
             rules: `
-                flex: 1 1 50%;
-                display: block;
+                flex: 1 1 60%;
+                display: flex;
                 width: 0;
             `
         }
@@ -359,11 +413,13 @@ const EditorAreaContainerResponsiveStyle = props => {
 }
 
 const EditorAreaContainer = styled.div`
+    ${EditorAreaContainerBaseStyle}
     ${props => EditorAreaContainerResponsiveStyle(props)}
 `;
 
 const EditorAreaBaseStyle = props => {
     return `
+        flex: 1 1 100%;
         display: flex;
         border-left: 1px solid rgba(255,120,0,1);
         flex-flow: column nowrap;
@@ -392,6 +448,7 @@ const EditorAreaBaseStyle = props => {
         }
 
         .ck-editor__main {
+            overflow-x: hidden;
             overflow-y: auto;
             height: 0;
         }
@@ -440,25 +497,6 @@ const EditorAreaBaseStyle = props => {
     `;
 }
 
-const EditorAreaResponsiveStyle = () => {
-    return makeResponsiveCSS([
-        {
-            constraint: 'min',
-            width: '0px',
-            rules: `
-                display: flex;
-            `
-        }, {
-            constraint: 'min',
-            width: '768px',
-            rules: `
-                display: block;
-            `
-        }
-      ])
-}
-
-// ${EditorAreaResponsiveStyle()}
 const EditorArea = styled.div`
     ${props => EditorAreaBaseStyle(props)}
 `;
@@ -469,25 +507,31 @@ const Note = ({ match }) => {
     const notebookContext = useContext(NotebookContext);
     const notedirContext = useContext(NotedirContext);
     const noteContext = useContext(NoteContext);
+    const alertContext = useContext(AlertContext);
 
     useEffect(() => {
         authContext.loadUser();
 
+        return () => {
+            // 清除自動儲存interval
+            clearInterval(autoSaveIntervalToken.current.value);
+            autoSaveIntervalToken.current = null;
+        }
+
         // eslint-disable-next-line
     }, []);
-
-    const notedirId = notedirContext.current !== '' ? notedirContext.current ? notedirContext.current._id : null : '';
 
     const {
         notes,
         current,
         cacheCurrent,
-        cacheNotes,
+        cacheMap,
         appendCacheNote,
         modifyCacheNote,
         removeCacheNote,
-        discardCacheNote,
+        setCacheNote,
         setCurrentNote,
+        clearCurrentNote,
         getNoteDetail,
         save,
         setSave,
@@ -498,84 +542,158 @@ const Note = ({ match }) => {
         updateNote,
         deleteNote,
         moveNote,
+        success,
         error,
+        saveResult,
         loading
     } = noteContext;
 
-    const autoSaveInterval = 10000;
-    const [autoSave, setAutoSave] = useState(true);
-    const [autoSaveIntervalToken, setAutoSaveIntervalToken] = useState({});
-    const [saveTextUpdateInterval, setSaveTextUpdateInterval] = useState(10000);
+    const {
+        setAlert
+    } = alertContext;
+
+    const notedirLoading = notedirContext.loading;
+    const noteLoading = noteContext.loading;
+    const autoSaveInterval = process.env.REACT_APP_AUTOSAVE_INTERVAL || 300000;
+    const [autoSave] = useState(true);
+    const [saveTextUpdateInterval] = useState(10000);
     const [modelOpen, setModelOpen] = useState(false);
     const [deleteNoteVisible, setDeleteNoteVisible] = useState(false);
     const [destNotedir, setDestNotedir] = useState(null);
-
+    const [destNotedirError, setDestNotedirError] = useState(false);
+    const autoSaveIntervalToken = useRef({});
+    
     const toggleOpen = () => setModelOpen(!modelOpen);
-
+    
     //目前筆記的狀態：編輯/閱讀模式
     const NOTEMODE = {
         EDIT: 'EDIT',
         READ: 'READ'
     };
-
+    
     const [noteMode, setNoteMode] = useState(NOTEMODE.READ);
-
+    
     const host = `${window.location.protocol}//${window.location.host}`;
-
-    const notebooks = notebookContext.notebooks;
+    
+    const {
+        notebooks,
+        getNotebooks
+     } = notebookContext;
     const notedirs = notedirContext.notedirs;
-
+    const notedirId = notedirContext.current !== '' ? notedirContext.current ? notedirContext.current._id : null : notedirContext.current;
+    const setNoteCount = notedirContext.setNoteCount;
+    const allCacheNotes = [...cacheMap.values()].flat();
+    const currentCacheNotes = cacheMap.get(notedirId) || [];      // 目前目錄裡的快取筆記
+    
     useEffect(() => {
-        notebooks && notebooks.length > 0 && notebookContext.setCurrentNotebook(match.params.id);
+        if(notebooks && notebooks.length > 0) {
+            notebookContext.setCurrentNotebook(match.params.id);
+        } else {
+            getNotebooks();            
+        }
 
         // eslint-disable-next-line
     }, [notebooks]);
-
+    
     useEffect(() => {
-        if(current && current._id) {
-            if(cacheCurrent) {
+        if(current && current._id && cacheCurrent) {
+            if(currentCacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) {
+                //控制儲存狀態(快取筆記載入時顯示未儲存)
+                setSave({state: UNSAVE, showUpdateTime: false});
+                
+                modifyCacheNote(notedirId, current);
+            } else {
                 //控制儲存狀態(筆記載入時顯示已儲存)
                 setSave({state: SAVED, showUpdateTime: true});
 
-                if(cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) {
-                    modifyCacheNote(current);
-                } else {
-                    let currentNote = notes.find(note => note._id === current._id);
-                    currentNote && (cacheCurrent.title !== current.title || cacheCurrent.content !== current.content)
-                                && appendCacheNote(current);
-                }
+                let currentNote = notes.find(note => note._id === current._id);
+                currentNote && (cacheCurrent.title !== current.title || cacheCurrent.content !== current.content)
+                && appendCacheNote(notedirId, current);
             }
         } else {
             //控制儲存、筆記狀態
             setNoteMode(NOTEMODE.READ);
             setSave({state: DISABLESAVE, showUpdateTime: false});
         }
-    },[current]);
 
+        // eslint-disable-next-line
+    },[current, cacheCurrent, cacheMap]);
+    
     useEffect(() => {
         //控制儲存狀態
         if(current && current._id
-            && cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) {
+            && currentCacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) {
                 current.title !== '' || current.content !== ''
                     ? setSave({state: UNSAVE, showUpdateTime: false}) : setSave({state: DISABLESAVE, showUpdateTime: false});
-            }
-    },[cacheNotes]);
+        }
+        
+        window.addEventListener("beforeunload", onClose);
+        
+        return () => {
+            window.removeEventListener("beforeunload", onClose);
+        }
 
+        // eslint-disable-next-line
+    },[current, cacheMap]);
+        
     useEffect(() => {
         //控制刪除狀態
         current && notes.map(note => note._id).indexOf(current._id) !== -1 ? enableDelete() : disableDelete();
-    },[current, notes]);
 
+        // eslint-disable-next-line
+    },[current, notes]);
+        
     useEffect(() => {
+        // 當目錄切換時清除目前的筆記
+        // 因為是直接清除current，可忽略current取到舊值的問題，所以在這裡並沒有相依current
+        clearCurrentNote();
+        
         // for 行動版:點擊目錄項目切換到筆記列表
         notedirContext.current !== null 
-            && setPanelVisible({
-                [PANEL.NOTEDIR]: false,
-                [PANEL.NOTE]: true,
-                [PANEL.EDITANDVIEW]: false
-            });
+        && setPanelVisible({
+            [PANEL.NOTEDIR]: false,
+            [PANEL.NOTE]: true,
+            [PANEL.EDITANDVIEW]: false
+        });
+
+        // eslint-disable-next-line
     }, [notedirContext.current]);
 
+    useEffect(() => {
+        success && setAlert(success, 'success');
+
+        // eslint-disable-next-line
+    }, [success]);
+
+    useEffect(() => {
+        error && setAlert(error, 'danger');
+
+        // eslint-disable-next-line
+    }, [error]);
+
+    useEffect(() => {
+        if(saveResult) {
+            if(saveResult.state) {
+                setSave({state: SAVED, showUpdateTime: true});
+            } else {
+                setSave({state: UNSAVE, showUpdateTime: false});
+                setAlert(SAVE_NOTE_ERROR,'danger');
+            }
+        }
+
+        // eslint-disable-next-line
+    }, [saveResult]);
+        
+    // 視窗關閉前確認是否有未儲存的暫存筆記
+    const onClose = e => {
+        if(allCacheNotes.length > 0) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+        
+        return null;
+    }
+    
     const PANEL = {
         NOTEDIR: 'NOTEDIR',
         NOTE: 'NOTE',
@@ -587,15 +705,22 @@ const Note = ({ match }) => {
         [PANEL.NOTE]: true,
         [PANEL.EDITANDVIEW]: false
     };
-
+        
     const [panelVisible, setPanelVisible] = useState(defaultPanelState);
+    const [noteFilterKeyword, setNoteFilterKeyword] = useState(null);
 
+    const setKeyword = keyword => {
+        setNoteFilterKeyword(keyword);
+    }
+        
     const titleChange = useCallback(e => {
         e.preventDefault();
-
+        
         current && setCurrentNote({ title: e.target.value });
-    },[current]);
 
+        // eslint-disable-next-line
+    },[current]);
+    
     const defaultColor = {
         edit: gray,
         view: gray,
@@ -611,21 +736,21 @@ const Note = ({ match }) => {
     });
 
     const contentChange = useCallback(data => {
-        console.log('data: ' + data);
-        current && console.log('content: ' + current.content);
-
         current && setCurrentNote({ content: data });
+
+        // eslint-disable-next-line
     },[current]);
 
     const setCacheNoteContent = note => {
         let currentNote = {
             _id: note._id,
             title: note.title,
-            content: cacheNotes.find(cacheNote => {
-                return cacheNote._id == note._id
-            }).content
+            content: currentCacheNotes.find(cacheNote => {
+                return cacheNote._id === note._id
+            }).content,
+            notedir: note.notedir
         };
-        setCurrentNote(currentNote);
+        setCacheNote(currentNote);
         setNoteMode(NOTEMODE.EDIT);
     }
 
@@ -647,9 +772,10 @@ const Note = ({ match }) => {
             _id: uuidv4(),
             title: '',
             content: '',
-            date: null
+            date: null,
+            notedir: notedirId
         };
-        appendCacheNote(newNote);
+        appendCacheNote(notedirId, newNote);
         setNoteMode(NOTEMODE.EDIT);
 
         // for 行動版: 切換到編輯/檢視panel
@@ -667,15 +793,19 @@ const Note = ({ match }) => {
 
     const onDelete = e => {
         e.preventDefault();
-        // 若目前的目錄是在「(全部)」則把筆記存入預設的目錄
-        let saveNotedirId;
+        // 若目前的目錄是在「(全部)」則用快取筆記裡的目錄ID
+        let deleteNotedirId;
+        let noteCount;
         if(notedirId === '') {
-            saveNotedirId = cacheCurrent.notedir;
+            deleteNotedirId = cacheCurrent.notedir;
+            noteCount = notedirs.find(notedir => notedir._id === deleteNotedirId).note_count - 1;
         } else {
-            saveNotedirId = notedirId;
+            deleteNotedirId = notedirId;
+            noteCount = notedirContext.current.note_count - 1;
         }
-        current && deleteNote(saveNotedirId, current._id);
+        current && deleteNote(deleteNotedirId, current._id);
         setDeleteNoteVisible(false);
+        setNoteCount(deleteNotedirId, noteCount);
     }
 
     const onCancelDelete = e => {
@@ -689,7 +819,8 @@ const Note = ({ match }) => {
 
     const onDiscard = e => {
         e.preventDefault();
-        current && discardCacheNote(current._id);
+        removeCacheNote(notedirId, current._id);
+        clearCurrentNote();
     }
 
     const openMoveNoteModel = e => {
@@ -699,9 +830,29 @@ const Note = ({ match }) => {
 
     const onMove = e => {
         e.preventDefault();
+        
+        // 回傳移動筆記後清單是否要移除移動的項目
+        const delItemCallback = () => {
+            return notedirId !== '' ? true : false;
+        }
+
         if(destNotedir) {
-            const noteField = {...current, ['notedir']: destNotedir};
-            moveNote(current._id, noteField);
+            const noteField = {...current, 'notedir': destNotedir._id};
+            let sourceNotedirId;
+            let sourceNoteCount;
+            const destNotedirId = destNotedir._id;
+            const destNoteCount = destNotedir.note_count + 1;
+            // 若目前的目錄是在「(全部)」則用快取筆記裡的目錄ID
+            if(notedirId === '') {
+                sourceNotedirId = cacheCurrent.notedir;
+                sourceNoteCount = notedirs.find(notedir => notedir._id === sourceNotedirId).note_count - 1;
+            } else {
+                sourceNotedirId = notedirId;
+                sourceNoteCount = notedirContext.current.note_count - 1;
+            }
+            moveNote(current._id, noteField, destNotedir.title, delItemCallback);
+            setNoteCount(sourceNotedirId, sourceNoteCount);
+            setNoteCount(destNotedirId, destNoteCount);
             setDestNotedir(null);
             setModelOpen(false);
         }
@@ -710,6 +861,7 @@ const Note = ({ match }) => {
     const onModelClose = e => {
         e.preventDefault();
         setDestNotedir(null);
+        setDestNotedirError(false);
         setModelOpen(false);
     }
 
@@ -718,34 +870,32 @@ const Note = ({ match }) => {
     }
 
     const toggleNotedirCollapse = () => {
-        setListCollapse({...listCollapse, ['notedir']: !listCollapse.notedir});
+        setListCollapse({...listCollapse, 'notedir': !listCollapse.notedir});
     }
 
     const toggleNoteCollapse = () => {
-        setListCollapse({...listCollapse, ['note']: !listCollapse.note});
+        setListCollapse({...listCollapse, 'note': !listCollapse.note});
+    }
+
+    const onEditorDoubleClick = e => {
+        e.preventDefault();
+        if(cacheCurrent && noteMode === NOTEMODE.READ) {
+            setNoteMode(NOTEMODE.EDIT);
+        }
     }
 
     const onSave = async () => {
-        //設定儲存狀態為正在儲存
         if(current && (current.title !== '' || current.content !== '')
-            && (cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1)) {
-            console.log('save editor');
-
+        && (currentCacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1)) {
             try {
-                //如果內容有被改過但又被改回來，儲存狀態直接設已儲存、移除快取筆記
-                //儲存按鈕上的儲存時間從資料庫抓，因為實際上沒有執行儲存，所以時間應該顯示上次儲存的時間
-                if(cacheCurrent.title === current.title && cacheCurrent.content === current.content) {
-                    removeCacheNote(current._id);
-                    setSave({state: SAVED, showUpdateTime: true});
-                    return;
-                }
-
+                //設定儲存狀態為正在儲存
                 setSave({state: SAVING, showUpdateTime: false});
 
                 let newContent = await ReplaceImage(current.content);
 
                 // 判斷筆記儲存的目錄
                 let saveNotedirId;
+                let noteCount;
 
                 // 1. 判斷要做Add還是Update
                 // 2. 判斷筆記儲存的目錄
@@ -753,9 +903,13 @@ const Note = ({ match }) => {
                     // 若目前的目錄是在「(全部)」則把筆記存入預設的目錄
                     if(notedirId === '') {
                         let currentNotebook = notebooks.find(notebook => notebook._id === match.params.id);
-                        saveNotedirId = currentNotebook.notedirs.find(notedir => notedir.default === true)._id;
+                        let defaultNotedirId = currentNotebook.notedirs.find(notedir => notedir.default === true)._id;
+                        saveNotedirId = defaultNotedirId;
+                        noteCount = notedirs.find(notedir => notedir._id === defaultNotedirId).note_count + 1;
+                        
                     } else {
                         saveNotedirId = notedirId;
+                        noteCount = notedirContext.current.note_count + 1;
                     }
 
                     // 儲存筆記
@@ -766,11 +920,20 @@ const Note = ({ match }) => {
                     };
                     
                     // 新增筆記
-                    await addNote(saveNote);
+                    addNote(notedirId, current._id, saveNote, noteFilterKeyword);
+                    setNoteCount(saveNotedirId, noteCount);
                 } else {
-                    // 若目前的目錄是在「(全部)」則用快取筆記裡的目錄ID
-                    if(notedirId === '') {
-                        saveNotedirId = cacheCurrent.notedir;
+                    //如果內容有被改過但又被改回來，儲存狀態直接設已儲存、移除快取筆記
+                    //儲存按鈕上的儲存時間從資料庫抓，因為實際上沒有執行儲存，所以時間應該顯示上次儲存的時間
+                    if(cacheCurrent.title === current.title && cacheCurrent.content === current.content) {
+                        removeCacheNote(notedirId, current._id);
+                        setSave({state: SAVED, showUpdateTime: true});
+                        return;
+                    }
+
+                    // 若此筆記是已儲存過的筆記用目前筆記裡的目錄ID，否則用目前目錄ID
+                    if(notes.findIndex(note => note._id === current._id) !== -1) {
+                        saveNotedirId = current.notedir;
                     } else {
                         saveNotedirId = notedirId;
                     }
@@ -783,22 +946,10 @@ const Note = ({ match }) => {
                     };
 
                     // 更新筆記
-                    await updateNote(current._id, saveNote);
+                    updateNote(notedirId, current._id, saveNote, noteFilterKeyword);
                 }
-
-                //wrong
-                if(error){
-                    setSave({state: UNSAVE, showUpdateTime: false});
-
-                    console.log('error');
-                } else {
-                    removeCacheNote(current._id);
-                    setSave({state: SAVED, showUpdateTime: true});
-                    console.log('executed');
-                }
-            } catch (err) {
-                //todo
-                console.log('儲存錯誤: ' + err);
+            } catch {
+                setAlert(SAVE_NOTE_ERROR, 'danger');
             }
         }
 
@@ -821,7 +972,7 @@ const Note = ({ match }) => {
                         }
                     };
 
-                    if(!imgFile) throw '圖片轉換發生錯誤';
+                    if(!imgFile) throw new Error('圖片轉換發生錯誤');
 
                     // 上傳圖片至Server
                     const data = new FormData();
@@ -835,8 +986,8 @@ const Note = ({ match }) => {
                     const decryptedData = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
                     _content = _content.replace(imgSrc, `${host}/api/images/${decryptedData.filename}`);
                 }
-                catch(err){
-                    //todo
+                catch {
+                    setAlert(UPLOAD_IMAGE_ERROR, 'danger');
                 }
             }
 
@@ -844,24 +995,28 @@ const Note = ({ match }) => {
         }
     };
 
+    const onAutoSave = () => {
+        current && (current.title !== '' || current.content !== '')
+        && (currentCacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) 
+        && setAlert('自動儲存...','info',1500);
+        onSave();
+    }
+
     useEffect(() => {
         // 清除上一次的token
-        autoSaveIntervalToken && clearInterval(autoSaveIntervalToken);
+        autoSaveIntervalToken.current.value && clearInterval(autoSaveIntervalToken.current.value);
 
         // 當自動儲存開啟/關閉改變時執行(清除setinterval或設定setinterval)
-        if(autoSave && noteMode === NOTEMODE.EDIT){
-            console.log('autosave launch');
-
-            cacheNotes.length > 0 && setAutoSaveIntervalToken(setInterval(onSave, autoSaveInterval));
+        if(autoSave && noteMode === NOTEMODE.EDIT && currentCacheNotes.length > 0){
+            autoSaveIntervalToken.current.value = setInterval(onAutoSave, autoSaveInterval);
         }
         else{
-            console.log('auto closed');
-
-            clearInterval(autoSaveIntervalToken);
-            setAutoSaveIntervalToken(null);
+            clearInterval(autoSaveIntervalToken.current.value);
+            autoSaveIntervalToken.current.value = null;
         }
 
-    }, [autoSave, current, cacheCurrent, cacheNotes , autoSaveInterval, noteMode]);
+        // eslint-disable-next-line
+    }, [autoSave, current, cacheCurrent, cacheMap , autoSaveInterval, noteMode]);
 
     const LoadRecycleBin = () => {
         history.push('/recyclebin');
@@ -869,19 +1024,19 @@ const Note = ({ match }) => {
 
     const iconChange = {
         'edit': () => {
-            setColor({...defaultColor, ['edit']: current && cacheCurrent ? orange : defaultColor.edit});
+            setColor({...defaultColor, 'edit': current && cacheCurrent ? orange : defaultColor.edit});
         },
         'view': () => {
-            setColor({...defaultColor, ['view']: orange});
+            setColor({...defaultColor, 'view': current && cacheCurrent && currentCacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) === -1 ? orange : defaultColor.view});
         },
         'discard': () => {
-            setColor({...defaultColor, ['discard']: cacheCurrent ? orange : defaultColor.discard});
+            setColor({...defaultColor, 'discard': cacheCurrent ? orange : defaultColor.discard});
         },
         'delete': () => {
-            setColor({...defaultColor, ['delete']: orange});
+            setColor({...defaultColor, 'delete': orange});
         },
         'move': () => {
-            setColor({...defaultColor, ['move']: current && cacheCurrent ? orange : defaultColor.move});
+            setColor({...defaultColor, 'move': current && cacheCurrent && currentCacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) === -1 ? orange : defaultColor.move});
         },
         'default': () => {
             setColor(defaultColor);
@@ -891,22 +1046,34 @@ const Note = ({ match }) => {
     const Notedir = ({notedir, onSelect}) => {
         const notedirSelect = e => {
             e.preventDefault();
-            onSelect(notedir._id);
+
+            // 判斷選取的目錄是否為筆記目前存放的目錄
+            if(notedir._id === current.notedir) {
+                setDestNotedirError(true);
+            } else {
+                setDestNotedirError(false);
+                onSelect(notedir);
+            }
         }
 
         return <NotedirModel
-                    isCurrent={destNotedir === notedir._id}
+                    isCurrent={destNotedir !== null ? destNotedir._id === notedir._id : false}
                     onClick={notedirSelect}>
                     {notedir.title}
                 </NotedirModel>;
     };
 
-    const BtnContent = ({onChange, children}) => {
-        return <span
-                    onMouseEnter={onChange}
-                    onMouseLeave={iconChange.default}>
-                    {children}
-                </span>;
+    const BtnContent = ({onChange, children, tooltip}) => {
+        return <Tooltip
+            title={tooltip}
+            placement='top'
+        >
+            <span
+                onMouseEnter={onChange}
+                onMouseLeave={iconChange.default}>
+                {children}
+            </span>
+        </Tooltip>
     };
 
     // 行動版切換目錄列表/筆記列表/編輯及檢視
@@ -923,108 +1090,137 @@ const Note = ({ match }) => {
 
     return (
         <MainContainer>
-            <SideBar notedirCollapse={listCollapse.notedir} noteCollapse={listCollapse.note}>
-                <li className='notedir-item' onClick={toggleNotedirCollapse}>目 錄</li>
-                <li className='note-item' onClick={toggleNoteCollapse}>筆 記</li>
-            </SideBar>
-            <NotedirContainer visible={panelVisible.NOTEDIR} collapse={listCollapse.notedir}>
-                <Notedirs notebookId={match.params.id} toggleCollapse={toggleNotedirCollapse}/>
-                <div className='recycle-bin'>
-                    <button className='recycle-bin-btn' onClick={LoadRecycleBin}>回收站</button>
-                </div>
-            </NotedirContainer>
-            <NoteContainer visible={panelVisible.NOTE} collapse={listCollapse.note}>
-                <Notes
-                    notebookId={match.params.id}
-                    addEvent={onAdd}
-                    setCacheNoteContent={setCacheNoteContent}
-                    setNoteContent = {setNoteContent}
-                    toggleCollapse={toggleNoteCollapse} />
-            </NoteContainer>
-            <EditorAreaContainer visible={panelVisible.EDITANDVIEW}>
-                <EditorArea className='editor-area'
-                    showToolPanel={noteMode === NOTEMODE.EDIT}
-                    current={current}
-                    cacheCurrent={cacheCurrent}>
-                    <div className='note-header'>
-                        <div className='editor-function-container'>
-                            {deleteEnable ? (<button className='note-delete-btn tiny-btn' onClick={toggleDeleteOpen}>
-                                <BtnContent onChange={iconChange.delete} children={<Trash size={22} color={color.delete} />} />
-                            </button>)
-                            : (<button className='note-discard-btn tiny-btn' onClick={onDiscard} disabled={!cacheCurrent}>
-                                    <BtnContent onChange={iconChange.discard} children={<FileX size={22} color={color.discard} />} />
-                                </button>)}
-                            {noteMode === NOTEMODE.EDIT ?
-                            (<button
-                                className='note-view-btn tiny-btn'
-                                onClick={onView}
-                                disabled={!(cacheCurrent && current && cacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) === -1)}>
-                                <BtnContent onChange={iconChange.view} children={<Browser size={22} color={color.view} />} />
-                            </button>)
-                            : (<button className='note-edit-btn tiny-btn' onClick={onEdit} disabled={!(current && cacheCurrent)}>
-                                <BtnContent onChange={iconChange.edit} children={<NotePencil size={22} color={color.edit} />} />
-                            </button>)}
-                            <button className='note-move-btn tiny-btn' onClick={openMoveNoteModel} disabled={!(current && cacheCurrent)}>
-                                <BtnContent onChange={iconChange.move} children={<ArrowsLeftRight size={22} color={color.move} />} />
-                            </button>
-                        </div>
-                        <div className='note-title-container'>
-                            <input type='text' placeholder='新筆記' className='note-title' value={current ? current.title || '' : ''} onChange={titleChange} disabled={noteMode !== NOTEMODE.EDIT}/>
-                            <SaveButton
-                                visible={noteMode === NOTEMODE.EDIT}
-                                state={save.state}
-                                onSave={onSave}
-                                showUpdateTime={save.showUpdateTime}
-                                updateTime={current && current._id ? current.date : null}
-                                updateInterval={saveTextUpdateInterval} />
-                        </div>
+            {notebookContext.current ? <div className='header-panel'><i className='parlgrm'></i><span className='notebook-icon'><Notebook size={20} /></span><p className='title'>{notebookContext.current.title}</p></div> : null}
+            <div className='content-panel'>
+                <SideBar notedirCollapse={listCollapse.notedir} noteCollapse={listCollapse.note}>
+                    <li className='notedir-item' onClick={toggleNotedirCollapse}>目 錄</li>
+                    <li className='note-item' onClick={toggleNoteCollapse}>筆 記</li>
+                </SideBar>
+                {(notedirLoading || noteLoading) ? <Spinner /> : null}
+                <NotedirContainer visible={panelVisible.NOTEDIR} collapse={listCollapse.notedir}>
+                    <Notedirs 
+                        notebookId={match.params.id} 
+                        toggleCollapse={toggleNotedirCollapse}/>
+                    <div className='recycle-bin'>
+                        <button className='recycle-bin-btn' onClick={LoadRecycleBin}>回收站</button>
                     </div>
-                    <Editor
-                        enable={noteMode === NOTEMODE.EDIT}
-                        content={current && current.content ? current.content : ''}
-                        loading={loading}
-                        contentChange={contentChange} />
-                </EditorArea>
-            </EditorAreaContainer>
-            <Models
-                isOpen={deleteNoteVisible}
-                toggleOpen={toggleDeleteOpen}
-                onConfirm={onDelete}
-                onCancel={onCancelDelete}
-                modelStyle={deleteStyle}>
-                <Models.Content>
-                    <p>筆記將會移動至回收站，確定刪除嗎？</p>
-                </Models.Content>
-                <Models.ConfirmBtn enable={true}>刪除</Models.ConfirmBtn>
-                <Models.CancelBtn>取消</Models.CancelBtn>
-            </Models>
-            <Models
-                isOpen={modelOpen}
-                toggleOpen={toggleOpen}
-                onConfirm={onMove}
-                onCancel={onModelClose}
-                modelStyle={modelStyle}>
-                <Models.Content>
-                    <p className='title'>移動筆記</p>
-                    <p className='tip'>請選擇要存放此筆記的目錄</p>
-                    <ul>
-                        {notedirs && notedirs.map(notedir => {
-                            return !notedir.default
-                            && (<Notedir
-                                key={notedir._id}
-                                notedir={notedir}
-                                onSelect={setDestNotedir} />)
-                        })}
-                    </ul>
-                </Models.Content>
-                <Models.ConfirmBtn enable={destNotedir !== null}>移動</Models.ConfirmBtn>
-                <Models.CancelBtn>取消</Models.CancelBtn>
-            </Models>
-            <div className='rwd-nav-bar'>
-                <RwdNavButton name={PANEL.NOTEDIR} onClick={togglePanel} isCurrent={panelVisible.NOTEDIR === true}>目錄</RwdNavButton>
-                <RwdNavButton name={PANEL.NOTE} onClick={togglePanel} isCurrent={panelVisible.NOTE === true}>筆記</RwdNavButton>
-                <RwdNavButton name={PANEL.EDITANDVIEW} onClick={togglePanel} isCurrent={panelVisible.EDITANDVIEW === true}>編輯/檢視</RwdNavButton>
-                <RwdNavButton onClick={LoadRecycleBin}>回收站</RwdNavButton>
+                </NotedirContainer>
+                <NoteContainer visible={panelVisible.NOTE} collapse={listCollapse.note}>
+                    <Notes
+                        notebookId={match.params.id}
+                        addEvent={onAdd}
+                        setCacheNoteContent={setCacheNoteContent}
+                        setNoteContent = {setNoteContent}
+                        setKeyword={setKeyword} 
+                        toggleCollapse={toggleNoteCollapse}/>
+                </NoteContainer>
+                <EditorAreaContainer visible={panelVisible.EDITANDVIEW}>
+                    <EditorArea className='editor-area'
+                        showToolPanel={noteMode === NOTEMODE.EDIT}
+                        current={current}
+                        cacheCurrent={cacheCurrent}>
+                        <div className='note-header'>
+                            <div className='editor-function-container'>
+                                {(deleteEnable && currentCacheNotes.length === 0) || (current && currentCacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) === -1) ? 
+                                    (<button className='note-delete-btn tiny-btn' onClick={toggleDeleteOpen}>
+                                        <BtnContent onChange={iconChange.delete} children={<Trash size={22} color={color.delete} />} tooltip='刪除筆記' />
+                                </button>)
+                                : (<button className='note-discard-btn tiny-btn' onClick={onDiscard} disabled={!cacheCurrent}>
+                                        <BtnContent onChange={iconChange.discard} children={<FileX size={22} color={color.discard} />} tooltip='捨棄筆記' />
+                                    </button>)}
+                                {noteMode === NOTEMODE.EDIT ?
+                                (<button
+                                    className='note-view-btn tiny-btn'
+                                    onClick={onView}
+                                    disabled={!(cacheCurrent && current && currentCacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) === -1)}>
+                                    <BtnContent onChange={iconChange.view} children={<Browser size={22} color={color.view} />} tooltip='檢視筆記' />
+                                </button>)
+                                : (<button className='note-edit-btn tiny-btn' onClick={onEdit} disabled={!(current && cacheCurrent)}>
+                                    <BtnContent onChange={iconChange.edit} children={<NotePencil size={22} color={color.edit} />} tooltip='編輯筆記' />
+                                </button>)}
+                                <button 
+                                    className='note-move-btn tiny-btn' 
+                                    onClick={openMoveNoteModel} 
+                                    disabled={!(cacheCurrent && current && currentCacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) === -1)}>
+                                    <BtnContent onChange={iconChange.move} children={<ArrowsLeftRight size={22} color={color.move} />} tooltip='移動筆記' />
+                                </button>
+                            </div>
+                            <div className='note-title-container'>
+                                <input type='text' placeholder='新筆記' className='note-title' value={current ? current.title || '' : ''} onChange={titleChange} disabled={noteMode !== NOTEMODE.EDIT}/>
+                                <SaveButton
+                                    visible={noteMode === NOTEMODE.EDIT}
+                                    state={save.state}
+                                    onSave={onSave}
+                                    showUpdateTime={save.showUpdateTime}
+                                    updateTime={current && current._id ? current.date : null}
+                                    updateInterval={saveTextUpdateInterval} />
+                            </div>
+                        </div>
+                        {current ?
+                            <Editor
+                                enable={noteMode === NOTEMODE.EDIT}
+                                content={current.content ? current.content : ''}
+                                loading={loading}
+                                contentChange={contentChange}
+                                onDoubleClick={onEditorDoubleClick} />
+                            : <IntroBox>
+                                <img alt='editor-bg' src={EditorSmallImage}
+                                    srcSet={`
+                                        ${EditorSmallImage} 300w,
+                                        ${EditorMediumImage} 1000w,
+                                        ${EditorLargeImage} 2000w
+                                    `}
+                                />
+                                <p>你可以在這裡編輯/檢視筆記內容</p>
+                            </IntroBox>
+                        }
+                    </EditorArea>
+                </EditorAreaContainer>
+                <Models
+                    isOpen={deleteNoteVisible}
+                    toggleOpen={toggleDeleteOpen}
+                    onConfirm={onDelete}
+                    onCancel={onCancelDelete}
+                    modelStyle={deleteStyle}>
+                    <Models.Content>
+                        <p>筆記將會移動至回收站，確定刪除嗎？</p>
+                    </Models.Content>
+                    <Models.ConfirmBtn enable={true}>刪除</Models.ConfirmBtn>
+                    <Models.CancelBtn>取消</Models.CancelBtn>
+                </Models>
+                <Models
+                    isOpen={modelOpen}
+                    toggleOpen={toggleOpen}
+                    onConfirm={onMove}
+                    onCancel={onModelClose}
+                    modelStyle={modelStyle}>
+                    <Models.Content>
+                        <p className='title'>移動筆記</p>
+                        <p className='tip'>請選擇要存放此筆記的目錄</p>
+                        {destNotedirError ? 
+                            <Alert color="warning">
+                                此筆記目前已存放在你選取的目錄
+                            </Alert>
+                        : null}
+                        <ul>
+                            {notedirs && notedirs.map(notedir => {
+                                return !notedir.default
+                                && (<Notedir
+                                    key={notedir._id}
+                                    notedir={notedir}
+                                    onSelect={setDestNotedir} />)
+                            })}
+                        </ul>
+                    </Models.Content>
+                    <Models.ConfirmBtn enable={destNotedir !== null}>移動</Models.ConfirmBtn>
+                    <Models.CancelBtn>取消</Models.CancelBtn>
+                </Models>
+                <div className='rwd-nav-bar'>
+                    <RwdNavButton name={PANEL.NOTEDIR} onClick={togglePanel} isCurrent={panelVisible.NOTEDIR === true}>目錄</RwdNavButton>
+                    <RwdNavButton name={PANEL.NOTE} onClick={togglePanel} isCurrent={panelVisible.NOTE === true}>筆記</RwdNavButton>
+                    <RwdNavButton name={PANEL.EDITANDVIEW} onClick={togglePanel} isCurrent={panelVisible.EDITANDVIEW === true}>編輯/檢視</RwdNavButton>
+                    <RwdNavButton onClick={LoadRecycleBin}>回收站</RwdNavButton>
+                </div>
             </div>
         </MainContainer>
     )

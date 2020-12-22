@@ -30,8 +30,6 @@ const Login = props => {
     const { toggleModel } = props;
     
     useEffect(() => {
-        window.history.state && console.log(window.history.state.prevUrl);
-
         if(error === INVALID_CREDENTIALS) {
             setFormAuthError('帳號密碼不正確');
             clearErrors();
@@ -41,6 +39,7 @@ const Login = props => {
             clearErrors();
         }
 
+        // eslint-disable-next-line
     }, [error, isAuthenticated]);
 
     const toggleRegister = () => {

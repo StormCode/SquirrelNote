@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { MagnifyingGlass, X } from "phosphor-react";
-import IconInput from '../layout/IconInput';
+import IconInput from '../general/IconInput';
 import styled from 'styled-components';
 
 // Import Style
@@ -21,7 +21,7 @@ const ClearIconStyle = `
     transform: translate(-150%, -120%);
 `;
 
-const NoteFilter = () => {
+const NoteFilter = ({setKeyword}) => {
     const noteContext = useContext(NoteContext);
 
     const { filterNote, clearFilterNote } = noteContext;
@@ -29,10 +29,14 @@ const NoteFilter = () => {
     const [color, setColor] = useState(gray);
 
     const onChange = val => {
-        if(val !== '')
+        if(val !== '') {
+            setKeyword(val);
             filterNote(val);
-        else
+        }
+        else {
+            setKeyword(null);
             clearFilterNote();
+        }
     }
 
     const hoverOn = () => {

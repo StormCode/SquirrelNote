@@ -10,19 +10,20 @@ import {
 
 const Button = styled.button`
     flex: 0 1 15%;
-    background: ${props => props.state !== DISABLESAVE ? 'rgb(190, 255, 180)' : 'rgb(222, 222, 222)'};
+    background: ${({theme}) => props => props.state !== DISABLESAVE ? theme._beffb4 : theme.lightGray};
     display: ${props => props.visible ? 'block' : 'none'};
     border: none;
-    border-radius: ${props => props.state === UNSAVE ? '5px' : 'none'};
-    margin-left: .5rem;
+    border-radius: ${props => props.state !== SAVED ? '10px' : 'none'};
     padding: .1rem;
     text-align: center;
     color: ${({theme}) => props => props.state !== DISABLESAVE ? theme.green : theme.gray};
-    box-shadow: ${props => props.state === UNSAVE ? 'inset' : ''} 2px 2px 3px rgba(0, 0, 0, .3);
+    box-shadow: ${props => props.state !== SAVED ? '' : 'inset'} 2px 2px 3px rgba(0, 0, 0, .3);
+    max-width: ${props => props.state !== SAVED ? '5rem' : 'none'};
+    margin: ${props => props.state !== SAVED ? '.3rem 0 .3rem .5rem' : '0 0 0 .5rem'};
 
     ${props => props.state === UNSAVE &&
         `&:hover {
-            background: rgb(145, 255, 120);
+            background: ${({theme}) => theme._91ff78};
             color: ${({theme}) => theme.darkGreen};
             font-weight: bold;
         }`
@@ -66,7 +67,9 @@ const SaveButton = ({visible, state, onSave, showUpdateTime, updateTime, updateI
             setUpdateTimeToken(null);
             setUpdateText('');
         }
-    }, [state, showUpdateTime, updateTime, updateInterval]);
+
+        // eslint-disable-next-line
+    }, []);
 
     switch(state) {
         case UNSAVE:

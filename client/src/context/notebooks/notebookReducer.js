@@ -16,31 +16,17 @@ import {
     CLEAR_NOTEBOOK,
     NOTEBOOK_ERROR
 } from '../types';
+import SortNotebook from '../../general/sort';
 
 export default (state, action) => {
-    const sortNotebook = (a,b) => {
-        let sort = action.payload.orderBy || state.orderBy;
-        let sortBy = action.payload.sortBy || state.sortBy;
-
-        if(sortBy === 'title'){
-            if(sort === 'asc')
-                return a.title < b.title ? -1 : 1
-            else
-                return a.title > b.title ? -1 : 1
-        }
-        else {
-            if(sort === 'asc')
-                return a.date < b.date ? -1 : 1
-            else
-                return a.date > b.date ? -1 : 1
-        }
-    };
-
+    let sort, sortBy;
     switch(action.type) {
         case GET_NOTEBOOKS:
+            sort = action.payload.orderBy || state.orderBy;
+            sortBy = action.payload.sortBy || state.sortBy;
             return {
                 ...state,
-                notebooks: action.payload.sort(sortNotebook),
+                notebooks: action.payload.sort((a,b) => SortNotebook(sort, sortBy, a, b)),
                 loading: false
             };
         case SET_CURRENT_NOTEBOOK:
@@ -50,48 +36,70 @@ export default (state, action) => {
                     ? state.notebooks.find(notebook => notebook._id === action.payload)
                     : null
             }
-        case CLEAR_NOTEBOOK:
-            return {
-                ...state,
-                current: null
-            }
         case ADD_NOTEBOOK:
+            sort = action.payload.orderBy || state.orderBy;
+            sortBy = action.payload.sortBy || state.sortBy;
             return {
                 ...state,
-                notebooks: [...state.notebooks, action.payload],
-                addNotebookVisible: false
+                notebooks: [...state.notebooks, action.payload.notebook],
+                filtered: state.filtered === null ? state.filtered : [...state.filtered, action.payload.notebook].filter(filteredItem => {
+                    const regex = new RegExp(`${action.payload.keyword}`, 'gi');
+                    return (filteredItem.title.match(regex) 
+                    || filteredItem.desc.match(regex) 
+                    || action.payload.notebook.title.match(regex) 
+                    || action.payload.notebook.desc.match(regex));
+                }).sort((a,b) => SortNotebook(sort, sortBy, a, b)),
+                addNotebookVisible: false,
+                success: action.payload.success
             }
         case UPDATE_NOTEBOOK:
+            sort = action.payload.orderBy || state.orderBy;
+            sortBy = action.payload.sortBy || state.sortBy;
             return {
                 ...state,
                 notebooks: state.notebooks.map(notebook => 
-                    notebook._id !== action.payload._id ? notebook : action.payload
+                    notebook._id !== action.payload.notebook._id ? notebook : action.payload.notebook
                 ),
-                currentEditNotebook: null
+                filtered: state.filtered === null ? state.filtered : state.filtered.map(filteredItem => 
+                    filteredItem._id !== action.payload.notebook._id ? filteredItem : action.payload.notebook
+                    ).filter(filteredItem => {
+                        const regex = new RegExp(`${action.payload.keyword}`, 'gi');
+                        return (filteredItem.title.match(regex) 
+                        || filteredItem.desc.match(regex) 
+                        || action.payload.notebook.title.match(regex) 
+                        || action.payload.notebook.desc.match(regex));
+                }).sort((a,b) => SortNotebook(sort, sortBy, a, b)),
+                currentEditNotebook: null,
+                success: action.payload.success
             }
         case DELETE_NOTEBOOK:
             return {
                 ...state,
                 notebooks: state.notebooks.filter(notebook => {
-                    return notebook._id !== action.payload
+                    return notebook._id !== action.payload.id
                 }),
-                currentDeleteNotebook: null
+                filtered: state.filtered === null ? state.filtered : state.filtered.filter(filteredItem => 
+                    filteredItem._id !== action.payload.id),
+                currentDeleteNotebook: null,
+                success: action.payload.success
             }
         case FILTER_NOTEBOOK:
+            sort = action.payload.orderBy || state.orderBy;
+            sortBy = action.payload.sortBy || state.sortBy;
             return {
                 ...state,
                 filtered: state.notebooks.filter(notebook => {
                     const regex = new RegExp(`${action.payload}`, 'gi');
                     return (notebook.title.match(regex) || notebook.desc.match(regex));
-                })
+                }).sort((a,b) => SortNotebook(sort, sortBy, a, b))
             }
         case SORT_NOTEBOOK:
             return {
                 ...state,
                 orderBy: action.payload.orderBy,
                 sortBy: action.payload.sortBy,
-                filtered: state.filtered === null ? state.filtered : state.filtered.sort(sortNotebook),
-                notebooks: state.notebooks === null ? state.notebooks : state.notebooks.sort(sortNotebook)
+                filtered: state.filtered === null ? state.filtered : state.filtered.sort((a,b) => SortNotebook(sort, sortBy, a, b)),
+                notebooks: state.notebooks === null ? state.notebooks : state.notebooks.sort((a,b) => SortNotebook(sort, sortBy, a, b))
             }
         case ENABLE_ADDNOTEBOOK:
             return {
@@ -137,18 +145,21 @@ export default (state, action) => {
         case CLEAR_NOTEBOOK:
             return {
                 ...state,
+                loading: true,
                 notebooks: null,
                 current: null,
                 filtered: null,
                 addNotebookVisible: false,
                 currentEditNotebook: null,
                 currentDeleteNotebook: null,
+                success: null,
                 error: null
             }
         case NOTEBOOK_ERROR:
             return {
                 ...state,
-                error: action.payload
+                error: action.payload,
+                loading: false
             }
         default:
             return state;

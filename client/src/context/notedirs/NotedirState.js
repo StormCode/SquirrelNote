@@ -18,9 +18,23 @@ import {
     DISABLE_EDITNOTEDIR,
     ENABLE_DELETENOTEDIR,
     DISABLE_DELETENOTEDIR,
+    SET_NOTE_COUNT,
     CLEAR_NOTEDIR,
     NOTEDIR_ERROR
 } from '../types.js';
+import {
+    ADD_NOTEDIR_SUCCESS,
+    UPDATE_NOTEDIR_SUCCESS,
+    DELETE_NOTEDIR_SUCCESS
+} from '../../success';
+import {
+    GET_NOTEDIR_ERROR,
+    ADD_NOTEDIR_ERROR,
+    UPDATE_NOTEDIR_ERROR,
+    DELETE_NOTEDIR_ERROR,
+    SERVER_ERROR,
+    UNKNOW_ERROR
+} from '../../error';
 
 const NotedirState = props => {
     const initialState = {
@@ -33,7 +47,8 @@ const NotedirState = props => {
         addNotedirVisible: false,
         currentEditNotedir: null,
         currentDeleteNotedir: null,
-        loading: false
+        success: null,
+        loading: true
     };
 
     const [state, dispatch] = useReducer(NotedirReducer, initialState);
@@ -50,7 +65,7 @@ const NotedirState = props => {
             const res = await axios.get('/api/notedirs',config);
             // 解密Server回傳的notedir資料
             const decryptedDatas = decrypt(res.data, process.env.REACT_APP_SECRET_KEY);
-            decryptedDatas.map(decryptedData => {
+            decryptedDatas.forEach(decryptedData => {
                 if(decryptedData.title) {
                     decryptedData.title = decrypt(decryptedData.title, process.env.REACT_APP_SECRET_KEY, false);
                 }
@@ -59,10 +74,10 @@ const NotedirState = props => {
                 type: GET_NOTEDIRS,
                 payload: decryptedDatas
             });
-        } catch {
+        } catch(err) {
             dispatch({
                 type: NOTEDIR_ERROR,
-                payload: '查詢筆記目錄發生異常'
+                payload: `${GET_NOTEDIR_ERROR}: ${err.msg || SERVER_ERROR}`
             })
         }
     }
@@ -75,26 +90,16 @@ const NotedirState = props => {
                 payload: notedirId
             });
         } catch {
-            dispatch({
+            dispatch({ 
                 type: NOTEDIR_ERROR,
-                payload: '設定筆記目錄發生異常'
-            })
+                payload: UNKNOW_ERROR
+            });
         }
     }
 
     //清除目前的筆記目錄
     const clearCurrentNotedir = () => {
-        try {
-            dispatch({
-                type: CLEAR_CURRENT_NOTEDIR,
-                payload: null
-            });
-        } catch {
-            dispatch({
-                type: NOTEDIR_ERROR,
-                payload: '清除筆記目錄發生異常'
-            })
-        }
+        dispatch({ type: CLEAR_CURRENT_NOTEDIR });
     }
 
     //新增筆記目錄
@@ -114,10 +119,13 @@ const NotedirState = props => {
             decryptedData.title = decrypt(decryptedData.title, process.env.REACT_APP_SECRET_KEY, false);
             dispatch({
                 type: ADD_NOTEDIR,
-                payload: decryptedData
+                payload: {notedir: decryptedData, success: ADD_NOTEDIR_SUCCESS}
             });
-        } catch {
-            dispatch({ type: NOTEDIR_ERROR});
+        } catch(err) {
+            dispatch({ 
+                type: NOTEDIR_ERROR,
+                payload: `${ADD_NOTEDIR_ERROR}: ${err.msg || SERVER_ERROR}`
+            });
         }
     }
 
@@ -138,10 +146,13 @@ const NotedirState = props => {
             decryptedData.title = decrypt(decryptedData.title, process.env.REACT_APP_SECRET_KEY, false);
             dispatch({
                 type: UPDATE_NOTEDIR,
-                payload: decryptedData
+                payload: {notedir: decryptedData, success: UPDATE_NOTEDIR_SUCCESS}
             });
-        } catch {
-            dispatch({ type: NOTEDIR_ERROR});
+        } catch(err) {
+            dispatch({ 
+                type: NOTEDIR_ERROR,
+                payload: `${UPDATE_NOTEDIR_ERROR}: ${err.msg || SERVER_ERROR}`
+            });
         }
     }
 
@@ -157,10 +168,13 @@ const NotedirState = props => {
             await axios.delete(`/api/notedirs/${notedirId}`, config);
             dispatch({
                 type: DELETE_NOTEDIR,
-                payload: notedirId
+                payload: {id: notedirId, success: DELETE_NOTEDIR_SUCCESS}
             });
-        } catch {
-            dispatch({ type: NOTEDIR_ERROR});
+        } catch(err) {
+            dispatch({ 
+                type: NOTEDIR_ERROR,
+                payload: `${DELETE_NOTEDIR_ERROR}: ${err.msg || SERVER_ERROR}`
+            });
         }
     }
 
@@ -174,71 +188,58 @@ const NotedirState = props => {
 
     //顯示新增筆記目錄
     const enableAddNotedir = () => {
-        try {
-            dispatch({ type: ENABLE_ADDNOTEDIR });
-        } catch {
-            dispatch({ type: NOTEDIR_ERROR});
-        }
+        dispatch({ type: ENABLE_ADDNOTEDIR });
     }
 
     //隱藏新增筆記目錄
     const disableAddNotedir = () => {
-        try {
-            dispatch({ type: DISABLE_ADDNOTEDIR });
-        } catch {
-            dispatch({ type: NOTEDIR_ERROR});
-        }
+        dispatch({ type: DISABLE_ADDNOTEDIR });
     }
 
     //設定正在編輯的筆記目錄
     const enableEditNotedir = id => {
-        try {
-            dispatch({ 
-                type: ENABLE_EDITNOTEDIR,
-                payload: id 
-            });
-        } catch {
-            dispatch({ type: NOTEDIR_ERROR});
-        }
+        dispatch({ 
+            type: ENABLE_EDITNOTEDIR,
+            payload: id 
+        });
     }
 
     //清除正在編輯的筆記目錄
     const disableEditNotedir = () => {
-        try {
-            dispatch({ type: DISABLE_EDITNOTEDIR });
-        } catch {
-            dispatch({ type: NOTEDIR_ERROR});
-        }
+        dispatch({ type: DISABLE_EDITNOTEDIR });
     }
 
     //設定正在刪除的筆記目錄
     const enableDeleteNotedir = id => {
-        try {
-            dispatch({ 
-                type: ENABLE_DELETENOTEDIR,
-                payload: id 
-            });
-        } catch {
-            dispatch({ type: NOTEDIR_ERROR});
-        }
+        dispatch({ 
+            type: ENABLE_DELETENOTEDIR,
+            payload: id 
+        });
     }
 
     //清除正在刪除的筆記目錄
-    const disableDeleteNotedir = id => {
+    const disableDeleteNotedir = () => {
+        dispatch({ type: DISABLE_DELETENOTEDIR });
+    }
+
+    //設定筆記個數
+    const setNoteCount = (id, count) => {
         try {
-            dispatch({ type: DISABLE_DELETENOTEDIR });
+            dispatch({
+                type: SET_NOTE_COUNT,
+                payload: {id, count}
+            })
         } catch {
-            dispatch({ type: NOTEDIR_ERROR});
+            dispatch({ 
+                type: NOTEDIR_ERROR,
+                payload: UNKNOW_ERROR
+            });
         }
     }
 
     //清除筆記目錄資料
     const clearNotedir = () => {
-        try {
-            dispatch({ type: CLEAR_NOTEDIR });
-        } catch {
-            dispatch({ type: NOTEDIR_ERROR });
-        }
+        dispatch({ type: CLEAR_NOTEDIR });
     }
 
     return (
@@ -248,10 +249,12 @@ const NotedirState = props => {
             current: state.current,
             orderBy: state.orderBy,
             sortBy: state.sortBy,
+            success: state.success,
             error: state.error,
             addNotedirVisible: state.addNotedirVisible,
             currentEditNotedir: state.currentEditNotedir,
             currentDeleteNotedir: state.currentDeleteNotedir,
+            loading: state.loading,
             getNotedirs,
             setCurrentNotedir,
             clearCurrentNotedir,
@@ -265,6 +268,7 @@ const NotedirState = props => {
             disableEditNotedir,
             enableDeleteNotedir,
             disableDeleteNotedir,
+            setNoteCount,
             clearNotedir
         }}>
             {props.children}
