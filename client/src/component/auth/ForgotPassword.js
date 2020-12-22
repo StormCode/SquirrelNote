@@ -36,7 +36,7 @@ const ForgotPassword = props => {
     };
 
     return (
-        <div className='form-container'>
+        <div>
             <h2 className='title'>{props.title}</h2>
             {(formAuthError !== null && formAuthError !== '') &&
                 <Alert color="danger">

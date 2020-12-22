@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
 import { 
@@ -9,11 +9,10 @@ import {
     Input
 } from 'reactstrap';
 
-import AlertContext from '../../context/alert/alertContext';
-
 const ResetPasswordContainer = styled.div`
     padding: 0 5rem;
-    width: 100%;
+    width: 50%;
+    margin: auto;
 
     .title {
         text-align: center;
@@ -23,6 +22,10 @@ const ResetPasswordContainer = styled.div`
     input[type='submit'] {
         margin: 30px 0;
         background: ${({theme}) => theme.orange};
+
+        &:hover {
+            background: ${({theme}) => theme.darkOrange};
+        }
     }
 
     p {
@@ -36,9 +39,8 @@ const ResetPasswordContainer = styled.div`
 `;
 
 const ResetPassword = ({ match }) => {
-    const alertContext = useContext(AlertContext);
-    const { setAlert } = alertContext;
     const [auth, setAuth] = useState(null);
+    const [resetPasswordMsg, setResetPasswordMsg] = useState(null);
     
     useEffect(() => {
         async function Auth() {
@@ -71,10 +73,10 @@ const ResetPassword = ({ match }) => {
     const onSubmit = async e => {
         e.preventDefault();
         if(password === '' || confirmPassword === '') {
-            setAlert('請填寫所有欄位', 'danger');
+            setResetPasswordMsg({msg: '請填寫所有欄位', stat: 'danger'});
         }
         else if(password !== confirmPassword){
-            setAlert('您所輸入的密碼不一致', 'danger');
+            setResetPasswordMsg({msg: '您所輸入的密碼不一致', stat: 'danger'});
         }
         else{
             try {
@@ -85,16 +87,22 @@ const ResetPassword = ({ match }) => {
                 };
 
                 await axios.post('/api/users/resetPassword/', user, config);
-                setAlert('您的密碼已重設，可以重新登入囉！', 'success');
+                setResetPasswordMsg({msg: '您的密碼已重設，可以重新登入囉！', stat: 'success'});
             } catch (err) {
-                setAlert('重設密碼發生異常', 'danger');
+                setResetPasswordMsg({msg: '重設密碼發生異常', stat: 'danger'});
             }
         }
     };
 
     return (
-        <ResetPasswordContainer className='form-container'>
+        <ResetPasswordContainer>
             <h2 className='title'>重設密碼</h2>
+            {resetPasswordMsg !== null ?
+                <Alert color={resetPasswordMsg.stat}>
+                    {resetPasswordMsg.msg}
+                </Alert>
+            : null
+            }
             {auth !== null ?
                 (auth === true ?
                     <Form onSubmit={onSubmit}>
@@ -111,7 +119,7 @@ const ResetPassword = ({ match }) => {
                 : <Alert color="danger">
                     連結驗證失敗，您的連結無效或已過期
                   </Alert>)
-                :null
+                : null
             }
         </ResetPasswordContainer>
     )

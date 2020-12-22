@@ -70,7 +70,7 @@ const Login = props => {
     };
 
     return (
-        <div className='form-container'>
+        <div>
             {/* 頁面跳轉至notebook */}
             {isAuthenticated && window.location.replace('/notebook')}
             <h2 className='title'>{props.title}</h2>

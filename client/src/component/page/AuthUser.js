@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Alert } from 'reactstrap';
+import styled from 'styled-components';
+
+const AuthContainer = styled.div`
+    margin: auto;
+`;
 
 const AuthUser = ({ match }) => {
     const [auth, setAuth] = useState(null);
@@ -21,7 +26,7 @@ const AuthUser = ({ match }) => {
     },[]);
 
     return (
-        <div className='form-container'>
+        <AuthContainer>
             {auth !== null ?
                 (auth === true ?
                     <Alert color="success">
@@ -31,7 +36,7 @@ const AuthUser = ({ match }) => {
                     連結驗證失敗，您的連結無效或已過期
                   </Alert>)
             :null}
-        </div>
+        </AuthContainer>
     )
 }
 

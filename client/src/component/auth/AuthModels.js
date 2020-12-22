@@ -30,6 +30,10 @@ const AuthPanel = styled.div`
     input[type='submit'] {
         margin: 30px 0;
         background: ${({theme}) => theme.orange};
+
+        &:hover {
+            background: ${({theme}) => theme.darkOrange};
+        }
     }
 
     p {
