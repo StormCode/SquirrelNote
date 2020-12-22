@@ -14,7 +14,6 @@ const User = require('../models/User');
 
 const logoLink = process.env.LOGO_URL;
 const brandLink = process.env.BRAND_URL;
-const backgroundLink = process.env.MAIL_BACKGROUND_URL;
 
 // @route           POST /api/users
 // @desc            註冊帳號
@@ -73,7 +72,6 @@ router.post('/', [
         let content = `<div class='container' 
                             style='text-align: center;
                             border-radius: 20px;
-                            background: url("${backgroundLink}");
                             background-size: 100% 100%;
                             padding: 50px;
                             width: 100%;
@@ -82,7 +80,7 @@ router.post('/', [
             <br /><br /><h2 style='text-align: left;'>${user.name} 您好,</h2><br />
             <p style='text-align: left;'>感謝您使用松鼠筆記，請點擊以下連結啟用您的帳號：</p>
             <p style='text-align: left;'><a href='${authUserLink}'>${authUserLink}</a></p>
-            <br /><br /><p style='text-align: left;'>希望您使用愉快~</p><p style='text-align: right;'>松鼠筆記 敬上</p>
+            <br /><br /><p style='text-align: left;'>希望您使用愉快~</p><p style='text-align: left;'>松鼠筆記 敬上</p>
             </div>`;
         
         let mailSender = require('../utils/email.js')({
@@ -155,7 +153,6 @@ router.post('/forgotPassword', [
         let content = `<div class='container' 
                             style='text-align: center;
                             border-radius: 20px;
-                            background: url("${backgroundLink}");
                             background-size: 100% 100%;
                             padding: 50px;
                             width: 100%;
