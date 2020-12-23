@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
+import { useHistory } from 'react-router-dom';
 import { ReactComponent as AddNotebook } from  '../../assets/general/add_notebook.svg';
 import { ArrowsCounterClockwise } from "phosphor-react";
 import styled from 'styled-components';
@@ -59,52 +60,52 @@ const NotebookContainer = styled.div`
         padding: 0;
         
         li {
-            a {
-                background-color: #FFF !important;
-                display: block;
-                position: relative;
-                margin-left: -2px;
-                margin-bottom: 1em;
-                border: 2px solid #000;
-                border-color: ${({theme}) => theme.green};
-                border-radius: 0 25px 25px 0;
-                color: ${({theme}) => theme.green};
-                font-size: 1.2rem;
-                line-height: 60px;
-                transition: all .4s ease;
-                width: 60px;
-                height: 60px;
+            background-color: #FFF !important;
+            display: block;
+            position: relative;
+            margin-left: -2px;
+            margin-bottom: 1em;
+            border: 2px solid #000;
+            border-color: ${({theme}) => theme.green};
+            border-radius: 0 25px 25px 0;
+            color: ${({theme}) => theme.green};
+            font-size: 1.2rem;
+            line-height: 60px;
+            transition: all .4s ease;
+            width: 60px;
+            height: 60px;
 
-                    &:hover {
-                        cursor: pointer;
-                        background-color: ${({theme}) => theme.green} !important;
-                        width: 150px;
-                        color: #FFF;
-
-                        span {
-                            left: 0;
-                        }
-                    }
+                &:hover {
+                    cursor: pointer;
+                    background-color: ${({theme}) => theme.green} !important;
+                    width: 150px;
+                    color: #FFF;
 
                     span {
-                        padding: 0 30px 0 15px;
-                        position: absolute;
-                        left: -120px;
-                        transition: left .4s ease;
+                        left: 0;
                     }
+                }
 
-                    i {
-                        position: absolute;
-                        top: 50%;
-                        right: 1rem;
-                        transform: translateY(-55%);
-                    }
-            }
+                span {
+                    padding: 0 30px 0 15px;
+                    position: absolute;
+                    left: -120px;
+                    transition: left .4s ease;
+                }
+
+                i {
+                    position: absolute;
+                    top: 50%;
+                    right: 1rem;
+                    transform: translateY(-55%);
+                }
         }
     }
 `;
 
 const Notebook = () => {
+    const history = useHistory();
+
     const authContext = useContext(AuthContext);
     const notebookContext = useContext(NotebookContext);
 
@@ -125,6 +126,10 @@ const Notebook = () => {
         setNotebookFilterKeyword(keyword);
     }
 
+    const LoadRecycleBin = () => {
+        history.push('/recyclebin');
+    };
+
     return (
         <NotebookContainer>
             <TopPanelAndContent>
@@ -141,8 +146,8 @@ const Notebook = () => {
                 </div>
             </TopPanelAndContent>
             <ul className='float-panel'>
-                <li>
-                    <a href='./recyclebin'><span>回收站</span><i><ArrowsCounterClockwise size={28} /></i></a>
+                <li onClick={LoadRecycleBin}>
+                    <span>回收站</span><i><ArrowsCounterClockwise size={28} /></i>
                 </li>
             </ul>
         </NotebookContainer>

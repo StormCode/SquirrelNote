@@ -20,6 +20,11 @@ import {
     NOTE_ERROR,
     NOTE_SAVE_ERROR
 } from '../types.js';
+import {
+    UNSAVE,
+    SAVED,
+    DISABLESAVE
+} from '../../saveState';
 
 export default (state, action) => {
     switch(action.type){
@@ -27,10 +32,19 @@ export default (state, action) => {
             return {
                 ...state,
                 notes: action.payload,
-                loading: false,
-                saveResult: null
+                loading: false
             }
         case GET_NOTE_DETAIL:
+            return {
+                ...state,
+                current: action.payload,
+                cacheCurrent: {
+                    title: action.payload.title,
+                    content: action.payload.content,
+                    notedir: action.payload.notedir
+                },
+                save: {state: SAVED, showUpdateTime: true}
+            }
         case SET_CACHE_NOTE:
             return {
                 ...state,
@@ -40,7 +54,7 @@ export default (state, action) => {
                     content: action.payload.content,
                     notedir: action.payload.notedir
                 },
-                saveResult: null
+                save: {state: UNSAVE, showUpdateTime: false}
             }
         case SET_CURRENT_NOTE:
             return {
@@ -59,7 +73,7 @@ export default (state, action) => {
                 ...state,
                 current: Object.assign({}, state.current, 
                     {
-                        _id: action.payload.note._id,
+                        // _id: action.payload.note._id,
                         content: action.payload.note.content, 
                         date: action.payload.note.date
                     }),
@@ -78,7 +92,7 @@ export default (state, action) => {
                 cacheMap: state.cacheMap.set(action.payload.notedir, state.cacheMap.get(action.payload.notedir).filter(cacheNote => {
                     return cacheNote._id !== action.payload.id;
                 })),
-                saveResult: {state: true}
+                save: {state: SAVED, showUpdateTime: true}
             }
         case UPDATE_NOTE:
             return {
@@ -108,7 +122,7 @@ export default (state, action) => {
                 cacheMap: state.cacheMap.set(action.payload.notedir, state.cacheMap.get(action.payload.notedir).filter(cacheNote => {
                     return cacheNote._id !== action.payload.id;
                 })),
-                saveResult: {state: true}
+                save: {state: SAVED, showUpdateTime: true}
             }
         case DELETE_NOTE:
             return {
@@ -149,13 +163,21 @@ export default (state, action) => {
                                 ? state.cacheCurrent : {
                                     title: '',
                                     content: ''
-                                }
+                                },
+                save: (action.payload.cacheNote.title !== '' 
+                        || action.payload.cacheNote.content !== '') ? 
+                            {state: SAVED, showUpdateTime: true}
+                        : {state: DISABLESAVE, showUpdateTime: false}
             }
         case MODIFY_CACHE_NOTE:
             return {
                 ...state,
                 cacheMap: state.cacheMap.set(action.payload.notedir, state.cacheMap.get(action.payload.notedir).map(cacheNote => 
-                        cacheNote._id === action.payload.cacheNote._id ? action.payload.cacheNote : cacheNote))
+                        cacheNote._id === action.payload.cacheNote._id ? action.payload.cacheNote : cacheNote)),
+                save: (action.payload.cacheNote.title !== '' 
+                || action.payload.cacheNote.content !== '') ? 
+                    {state: UNSAVE, showUpdateTime: false}
+                : {state: DISABLESAVE, showUpdateTime: false}
             }
         case REMOVE_CACHE_NOTE:
             return {
@@ -194,13 +216,12 @@ export default (state, action) => {
                 deleteEnable: false,
                 filtered: null,
                 success: null,
-                error: null,
-                saveResult: null
+                error: null
             }
         case NOTE_SAVE_ERROR:
             return {
                 ...state,
-                saveResult: {state: false}
+                save: {state: UNSAVE, showUpdateTime: false}
             }
         case NOTE_ERROR:
             return {

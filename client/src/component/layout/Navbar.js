@@ -130,7 +130,7 @@ const NavContainer = styled.div`
     ${({theme}) => NavContainerResponsiveStyle(theme)}
 `;
 
-const MainNavbar = ({ title }) => {
+const MainNavbar = () => {
     const history = useHistory();
 
     const authContext = useContext(AuthContext)

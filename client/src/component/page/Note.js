@@ -35,10 +35,8 @@ import AlertContext from '../../context/alert/alertContext';
 
 import SaveButton from '../notes/SaveButton';
 import {
-    UNSAVE,
     SAVING,
-    SAVED,
-    DISABLESAVE
+    SAVED
 } from '../../saveState';
 import {
     SAVE_NOTE_ERROR,
@@ -544,7 +542,6 @@ const Note = ({ match }) => {
         moveNote,
         success,
         error,
-        saveResult,
         loading
     } = noteContext;
 
@@ -598,35 +595,21 @@ const Note = ({ match }) => {
     useEffect(() => {
         if(current && current._id && cacheCurrent) {
             if(currentCacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) {
-                //控制儲存狀態(快取筆記載入時顯示未儲存)
-                setSave({state: UNSAVE, showUpdateTime: false});
-                
                 modifyCacheNote(notedirId, current);
             } else {
-                //控制儲存狀態(筆記載入時顯示已儲存)
-                setSave({state: SAVED, showUpdateTime: true});
-
                 let currentNote = notes.find(note => note._id === current._id);
                 currentNote && (cacheCurrent.title !== current.title || cacheCurrent.content !== current.content)
                 && appendCacheNote(notedirId, current);
             }
         } else {
-            //控制儲存、筆記狀態
+            //控制筆記狀態
             setNoteMode(NOTEMODE.READ);
-            setSave({state: DISABLESAVE, showUpdateTime: false});
         }
 
         // eslint-disable-next-line
     },[current, cacheCurrent, cacheMap]);
     
     useEffect(() => {
-        //控制儲存狀態
-        if(current && current._id
-            && currentCacheNotes.map(cacheNote => cacheNote._id).indexOf(current._id) !== -1) {
-                current.title !== '' || current.content !== ''
-                    ? setSave({state: UNSAVE, showUpdateTime: false}) : setSave({state: DISABLESAVE, showUpdateTime: false});
-        }
-        
         window.addEventListener("beforeunload", onClose);
         
         return () => {
@@ -670,19 +653,6 @@ const Note = ({ match }) => {
 
         // eslint-disable-next-line
     }, [error]);
-
-    useEffect(() => {
-        if(saveResult) {
-            if(saveResult.state) {
-                setSave({state: SAVED, showUpdateTime: true});
-            } else {
-                setSave({state: UNSAVE, showUpdateTime: false});
-                setAlert(SAVE_NOTE_ERROR,'danger');
-            }
-        }
-
-        // eslint-disable-next-line
-    }, [saveResult]);
         
     // 視窗關閉前確認是否有未儲存的暫存筆記
     const onClose = e => {

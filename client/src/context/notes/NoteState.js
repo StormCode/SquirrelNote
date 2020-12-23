@@ -58,7 +58,6 @@ const NoteState = props => {
         sortBy: 'title',
         success: null,
         error: null,
-        saveResult: null,
         loading: true
     };
 
@@ -384,7 +383,6 @@ const NoteState = props => {
             sortBy: state.sortBy,
             success: state.success,
             error: state.error,
-            saveResult: state.saveResult,
             loading: state.loading,
             getAllNotes,
             getNotes,
