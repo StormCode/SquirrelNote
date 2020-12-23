@@ -55,7 +55,7 @@ router.post('/', [
         // 產生驗證帳號連結
         let token = await bcrypt.hash(email, salt);
         token = token.replace(/\//g,'');    //把斜線去掉
-        const baseUrl = `${req.protocol}://${url.parse(req.get('origin'), false, true).hostname}:${process.env.PROXY_PORT}`;
+        const baseUrl = `${req.protocol}://${url.parse(req.get('origin'), false, true).hostname}`;
         const authUserLink = `${baseUrl}/AuthUser/${token}`;
         
         // 將token存到該名使用者document
@@ -137,7 +137,7 @@ router.post('/forgotPassword', [
         const salt = await bcrypt.genSalt(10);
         let token = await bcrypt.hash(email, salt);
         token = token.replace(/\//g,'');    //把斜線去掉
-        const baseUrl = `${req.protocol}://${url.parse(req.get('origin'), false, true).hostname}:${process.env.PROXY_PORT}`;
+        const baseUrl = `${req.protocol}://${url.parse(req.get('origin'), false, true).hostname}`;
         const resetPwdLink = `${baseUrl}/ResetPassword/${token}`;
         
         // 將token存到該名使用者document
