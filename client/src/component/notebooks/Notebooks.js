@@ -78,42 +78,43 @@ const Notebooks = ({keyword}) => {
     }
 
     return <Fragment>
-            { !loading ?
-                notebooks ?
-                    (notebooks.length === 0 ? 
-                        <IntroBox>
-                            <img alt='notebook-bg' src={NotebookSmallImage}
-                                srcSet={`
-                                    ${NotebookSmallImage} 300w, 
-                                    ${NotebookMediumImage} 1000w, 
-                                    ${NotebookLargeImage} 2000w
-                                `}
-                            />
-                            <p>從現在開始建立你的第一本筆記本吧</p>
-                        </IntroBox>
-                    : <Fragment>
+                { !loading ?
+                    <Fragment>
                         <NewNotebook visible={addNotebookVisible} addNotebook={onAddNotebook} />
-                        { filtered !== null ?
-                        (filtered.map(notebook => 
-                            <Notebook key={notebook._id} 
-                                notebook={notebook} 
-                                toolPanel={currentToolPanel} 
-                                setToolPanel={setToolPanel}
-                                updateNotebook={onUpdateNotebook}
-                                deleteNotebook={onDeleteNotebook} />
-                        )) :
-                        (notebooks.map(notebook => 
-                            <Notebook key={notebook._id} 
-                                notebook={notebook} 
-                                toolPanel={currentToolPanel} 
-                                setToolPanel={setToolPanel}
-                                updateNotebook={onUpdateNotebook}
-                                deleteNotebook={onDeleteNotebook} />
-                        ))}
-                    </Fragment>) 
-                    : null
-                : <Spinner />
-            }
+                        {notebooks ?
+                            (notebooks.length === 0 && !addNotebookVisible ? 
+                                    <IntroBox>
+                                        <img alt='notebook-bg' src={NotebookSmallImage}
+                                            srcSet={`
+                                                ${NotebookSmallImage} 300w, 
+                                                ${NotebookMediumImage} 1000w, 
+                                                ${NotebookLargeImage} 2000w
+                                            `}
+                                        />
+                                        <p>從現在開始建立你的第一本筆記本吧</p>
+                                    </IntroBox>
+                            : <Fragment>
+                                { filtered !== null ?
+                                (filtered.map(notebook => 
+                                    <Notebook key={notebook._id} 
+                                        notebook={notebook} 
+                                        toolPanel={currentToolPanel} 
+                                        setToolPanel={setToolPanel}
+                                        updateNotebook={onUpdateNotebook}
+                                        deleteNotebook={onDeleteNotebook} />
+                                )) :
+                                (notebooks.map(notebook => 
+                                    <Notebook key={notebook._id} 
+                                        notebook={notebook} 
+                                        toolPanel={currentToolPanel} 
+                                        setToolPanel={setToolPanel}
+                                        updateNotebook={onUpdateNotebook}
+                                        deleteNotebook={onDeleteNotebook} />
+                                ))}
+                            </Fragment>) 
+                        : null}
+                    </Fragment>
+                : <Spinner />}
             </Fragment>
 }
 
