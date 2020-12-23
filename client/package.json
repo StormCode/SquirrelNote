@@ -39,7 +39,8 @@
     "style-loader": "^0.23.1",
     "styled-components": "^5.2.1",
     "uuid": "^8.3.1",
-    "react-app-rewired": "^2.1.4"
+    "react-app-rewired": "^2.1.4",
+    "customize-cra": "^1.0.0"
   },
   "scripts": {
     "start": "react-app-rewired start",
@@ -65,6 +66,5 @@
   "proxy": "http://localhost:5000",
   "secure": false,
   "devDependencies": {
-    "customize-cra": "^1.0.0"
   }
 }
