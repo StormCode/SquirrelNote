@@ -24,8 +24,6 @@ npm client-install
 ### Server
 在根目錄新增.env檔，設定以下資訊:
 
-PROXY_PORT=[你的React App client運行的Port] e.g. "3000"
-
 GMAIL_USERNAME=[你的Gmail信箱]
 
 GMAIL_CLIENT_ID=[你的Gamil Client Id]
