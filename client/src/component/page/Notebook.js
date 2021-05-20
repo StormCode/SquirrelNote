@@ -1,4 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { ReactComponent as AddNotebook } from  '../../assets/general/add_notebook.svg';
 import { ArrowsCounterClockwise } from "phosphor-react";
@@ -11,7 +13,9 @@ import Notebooks from '../notebooks/Notebooks';
 import NotebookFilter from '../notebooks/NotebookFilter';
 import NotebookSorter from '../notebooks/NotebookSorter';
 import AuthContext from '../../context/auth/authContext';
-import NotebookContext from '../../context/notebooks/notebookContext';
+import {
+    enableAddNotebook
+} from '../../actions/notebookActions';
 
 // Import Style
 import TopPanelAndContent from '../../style/layout/TopPanelAndContent';
@@ -103,11 +107,10 @@ const NotebookContainer = styled.div`
     }
 `;
 
-const Notebook = () => {
+const Notebook = ({ enableAddNotebook }) => {
     const history = useHistory();
 
     const authContext = useContext(AuthContext);
-    const notebookContext = useContext(NotebookContext);
 
     useEffect(() => {
         authContext.loadUser();
@@ -119,7 +122,7 @@ const Notebook = () => {
 
     const onEnableAddNotebook = e => {
         e.preventDefault();
-        notebookContext.enableAddNotebook();
+        enableAddNotebook();
     }
 
     const setKeyword = keyword => {
@@ -154,4 +157,11 @@ const Notebook = () => {
     )
 }
 
-export default Notebook;
+Notebook.propTypes = {
+    enableAddNotebook: PropTypes.func.isRequired
+}
+
+export default connect(
+    null,
+    { enableAddNotebook }
+)(Notebook);

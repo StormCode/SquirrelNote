@@ -1,5 +1,7 @@
 import React from 'react'
 import { BrowserRouter as Router, Switch, Route } from 'react-router-dom'
+import { Provider } from 'react-redux'
+import store from './store'
 import styled, { ThemeProvider } from 'styled-components';
 import { theme } from './style/themes';
 import { GlobalStyles } from './style/global';
@@ -16,7 +18,6 @@ import setAuthToken from './utils/setAuthToken'
 import PrivateRoute from './routing/PrivateRoute'
 
 import AuthState from './context/auth/AuthState'
-import AlertState from './context/alert/AlertState'
 import NotebookState from './context/notebooks/NotebookState'
 import NotedirState from './context/notedirs/NotedirState'
 import NoteState from './context/notes/NoteState'
@@ -65,11 +66,11 @@ if (localStorage.token) {
 
 function App() {
     return (
-        <ThemeProvider theme={theme}>
-            <GlobalStyles />
-            <AppStyle>
-                <AuthState>
-                    <AlertState>
+        <Provider store={store}>
+            <ThemeProvider theme={theme}>
+                <GlobalStyles />
+                <AppStyle>
+                    <AuthState>
                         <NotebookState>
                             <NotedirState>
                                 <NoteState>
@@ -124,10 +125,10 @@ function App() {
                                 </NoteState>
                             </NotedirState>
                         </NotebookState>
-                    </AlertState>
-                </AuthState>
-            </AppStyle>
-        </ThemeProvider>
+                    </AuthState>
+                </AppStyle>
+            </ThemeProvider>
+        </Provider>
     )
 }
 

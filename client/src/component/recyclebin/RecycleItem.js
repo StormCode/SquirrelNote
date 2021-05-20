@@ -1,21 +1,18 @@
 import React, { Fragment, useState, useContext } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import { Notebook, FolderOpen, Note, Warning } from "phosphor-react";
 import Tooltip from "@material-ui/core/Tooltip";
 import { CustomShortDate } from '../../utils/date';
 import Models from '../general/Models';
-import AlertContext from '../../context/alert/alertContext';
 import RecyclebinContext from '../../context/recyclebin/recyclebinContext';
+import { setAlert } from '../../actions/alertActions';
 
 // Import Style
 import deleteStyle from '../../style/model/delete';
 
-const RecycleItem = ({item}) => {
+const RecycleItem = ({ item, setAlert }) => {
     const recyclebinContext = useContext(RecyclebinContext);
-    const alertContext = useContext(AlertContext);
-
-    const {
-        setAlert
-    } = alertContext;
     
     const { 
         restore, 
@@ -139,4 +136,12 @@ const RecycleItem = ({item}) => {
     )
 }
 
-export default RecycleItem;
+RecycleItem.propTypes = {
+    item: PropTypes.object.isRequired,
+    setAlert: PropTypes.func.isRequired
+}
+
+export default connect(
+    null,
+    { setAlert }
+)(RecycleItem);

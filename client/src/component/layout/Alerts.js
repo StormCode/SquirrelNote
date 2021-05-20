@@ -1,6 +1,7 @@
-import React, { useContext } from 'react';
+import React from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import AlertContext from '../../context/alert/alertContext';
 
 const Alert = styled.span`
     position: fixed;
@@ -9,11 +10,10 @@ const Alert = styled.span`
     z-index: 9999;
 `;
 
-const Alerts = () => {
-    const alertContext = useContext(AlertContext);
+const Alerts = ({ alerts }) => {
 
     return (
-        alertContext.alerts.length > 0 && alertContext.alerts.map(alert => (
+        alerts.length > 0 && alerts.map(alert => (
             <Alert key={alert.id} className={`alert alert-${alert.type}`}>
                 {alert.msg}
             </Alert>
@@ -21,4 +21,12 @@ const Alerts = () => {
     );
 }
 
-export default Alerts;
+Alert.propTypes = {
+    alerts: PropTypes.array.isRequired
+}
+
+const mapStateProps = state => ({
+    alerts: state.alerts
+});
+
+export default connect(mapStateProps)(Alerts);

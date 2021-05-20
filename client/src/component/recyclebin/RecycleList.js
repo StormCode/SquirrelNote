@@ -1,16 +1,18 @@
 import React, { useContext, useEffect, useCallback } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import { v4 as uuidv4 } from 'uuid';
 import styled from 'styled-components';
 import makeResponsiveCSS from '../../utils/make-responsive-css'
 import Pagination from '../general/Pagination';
 import RecycleItem from './RecycleItem';
 import Spinner from '../layout/Spinner';
+import { setAlert } from '../../actions/alertActions';
 
 // Import Style
 import { RwdTableBaseStyle, RwdTableForDestopStyle, RwdTableForPhoneStyle } from '../../style/general/RwdTable';
 
 import RecyclebinContext from '../../context/recyclebin/recyclebinContext';
-import AlertContext from '../../context/alert/alertContext';
 
 const RecycleListContainerBaseStyle = theme => {
     return `
@@ -139,9 +141,8 @@ const Table = styled.table`
     ${TableResponsiveStyle()}
 `;
 
-const RecycleList = () => {
+const RecycleList = ({ setAlert }) => {
     const recyclebinContext = useContext(RecyclebinContext);
-    const alertContext = useContext(AlertContext);
 
     const {
         deletedItems,
@@ -152,10 +153,6 @@ const RecycleList = () => {
         success,
         error
     } = recyclebinContext;
-
-    const {
-        setAlert
-    } = alertContext;
     
     useEffect(() => {
         getDeletedItems();
@@ -215,4 +212,11 @@ const RecycleList = () => {
     )
 }
 
-export default RecycleList;
+RecycleList.propTypes = {
+    setAlert: PropTypes.func.isRequired
+}
+
+export default connect(
+    null,
+    { setAlert }
+)(RecycleList);

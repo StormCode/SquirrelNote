@@ -1,4 +1,6 @@
 import React, { useState, useRef, useContext, useEffect, useCallback } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import { Alert } from 'reactstrap';
 import { Notebook } from "phosphor-react";
 import { useHistory } from 'react-router-dom';
@@ -31,7 +33,7 @@ import AuthContext from '../../context/auth/authContext';
 import NotebookContext from '../../context/notebooks/notebookContext';
 import NotedirContext from '../../context/notedirs/notedirContext';
 import NoteContext from '../../context/notes/noteContext';
-import AlertContext from '../../context/alert/alertContext';
+import { setAlert } from '../../actions/alertActions';
 
 import SaveButton from '../notes/SaveButton';
 import {
@@ -499,13 +501,12 @@ const EditorArea = styled.div`
     ${props => EditorAreaBaseStyle(props)}
 `;
 
-const Note = ({ match }) => {
+const Note = ({ match, setAlert }) => {
     const history = useHistory();
     const authContext = useContext(AuthContext);
     const notebookContext = useContext(NotebookContext);
     const notedirContext = useContext(NotedirContext);
     const noteContext = useContext(NoteContext);
-    const alertContext = useContext(AlertContext);
 
     useEffect(() => {
         authContext.loadUser();
@@ -544,10 +545,6 @@ const Note = ({ match }) => {
         error,
         loading
     } = noteContext;
-
-    const {
-        setAlert
-    } = alertContext;
 
     const notedirLoading = notedirContext.loading;
     const noteLoading = noteContext.loading;
@@ -1196,4 +1193,12 @@ const Note = ({ match }) => {
     )
 }
 
-export default Note;
+Note.propTypes = {
+    match: PropTypes.object.isRequired,
+    setAlert: PropTypes.func.isRequired
+}
+
+export default connect(
+    null,
+    { setAlert }
+)(Note);

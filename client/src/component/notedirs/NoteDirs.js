@@ -1,4 +1,6 @@
 import React, { Fragment, useContext, useState, useEffect } from 'react'
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Check, X, FolderSimplePlus, ArrowLineLeft } from "phosphor-react";
 import Tooltip from "@material-ui/core/Tooltip";
@@ -19,7 +21,7 @@ import IntroBox from '../../style/general/IntroBox';
 
 import NotebookContext from '../../context/notebooks/notebookContext';
 import NotedirContext from '../../context/notedirs/notedirContext';
-import AlertContext from '../../context/alert/alertContext';
+import { setAlert } from '../../actions/alertActions';
 
 const { orange, gray } = theme;
 
@@ -104,10 +106,12 @@ const NotedirList = styled.div`
     ${NotedirListResponsiveStyle()}
 `;
 
-const Notedirs = ({notebookId, toggleCollapse}) => {
+const Notedirs = ({ notebookId, 
+    toggleCollapse,
+    setAlert 
+}) => {
     const notebookContext = useContext(NotebookContext);
     const notedirContext = useContext(NotedirContext);
-    const alertContext = useContext(AlertContext);
 
     const {
         notebooks
@@ -127,10 +131,6 @@ const Notedirs = ({notebookId, toggleCollapse}) => {
         success,
         error
     } = notedirContext;
-
-    const {
-        setAlert
-    } = alertContext;
 
     useEffect(() => {
         return () => {
@@ -318,4 +318,13 @@ const Notedirs = ({notebookId, toggleCollapse}) => {
     )
 }
 
-export default Notedirs;
+Notedirs.propTypes = {
+    notebookId: PropTypes.string.isRequired,
+    toggleCollapse: PropTypes.func.isRequired,
+    setAlert: PropTypes.func.isRequired
+}
+
+export default connect(
+    null,
+    { setAlert }
+)(Notedirs);

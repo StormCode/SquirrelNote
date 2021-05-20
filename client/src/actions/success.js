@@ -1,0 +1,10 @@
+export const ADD_NOTEBOOK_SUCCESS = '已新增筆記本';
+export const UPDATE_NOTEBOOK_SUCCESS = '已修改筆記本';
+export const DELETE_NOTEBOOK_SUCCESS = '已刪除筆記本';
+export const ADD_NOTEDIR_SUCCESS = '已新增筆記目錄';
+export const UPDATE_NOTEDIR_SUCCESS = '已修改筆記目錄';
+export const DELETE_NOTEDIR_SUCCESS = '已刪除筆記目錄';
+export const DELETE_NOTE_SUCCESS = '已刪除筆記';
+export const MOVE_NOTE_SUCCESS = '已移動筆記';
+export const RESTORE_DELETED_ITEM_SUCCESS = '復原已完成';
+export const PERMANENTLY_DELETE_SUCCESS = '永久刪除已完成';

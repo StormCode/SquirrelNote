@@ -1,4 +1,6 @@
-import React, { Fragment, useState, useContext, useEffect } from 'react'
+import React, { Fragment, useState, useEffect } from 'react'
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import { Card, CardText, CardBody, CardTitle } from 'reactstrap';
 import { Check, X } from "phosphor-react";
 import ToolPanel from '../general/ToolPanel';
@@ -7,16 +9,17 @@ import ToolPanel from '../general/ToolPanel';
 import { theme } from '../../style/themes';
 import NotebookContainer from '../../style/components/Notebook';
 
-import NotebookContext from '../../context/notebooks/notebookContext';
+import {
+    disableAddNotebook
+} from '../../actions/notebookActions';
 
 const { orange, gray } = theme;
 
-const NewNotebook = ({visible, addNotebook}) => {
-    const notebookContext = useContext(NotebookContext);
-
-    const { 
-        disableAddNotebook, 
-    } = notebookContext;
+const NewNotebook = ({
+    visible, 
+    addNotebook, 
+    disableAddNotebook
+}) => {
 
     const [notebook, setNotebook] = useState({
         title: '',
@@ -137,4 +140,13 @@ const NewNotebook = ({visible, addNotebook}) => {
     )
 }
 
-export default NewNotebook;
+NewNotebook.propTypes = {
+    visible: PropTypes.bool.isRequired, 
+    addNotebook: PropTypes.func.isRequired, 
+    disableAddNotebook: PropTypes.func.isRequired
+}
+
+export default connect(
+    null,
+    { disableAddNotebook }
+)(NewNotebook);

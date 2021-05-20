@@ -1,4 +1,6 @@
-import React, { Fragment, useContext, useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import Spinner from '../../component/layout/Spinner';
 import Notebook from './Notebook';
 import NewNotebook from './NewNotebook';
@@ -11,30 +13,33 @@ import NotebookLargeImage from '../../assets/notebook/notebook_2000w.png';
 // Import Style
 import IntroBox from '../../style/general/IntroBox';
 
-import NotebookContext from '../../context/notebooks/notebookContext';
-import AlertContext from '../../context/alert/alertContext';
+import {
+    getNotebooks,
+    clearNotebook, 
+    addNotebook, 
+    updateNotebook, 
+    deleteNotebook
+} from '../../actions/notebookActions';
+import { setAlert } from '../../actions/alertActions';
 
-const Notebooks = ({keyword}) => {
-    const notebookContext = useContext(NotebookContext);
-    const alertContext = useContext(AlertContext);
-    
+const Notebooks = ({ keyword, 
+    notebook,
+    getNotebooks,
+    clearNotebook, 
+    addNotebook, 
+    updateNotebook, 
+    deleteNotebook,
+    setAlert 
+}) => {
+
     const { 
         notebooks, 
-        getNotebooks, 
-        clearNotebook, 
         addNotebookVisible,
         filtered, 
-        addNotebook, 
-        updateNotebook, 
-        deleteNotebook,
         loading,
         success,
         error 
-    } = notebookContext;
-
-    const {
-        setAlert
-    } = alertContext;
+    } = notebook;
     
     useEffect(() => {
         getNotebooks();
@@ -118,4 +123,29 @@ const Notebooks = ({keyword}) => {
             </Fragment>
 }
 
-export default Notebooks;
+Notebooks.propTypes = {
+    keyword: PropTypes.string,
+    notebook: PropTypes.object.isRequired,
+    getNotebooks: PropTypes.func.isRequired,
+    clearNotebook: PropTypes.func.isRequired, 
+    addNotebook: PropTypes.func.isRequired, 
+    updateNotebook: PropTypes.func.isRequired, 
+    deleteNotebook: PropTypes.func.isRequired,
+    setAlert: PropTypes.func.isRequired,
+}
+
+const mapStateProps = state => ({ 
+    notebook: state.notebooks
+});
+
+export default connect(
+    mapStateProps,
+    { 
+        getNotebooks,
+        clearNotebook, 
+        addNotebook, 
+        updateNotebook, 
+        deleteNotebook,
+        setAlert 
+    }
+)(Notebooks);

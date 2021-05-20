@@ -29,18 +29,22 @@
     "axios": "^0.20.0",
     "bootstrap": "^4.5.2",
     "crypto-js": "^4.0.0",
+    "customize-cra": "^1.0.0",
     "phosphor-react": "^1.0.1",
     "raw-loader": "^3.1.0",
     "react": "^16.13.1",
+    "react-app-rewired": "^2.1.4",
     "react-dom": "^16.13.1",
+    "react-redux": "^7.2.4",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.3",
     "reactstrap": "^8.6.0",
+    "redux": "^4.1.0",
+    "redux-devtools-extension": "^2.13.9",
+    "redux-thunk": "^2.3.0",
     "style-loader": "^0.23.1",
     "styled-components": "^5.2.1",
-    "uuid": "^8.3.1",
-    "react-app-rewired": "^2.1.4",
-    "customize-cra": "^1.0.0"
+    "uuid": "^8.3.1"
   },
   "scripts": {
     "start": "react-app-rewired start",
@@ -65,6 +69,5 @@
   },
   "proxy": "http://localhost:5000",
   "secure": false,
-  "devDependencies": {
-  }
+  "devDependencies": {}
 }
