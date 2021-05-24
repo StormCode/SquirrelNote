@@ -19,7 +19,6 @@ import NotedirLargeImage from '../../assets/note/notedir_2000w.png';
 import { theme } from '../../style/themes';
 import IntroBox from '../../style/general/IntroBox';
 
-import NotebookContext from '../../context/notebooks/notebookContext';
 import NotedirContext from '../../context/notedirs/notedirContext';
 import { setAlert } from '../../actions/alertActions';
 
@@ -107,15 +106,11 @@ const NotedirList = styled.div`
 `;
 
 const Notedirs = ({ notebookId, 
+    notebooks,
     toggleCollapse,
     setAlert 
 }) => {
-    const notebookContext = useContext(NotebookContext);
     const notedirContext = useContext(NotedirContext);
-
-    const {
-        notebooks
-     } = notebookContext;
     
     const { 
         notedirs, 
@@ -324,7 +319,11 @@ Notedirs.propTypes = {
     setAlert: PropTypes.func.isRequired
 }
 
+const mapStateProps = state => ({
+    notebooks: state.notebooks.notebooks
+});
+
 export default connect(
-    null,
+    mapStateProps,
     { setAlert }
 )(Notedirs);

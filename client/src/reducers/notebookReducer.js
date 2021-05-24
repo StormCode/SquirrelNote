@@ -33,10 +33,10 @@ const initialState = {
 
 export default (state = initialState, action) => {
     let sort, sortBy;
+    sort = (action.payload && action.payload.orderBy) || state.orderBy;
+    sortBy = (action.payload && action.payload.sortBy) || state.sortBy;
     switch(action.type) {
         case GET_NOTEBOOKS:
-            sort = action.payload.orderBy || state.orderBy;
-            sortBy = action.payload.sortBy || state.sortBy;
             return {
                 ...state,
                 notebooks: action.payload.sort((a,b) => SortNotebook(sort, sortBy, a, b)),
@@ -50,8 +50,6 @@ export default (state = initialState, action) => {
                     : null
             }
         case ADD_NOTEBOOK:
-            sort = action.payload.orderBy || state.orderBy;
-            sortBy = action.payload.sortBy || state.sortBy;
             return {
                 ...state,
                 notebooks: [...state.notebooks, action.payload.notebook],
@@ -66,8 +64,6 @@ export default (state = initialState, action) => {
                 success: action.payload.success
             }
         case UPDATE_NOTEBOOK:
-            sort = action.payload.orderBy || state.orderBy;
-            sortBy = action.payload.sortBy || state.sortBy;
             return {
                 ...state,
                 notebooks: state.notebooks.map(notebook => 
@@ -97,8 +93,6 @@ export default (state = initialState, action) => {
                 success: action.payload.success
             }
         case FILTER_NOTEBOOK:
-            sort = action.payload.orderBy || state.orderBy;
-            sortBy = action.payload.sortBy || state.sortBy;
             return {
                 ...state,
                 filtered: state.notebooks.filter(notebook => {

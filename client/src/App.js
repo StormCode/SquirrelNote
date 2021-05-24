@@ -18,7 +18,6 @@ import setAuthToken from './utils/setAuthToken'
 import PrivateRoute from './routing/PrivateRoute'
 
 import AuthState from './context/auth/AuthState'
-import NotebookState from './context/notebooks/NotebookState'
 import NotedirState from './context/notedirs/NotedirState'
 import NoteState from './context/notes/NoteState'
 import RecyclebinState from './context/recyclebin/RecyclebinState'
@@ -71,60 +70,58 @@ function App() {
                 <GlobalStyles />
                 <AppStyle>
                     <AuthState>
-                        <NotebookState>
-                            <NotedirState>
-                                <NoteState>
-                                    <RecyclebinState>
-                                        <Router>
-                                            <div id="container">
-                                                <Navbar />
-                                                <Alerts />
-                                                <div className='main'>
-                                                    <Switch>
-                                                        <PrivateRoute
-                                                            exact
-                                                            path="/Notebook"
-                                                            component={Notebook}
-                                                        ></PrivateRoute>
-                                                        <PrivateRoute
-                                                            exact
-                                                            path="/Notebook/:id"
-                                                            component={Note}
-                                                        ></PrivateRoute>
-                                                        <PrivateRoute
-                                                            exact
-                                                            path="/RecycleBin"
-                                                            component={RecycleBin}
-                                                        ></PrivateRoute>
-                                                        <Route
-                                                            exact
-                                                            path="/"
-                                                            component={Index}
-                                                        ></Route>
-                                                        <Route
-                                                            exact
-                                                            path="/Index"
-                                                            component={Index}
-                                                        ></Route>
-                                                        <Route
-                                                            exact
-                                                            path="/AuthUser/:token"
-                                                            component={AuthUser}
-                                                        ></Route>
-                                                        <Route
-                                                            exact
-                                                            path="/ResetPassword/:token"
-                                                            component={ResetPassword}
-                                                        ></Route>
-                                                    </Switch>
-                                                </div>
-                                                <Footer />
+                        <NotedirState>
+                            <NoteState>
+                                <RecyclebinState>
+                                    <Router>
+                                        <div id="container">
+                                            <Navbar />
+                                            <Alerts />
+                                            <div className='main'>
+                                                <Switch>
+                                                    <PrivateRoute
+                                                        exact
+                                                        path="/Notebook"
+                                                        component={Notebook}
+                                                    ></PrivateRoute>
+                                                    <PrivateRoute
+                                                        exact
+                                                        path="/Notebook/:id"
+                                                        component={Note}
+                                                    ></PrivateRoute>
+                                                    <PrivateRoute
+                                                        exact
+                                                        path="/RecycleBin"
+                                                        component={RecycleBin}
+                                                    ></PrivateRoute>
+                                                    <Route
+                                                        exact
+                                                        path="/"
+                                                        component={Index}
+                                                    ></Route>
+                                                    <Route
+                                                        exact
+                                                        path="/Index"
+                                                        component={Index}
+                                                    ></Route>
+                                                    <Route
+                                                        exact
+                                                        path="/AuthUser/:token"
+                                                        component={AuthUser}
+                                                    ></Route>
+                                                    <Route
+                                                        exact
+                                                        path="/ResetPassword/:token"
+                                                        component={ResetPassword}
+                                                    ></Route>
+                                                </Switch>
                                             </div>
-                                        </Router>
-                                    </RecyclebinState>
-                                </NoteState>
-                            </NotedirState>
-                        </NotebookState>
+                                            <Footer />
+                                        </div>
+                                    </Router>
+                                </RecyclebinState>
+                            </NoteState>
+                        </NotedirState>
                     </AuthState>
                 </AppStyle>
             </ThemeProvider>

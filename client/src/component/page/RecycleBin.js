@@ -1,4 +1,6 @@
 import React, { useContext, useEffect } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { ArrowUUpLeft } from "phosphor-react";
@@ -8,7 +10,6 @@ import {
 } from '../../utils/breakpoints.jsx';
 
 import AuthContext from '../../context/auth/authContext';
-import NotebookContext from '../../context/notebooks/notebookContext';
 
 import RecycleFilter from '../recyclebin/RecycleFilter'
 import RecycleSorter from '../recyclebin/RecycleSorter'
@@ -84,10 +85,11 @@ const RecycleBinContainer = styled.div`
     ${RecycleBinResponsiveStyle()}
 `;
 
-const RecycleBin = () => {
+const RecycleBin = ({
+    currentNotebook
+}) => {
     const authContext = useContext(AuthContext);
-    const notebookContext = useContext(NotebookContext);
-    const notebookId = notebookContext.current ? notebookContext.current._id : null;
+    const notebookId = currentNotebook ? currentNotebook._id : null;
 
     useEffect(() => {
         authContext.loadUser();
@@ -115,4 +117,14 @@ const RecycleBin = () => {
     )
 }
 
-export default RecycleBin;
+RecycleBin.propTypes = {
+    currentNotebook: PropTypes.object
+};
+
+const mapStateProps = state => ({
+    currentNotebook: state.notebooks.current
+});
+
+export default connect(
+    mapStateProps
+)(RecycleBin);

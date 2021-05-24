@@ -1,13 +1,17 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import { MagnifyingGlass, X } from "phosphor-react";
 import IconInput from '../general/IconInput';
 import styled from 'styled-components';
 import makeResponsiveCSS from '../../utils/make-responsive-css'
+import {
+    filterNotebook, 
+    clearFilterNotebook
+} from '../../actions/notebookActions';
 
 // Import Style
 import { theme } from '../../style/themes';
-
-import NotebookContext from '../../context/notebooks/notebookContext';
 
 const { defaultColor, orange, gray } = theme;
 
@@ -100,11 +104,11 @@ const IconInputContainerResponsiveStyle = () => {
 
 const IconInputContainerStyle = IconInputContainerBaseStyle.concat(IconInputContainerResponsiveStyle());
 
-const NotebookFilter = ({setKeyword}) => {
-    const notebookContext = useContext(NotebookContext);
-
-    const { filterNotebook, clearFilterNotebook } = notebookContext;
-
+const NotebookFilter = ({
+    setKeyword,
+    filterNotebook,
+    clearFilterNotebook
+}) => {
     const [focus, setFocus] = useState(false);
     const [color, setColor] = useState(gray);
 
@@ -192,4 +196,13 @@ const NotebookFilter = ({setKeyword}) => {
     )
 }
 
-export default NotebookFilter;
+NotebookFilter.propTypes = {
+    setKeyword: PropTypes.func,
+    filterNotebook: PropTypes.func.isRequired,
+    clearFilterNotebook: PropTypes.func.isRequired
+};
+
+export default connect(
+    null,
+    { filterNotebook, clearFilterNotebook }
+)(NotebookFilter);

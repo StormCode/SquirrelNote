@@ -30,10 +30,13 @@ import deleteStyle from '../../style/model/delete';
 import IntroBox from '../../style/general/IntroBox';
 
 import AuthContext from '../../context/auth/authContext';
-import NotebookContext from '../../context/notebooks/notebookContext';
 import NotedirContext from '../../context/notedirs/notedirContext';
 import NoteContext from '../../context/notes/noteContext';
 import { setAlert } from '../../actions/alertActions';
+import {
+    getNotebooks,
+    setCurrentNotebook
+} from '../../actions/notebookActions';
 
 import SaveButton from '../notes/SaveButton';
 import {
@@ -501,10 +504,16 @@ const EditorArea = styled.div`
     ${props => EditorAreaBaseStyle(props)}
 `;
 
-const Note = ({ match, setAlert }) => {
+const Note = ({ 
+    match,
+    notebooks,
+    currentNotebook,
+    getNotebooks,
+    setCurrentNotebook,
+    setAlert 
+}) => {
     const history = useHistory();
     const authContext = useContext(AuthContext);
-    const notebookContext = useContext(NotebookContext);
     const notedirContext = useContext(NotedirContext);
     const noteContext = useContext(NoteContext);
 
@@ -569,10 +578,6 @@ const Note = ({ match, setAlert }) => {
     
     const host = `${window.location.protocol}//${window.location.host}`;
     
-    const {
-        notebooks,
-        getNotebooks
-     } = notebookContext;
     const notedirs = notedirContext.notedirs;
     const notedirId = notedirContext.current !== '' ? notedirContext.current ? notedirContext.current._id : null : notedirContext.current;
     const setNoteCount = notedirContext.setNoteCount;
@@ -581,7 +586,7 @@ const Note = ({ match, setAlert }) => {
     
     useEffect(() => {
         if(notebooks && notebooks.length > 0) {
-            notebookContext.setCurrentNotebook(match.params.id);
+            setCurrentNotebook(match.params.id);
         } else {
             getNotebooks();            
         }
@@ -1057,7 +1062,7 @@ const Note = ({ match, setAlert }) => {
 
     return (
         <MainContainer>
-            {notebookContext.current ? <div className='header-panel'><i className='parlgrm'></i><span className='notebook-icon'><Notebook size={20} /></span><p className='title'>{notebookContext.current.title}</p></div> : null}
+            {currentNotebook ? <div className='header-panel'><i className='parlgrm'></i><span className='notebook-icon'><Notebook size={20} /></span><p className='title'>{currentNotebook.title}</p></div> : null}
             <div className='content-panel'>
                 <SideBar notedirCollapse={listCollapse.notedir} noteCollapse={listCollapse.note}>
                     <li className='notedir-item' onClick={toggleNotedirCollapse}>目 錄</li>
@@ -1195,10 +1200,19 @@ const Note = ({ match, setAlert }) => {
 
 Note.propTypes = {
     match: PropTypes.object.isRequired,
+    notebooks: PropTypes.array,
+    current: PropTypes.object,
+    getNotebooks: PropTypes.func.isRequired,
+    setCurrentNotebook: PropTypes.func.isRequired,
     setAlert: PropTypes.func.isRequired
 }
 
+const mapStateProps = state => ({
+    notebooks: state.notebooks.notebooks,
+    currentNotebook: state.notebooks.current
+});
+
 export default connect(
-    null,
-    { setAlert }
+    mapStateProps,
+    { getNotebooks, setCurrentNotebook, setAlert }
 )(Note);

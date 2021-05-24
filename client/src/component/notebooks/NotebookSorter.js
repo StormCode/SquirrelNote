@@ -1,4 +1,6 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import { FunnelSimple } from "phosphor-react";
 import styled from 'styled-components';
 import Sorter from '../general/Sorter';
@@ -7,7 +9,9 @@ import makeResponsiveCSS from '../../utils/make-responsive-css'
 // Import Style
 import { theme } from '../../style/themes';
 
-import NotebookContext from '../../context/notebooks/notebookContext'
+import {
+    sortNotebook
+} from '../../actions/notebookActions';
 
 const { defaultColor, orange, gray } = theme;
 
@@ -41,10 +45,11 @@ const SorterContainer = styled.span`
     ${SorterContainerResponsiveStyle()}
 `;
 
-const NotebookSorter = () => {
-    const notebookContext = useContext(NotebookContext);
-
-    const { orderBy, sortBy, sortNotebook } = notebookContext;
+const NotebookSorter = ({ 
+    orderBy, 
+    sortBy, 
+    sortNotebook 
+}) => {
 
     // 下拉選單狀態
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -104,4 +109,18 @@ const NotebookSorter = () => {
     )
 }
 
-export default NotebookSorter;
+NotebookSorter.propTypes = {
+    orderBy: PropTypes.string.isRequired, 
+    sortBy: PropTypes.string.isRequired,
+    sortNotebook: PropTypes.func.isRequired
+}
+
+const mapStateProps = state => ({
+    orderBy: state.notebooks.orderBy,
+    sortBy: state.notebooks.sortBy
+});
+
+export default connect(
+    mapStateProps,
+    { sortNotebook }
+)(NotebookSorter);

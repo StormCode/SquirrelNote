@@ -1,4 +1,6 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { Card, CardText, CardBody, CardTitle } from 'reactstrap';
 import { Pencil, Trash, Check, X } from "phosphor-react";
@@ -6,13 +8,17 @@ import styled from 'styled-components';
 import makeResponsiveCSS from '../../utils/make-responsive-css'
 import EDToolPanel from '../general/EDToolPanel';
 import Models from '../general/Models';
+import {
+    enableEditNotebook,
+    disableEditNotebook,
+    enableDeleteNotebook,
+    disableDeleteNotebook
+} from '../../actions/notebookActions';
 
 // Import Style
 import { theme } from '../../style/themes';
 import NotebookContainer from '../../style/components/Notebook';
 import deleteStyle from '../../style/model/delete';
-
-import NotebookContext from '../../context/notebooks/notebookContext';
 
 const { orange, gray } = theme;
 
@@ -45,20 +51,19 @@ const ToolPanelContainer = styled.div`
     ${props => ToolPanelContainerResponsiveStyle(props)}
 `;
 
-const Notebook = props => {
-    const notebookContext = useContext(NotebookContext);
-
-    const { 
-        currentEditNotebook,
-        currentDeleteNotebook,
-        enableEditNotebook,
-        disableEditNotebook,
-        enableDeleteNotebook,
-        disableDeleteNotebook
-    } = notebookContext;
+const Notebook = ({
+    notebook: notebookProps,
+    currentEditNotebook,
+    currentDeleteNotebook,
+    enableEditNotebook,
+    disableEditNotebook,
+    enableDeleteNotebook,
+    disableDeleteNotebook,
+    ...props
+}) => {
 
     const [notebook, setNotebook] = useState({
-        ...props.notebook
+        ...notebookProps
     });
 
     const { _id, title, desc } = notebook;
@@ -126,8 +131,8 @@ const Notebook = props => {
     const onEdit = () => {
         //對點擊編輯的那一個筆記本執行update
         if(currentEditNotebook === _id 
-            && (title !== props.notebook.title 
-            || desc !== props.notebook.desc)) {
+            && (title !== notebookProps.title 
+            || desc !== notebookProps.desc)) {
                 props.updateNotebook(_id, notebook);
         }
 
@@ -168,8 +173,8 @@ const Notebook = props => {
 
         //設回原本筆記本內容
         setNotebook({...notebook,
-            'title': props.notebook.title,
-            'desc': props.notebook.desc
+            'title': notebookProps.title,
+            'desc': notebookProps.desc
         });
 
         //取消目前正在使用的ToolPanel
@@ -231,17 +236,17 @@ const Notebook = props => {
                                 value={title} 
                                 onChange={onChange} />
                             
-                        : <p>{props.notebook.title}</p>}
+                        : <p>{notebookProps.title}</p>}
                     </CardTitle>
                     <CardText>
                         {editNotebookVisible ? 
-                            (<textarea className='form-control' 
+                            <textarea className='form-control' 
                                 rows={3} 
                                 name='desc' 
                                 placeholder='描述' 
                                 value={desc} 
                                 onChange={onChange} />
-                            ) : props.notebook.desc}
+                        : notebookProps.desc}
                     </CardText>
                     <Models
                         isOpen={deleteNotebookVisible}
@@ -261,4 +266,26 @@ const Notebook = props => {
     )
 }
 
-export default Notebook;
+Notebook.propTypes = { 
+    currentEditNotebook: PropTypes.string,
+    currentDeleteNotebook: PropTypes.string,
+    enableEditNotebook: PropTypes.func.isRequired,
+    disableEditNotebook: PropTypes.func.isRequired,
+    enableDeleteNotebook: PropTypes.func.isRequired,
+    disableDeleteNotebook: PropTypes.func.isRequired
+};
+
+const mapStateProps = state => ({
+    currentEditNotebook: state.notebooks.currentEditNotebook,
+    currentDeleteNotebook: state.notebooks.currentDeleteNotebook
+});
+
+export default connect(
+    mapStateProps,
+    {
+        enableEditNotebook,
+        disableEditNotebook,
+        enableDeleteNotebook,
+        disableDeleteNotebook
+    }
+)(Notebook);
