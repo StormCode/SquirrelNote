@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useState, useEffect } from 'react'
+import React, { Fragment, useState, useEffect } from 'react'
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
@@ -19,7 +19,14 @@ import NotedirLargeImage from '../../assets/note/notedir_2000w.png';
 import { theme } from '../../style/themes';
 import IntroBox from '../../style/general/IntroBox';
 
-import NotedirContext from '../../context/notedirs/notedirContext';
+import { 
+    getNotedirs, 
+    clearNotedir,
+    setCurrentNotedir, 
+    enableAddNotedir,
+    disableAddNotedir,
+    addNotedir
+} from '../../actions/notedirActions';
 import { setAlert } from '../../actions/alertActions';
 
 const { orange, gray } = theme;
@@ -105,27 +112,24 @@ const NotedirList = styled.div`
     ${NotedirListResponsiveStyle()}
 `;
 
-const Notedirs = ({ notebookId, 
-    notebooks,
+const Notedirs = ({ 
+    notebookId, 
     toggleCollapse,
+    notebooks,
+    notedirs, 
+    current,
+    addNotedirVisible, 
+    loading,
+    success,
+    error,
+    getNotedirs, 
+    clearNotedir,
+    setCurrentNotedir, 
+    enableAddNotedir,
+    disableAddNotedir,
+    addNotedir, 
     setAlert 
 }) => {
-    const notedirContext = useContext(NotedirContext);
-    
-    const { 
-        notedirs, 
-        current,
-        getNotedirs, 
-        clearNotedir,
-        setCurrentNotedir, 
-        addNotedirVisible, 
-        enableAddNotedir,
-        disableAddNotedir,
-        addNotedir, 
-        loading,
-        success,
-        error
-    } = notedirContext;
 
     useEffect(() => {
         return () => {
@@ -316,14 +320,44 @@ const Notedirs = ({ notebookId,
 Notedirs.propTypes = {
     notebookId: PropTypes.string.isRequired,
     toggleCollapse: PropTypes.func.isRequired,
+    notebooks: PropTypes.array,
+    notedirs: PropTypes.array,
+    current: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.object
+    ]),
+    getNotedirs: PropTypes.func.isRequired, 
+    clearNotedir: PropTypes.func.isRequired,
+    setCurrentNotedir: PropTypes.func.isRequired, 
+    addNotedirVisible: PropTypes.bool.isRequired, 
+    enableAddNotedir: PropTypes.func.isRequired,
+    disableAddNotedir: PropTypes.func.isRequired,
+    addNotedir: PropTypes.func.isRequired, 
+    loading: PropTypes.bool.isRequired,
+    success: PropTypes.string,
+    error: PropTypes.string,
     setAlert: PropTypes.func.isRequired
 }
 
 const mapStateProps = state => ({
-    notebooks: state.notebooks.notebooks
+    notebooks: state.notebooks.notebooks,
+    notedirs: state.notedirs.notedirs,
+    current: state.notedirs.current,
+    addNotedirVisible: state.notedirs.addNotedirVisible, 
+    loading: state.notedirs.loading,
+    success: state.notedirs.success,
+    error: state.notedirs.error
 });
 
 export default connect(
     mapStateProps,
-    { setAlert }
+    { 
+        getNotedirs, 
+        clearNotedir,
+        setCurrentNotedir, 
+        enableAddNotedir,
+        disableAddNotedir,
+        addNotedir, 
+        setAlert 
+    }
 )(Notedirs);

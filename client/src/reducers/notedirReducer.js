@@ -15,15 +15,28 @@ import {
     SET_NOTE_COUNT,
     CLEAR_NOTEDIR,
     NOTEDIR_ERROR
-} from '../types.js';
-import SortNotedir from '../../general/sort';
+} from '../actions/types';
+import SortNotedir from '../general/sort';
 
-export default (state, action) => {
-    let sort, sortBy;
+const initialState = {
+    currentToolPanel: null,
+    notedirs: null,
+    current: null,
+    orderBy: 'asc',
+    sortBy: 'title',
+    error: null,
+    addNotedirVisible: false,
+    currentEditNotedir: null,
+    currentDeleteNotedir: null,
+    success: null,
+    loading: true
+};
+
+export default (state = initialState, action) => {
+    let sort = (action.payload && action.payload.orderBy) || state.orderBy;
+    let sortBy = (action.payload && action.payload.sortBy) || state.sortBy;
     switch(action.type){
         case GET_NOTEDIRS:
-            sort = action.payload.orderBy || state.orderBy;
-            sortBy = action.payload.sortBy || state.sortBy;
             return {
                 ...state,
                 notedirs: action.payload.sort((a,b) => SortNotedir(sort, sortBy, a, b)),
@@ -66,13 +79,11 @@ export default (state, action) => {
                 success: action.payload.success
             }
         case SORT_NOTEDIR:
-            sort = action.payload.orderBy || state.orderBy;
-            sortBy = action.payload.sortBy || state.sortBy;
             return {
                 ...state,
                 orderBy: action.payload.orderBy,
                 sortBy: action.payload.sortBy,
-                notedirs: state.notedirs === null ? state.notedirs : state.notedirs.sort((a,b) => SortNotedir(sort, sortBy, a, b))
+                notedirs: state.notedirs === null ? state.notedirs : [...state.notedirs.sort((a,b) => SortNotedir(sort, sortBy, a, b))]
             }
         case ENABLE_ADDNOTEDIR:
             return {

@@ -1,4 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import Tooltip from "@material-ui/core/Tooltip";
 import { FilePlus, ArrowLineLeft } from "phosphor-react";
@@ -15,7 +17,6 @@ import NoteLargeImage from '../../assets/note/note_2000w.png';
 import { theme } from '../../style/themes';
 import IntroBox from '../../style/general/IntroBox';
 
-import NotedirContext from '../../context/notedirs/notedirContext';
 import NoteContext from '../../context/notes/noteContext';
 
 const { orange, gray } = theme;
@@ -102,8 +103,15 @@ const NoteList = styled.div`
     ${NoteListResponsiveStyle()}
 `;
 
-const Notes = ({ notebookId, addEvent, setCacheNoteContent, setNoteContent, setKeyword, toggleCollapse }) => {
-    const notedirContext = useContext(NotedirContext);
+const Notes = ({ 
+    notebookId,
+    currentNotedir, 
+    addEvent, 
+    setCacheNoteContent, 
+    setNoteContent, 
+    setKeyword, 
+    toggleCollapse 
+}) => {
     const noteContext = useContext(NoteContext);
 
     const { notes, 
@@ -121,7 +129,7 @@ const Notes = ({ notebookId, addEvent, setCacheNoteContent, setNoteContent, setK
         note: gray,
         collapse: gray
     };
-    const notedirId = notedirContext.current !== '' ? notedirContext.current ? notedirContext.current._id : null : notedirContext.current;
+    const notedirId = currentNotedir !== '' ? currentNotedir ? currentNotedir._id : null : currentNotedir;
     const allCacheNotes = [...cacheMap.values()].flat();
     const currentCacheNotes = cacheMap.get(notedirId) || [];      // 目前目錄裡的快取筆記
     
@@ -259,4 +267,23 @@ const Notes = ({ notebookId, addEvent, setCacheNoteContent, setNoteContent, setK
     )
 }
 
-export default Notes;
+Notes.propTypes = {
+    notebookId: PropTypes.string.isRequired,
+    currentNotedir: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.object
+    ]),
+    addEvent: PropTypes.func.isRequired,
+    setCacheNoteContent: PropTypes.func.isRequired,
+    setNoteContent: PropTypes.func.isRequired,
+    setKeyword: PropTypes.func.isRequired,
+    toggleCollapse: PropTypes.func.isRequired
+}
+
+const mapStateProps = state => ({
+    currentNotedir: state.notedirs.current
+});
+
+export default connect(
+    mapStateProps
+)(Notes);

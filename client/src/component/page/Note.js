@@ -30,8 +30,8 @@ import deleteStyle from '../../style/model/delete';
 import IntroBox from '../../style/general/IntroBox';
 
 import AuthContext from '../../context/auth/authContext';
-import NotedirContext from '../../context/notedirs/notedirContext';
 import NoteContext from '../../context/notes/noteContext';
+import { setNoteCount } from '../../actions/notedirActions';
 import { setAlert } from '../../actions/alertActions';
 import {
     getNotebooks,
@@ -508,13 +508,16 @@ const Note = ({
     match,
     notebooks,
     currentNotebook,
+    notedirLoading,
+    notedirs,
+    currentNotedir,
     getNotebooks,
     setCurrentNotebook,
+    setNoteCount,
     setAlert 
 }) => {
     const history = useHistory();
     const authContext = useContext(AuthContext);
-    const notedirContext = useContext(NotedirContext);
     const noteContext = useContext(NoteContext);
 
     useEffect(() => {
@@ -555,7 +558,6 @@ const Note = ({
         loading
     } = noteContext;
 
-    const notedirLoading = notedirContext.loading;
     const noteLoading = noteContext.loading;
     const autoSaveInterval = process.env.REACT_APP_AUTOSAVE_INTERVAL || 300000;
     const [autoSave] = useState(true);
@@ -578,9 +580,7 @@ const Note = ({
     
     const host = `${window.location.protocol}//${window.location.host}`;
     
-    const notedirs = notedirContext.notedirs;
-    const notedirId = notedirContext.current !== '' ? notedirContext.current ? notedirContext.current._id : null : notedirContext.current;
-    const setNoteCount = notedirContext.setNoteCount;
+    const notedirId = currentNotedir !== '' ? currentNotedir ? currentNotedir._id : null : currentNotedir;
     const allCacheNotes = [...cacheMap.values()].flat();
     const currentCacheNotes = cacheMap.get(notedirId) || [];      // 目前目錄裡的快取筆記
     
@@ -634,7 +634,7 @@ const Note = ({
         clearCurrentNote();
         
         // for 行動版:點擊目錄項目切換到筆記列表
-        notedirContext.current !== null 
+        currentNotedir !== null 
         && setPanelVisible({
             [PANEL.NOTEDIR]: false,
             [PANEL.NOTE]: true,
@@ -642,7 +642,7 @@ const Note = ({
         });
 
         // eslint-disable-next-line
-    }, [notedirContext.current]);
+    }, [currentNotedir]);
 
     useEffect(() => {
         success && setAlert(success, 'success');
@@ -773,7 +773,7 @@ const Note = ({
             noteCount = notedirs.find(notedir => notedir._id === deleteNotedirId).note_count - 1;
         } else {
             deleteNotedirId = notedirId;
-            noteCount = notedirContext.current.note_count - 1;
+            noteCount = currentNotedir.note_count - 1;
         }
         current && deleteNote(deleteNotedirId, current._id);
         setDeleteNoteVisible(false);
@@ -820,7 +820,7 @@ const Note = ({
                 sourceNoteCount = notedirs.find(notedir => notedir._id === sourceNotedirId).note_count - 1;
             } else {
                 sourceNotedirId = notedirId;
-                sourceNoteCount = notedirContext.current.note_count - 1;
+                sourceNoteCount = currentNotedir.note_count - 1;
             }
             moveNote(current._id, noteField, destNotedir.title, delItemCallback);
             setNoteCount(sourceNotedirId, sourceNoteCount);
@@ -881,7 +881,7 @@ const Note = ({
                         
                     } else {
                         saveNotedirId = notedirId;
-                        noteCount = notedirContext.current.note_count + 1;
+                        noteCount = currentNotedir.note_count + 1;
                     }
 
                     // 儲存筆記
@@ -1072,7 +1072,8 @@ const Note = ({
                 <NotedirContainer visible={panelVisible.NOTEDIR} collapse={listCollapse.notedir}>
                     <Notedirs 
                         notebookId={match.params.id} 
-                        toggleCollapse={toggleNotedirCollapse}/>
+                        toggleCollapse={toggleNotedirCollapse}
+                    />
                     <div className='recycle-bin'>
                         <button className='recycle-bin-btn' onClick={LoadRecycleBin}>回收站</button>
                     </div>
@@ -1201,7 +1202,15 @@ const Note = ({
 Note.propTypes = {
     match: PropTypes.object.isRequired,
     notebooks: PropTypes.array,
+    currentNotebook: PropTypes.object,
     current: PropTypes.object,
+    notedirLoading: PropTypes.bool.isRequired,
+    notedirs: PropTypes.array,
+    currentNotedir: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.object
+    ]),
+    setNoteCount: PropTypes.func.isRequired,
     getNotebooks: PropTypes.func.isRequired,
     setCurrentNotebook: PropTypes.func.isRequired,
     setAlert: PropTypes.func.isRequired
@@ -1209,10 +1218,18 @@ Note.propTypes = {
 
 const mapStateProps = state => ({
     notebooks: state.notebooks.notebooks,
-    currentNotebook: state.notebooks.current
+    currentNotebook: state.notebooks.current,
+    notedirLoading: state.notedirs.loading,
+    notedirs: state.notedirs.notedirs,
+    currentNotedir: state.notedirs.current
 });
 
 export default connect(
     mapStateProps,
-    { getNotebooks, setCurrentNotebook, setAlert }
+    { 
+        getNotebooks, 
+        setCurrentNotebook, 
+        setNoteCount, 
+        setAlert 
+    }
 )(Note);

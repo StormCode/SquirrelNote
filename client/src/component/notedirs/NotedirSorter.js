@@ -1,12 +1,15 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import { FunnelSimple } from "phosphor-react";
 import styled from 'styled-components';
 import Sorter from '../general/Sorter';
+import {
+    sortNotedir
+} from '../../actions/notedirActions';
 
 // Import Style
 import { theme } from '../../style/themes';
-
-import NotedirContext from '../../context/notedirs/notedirContext'
 
 const { orange, gray } = theme;
 
@@ -15,10 +18,11 @@ const SorterContainer = styled.span`
     margin: 0 5px;
 `;
 
-const NotedirSorter = () => {
-    const notedirContext = useContext(NotedirContext);
-
-    const { orderBy, sortBy, sortNotedir } = notedirContext;
+const NotedirSorter = ({ 
+    orderBy, 
+    sortBy, 
+    sortNotedir 
+}) => {
 
     // 下拉選單狀態
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -78,4 +82,18 @@ const NotedirSorter = () => {
     )
 }
 
-export default NotedirSorter;
+NotedirSorter.propTypes = { 
+    orderBy: PropTypes.string.isRequired, 
+    sortBy: PropTypes.string.isRequired,
+    sortNotedir: PropTypes.func.isRequired
+};
+
+const mapStateProps = state => ({
+    orderBy: state.notedirs.orderBy, 
+    sortBy: state.notedirs.sortBy
+});
+
+export default connect(
+    mapStateProps,
+    { sortNotedir }
+)(NotedirSorter);

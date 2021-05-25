@@ -1,4 +1,6 @@
 import React, { Fragment, useCallback, useState, useContext, useEffect } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Pencil, Trash, Check, X } from "phosphor-react";
 import EDToolPanel from '../general/EDToolPanel';
@@ -10,8 +12,15 @@ import { theme } from '../../style/themes';
 import deleteStyle from '../../style/model/delete';
 import NoteDirContainer from '../../style/components/Notedir';
 
-import NotedirContext from '../../context/notedirs/notedirContext';
 import NoteContext from '../../context/notes/noteContext';
+import {
+    enableEditNotedir,
+    disableEditNotedir,
+    enableDeleteNotedir,
+    disableDeleteNotedir,
+    updateNotedir,
+    deleteNotedir
+} from '../../actions/notedirActions';
 
 const { orange, gray } = theme;
 const currentFontColor = '#FFF';
@@ -47,7 +56,18 @@ const ToolPanelContainer = styled.div`
     ${props => ToolPanelContainerResponsiveStyle(props)}
 `;
 
-const Notedir = props => {
+const Notedir = ({
+    current,
+    currentEditNotedir,
+    currentDeleteNotedir,
+    enableEditNotedir,
+    disableEditNotedir,
+    enableDeleteNotedir,
+    disableDeleteNotedir,
+    updateNotedir,
+    deleteNotedir,
+    ...props
+}) => {
     const noteContext = useContext(NoteContext);
     
     const {
@@ -77,21 +97,8 @@ const Notedir = props => {
     const [color, setColor] = useState(defaultColor);
     
     const currentCacheNotes = cacheMap.get(_id) || [];      // 目前目錄裡的快取筆記
-    const notedirContext = useContext(NotedirContext);
-
-    const currentNotedirId = notedirContext.current ? notedirContext.current._id : null;
+    const currentNotedirId = current !== '' ? current ? current._id : null : current;
     const currentCacheNoteLength = currentCacheNotes.length;
-    
-    const { 
-        currentEditNotedir,
-        currentDeleteNotedir,
-        enableEditNotedir,
-        disableEditNotedir,
-        enableDeleteNotedir,
-        disableDeleteNotedir,
-        updateNotedir,
-        deleteNotedir
-    } = notedirContext;
 
     useEffect(() => {
         return () =>　{
@@ -282,4 +289,35 @@ const Notedir = props => {
     )
 }
 
-export default Notedir;
+Notedir.propTypes = {
+    current: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.object
+    ]),
+    currentEditNotedir: PropTypes.string,
+    currentDeleteNotedir: PropTypes.string,
+    enableEditNotedir: PropTypes.func.isRequired,
+    disableEditNotedir: PropTypes.func.isRequired,
+    enableDeleteNotedir: PropTypes.func.isRequired,
+    disableDeleteNotedir: PropTypes.func.isRequired,
+    updateNotedir: PropTypes.func.isRequired,
+    deleteNotedir: PropTypes.func.isRequired
+}
+
+const mapStateProps = state => ({
+    current: state.notedirs.current,
+    currentEditNotedir: state.notedirs.currentEditNotedir,
+    currentDeleteNotedir: state.notedirs.currentDeleteNotedir
+});
+
+export default connect(
+    mapStateProps,
+    {
+        enableEditNotedir,
+        disableEditNotedir,
+        enableDeleteNotedir,
+        disableDeleteNotedir,
+        updateNotedir,
+        deleteNotedir
+    }
+)(Notedir);

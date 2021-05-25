@@ -32,9 +32,8 @@ const initialState = {
 };
 
 export default (state = initialState, action) => {
-    let sort, sortBy;
-    sort = (action.payload && action.payload.orderBy) || state.orderBy;
-    sortBy = (action.payload && action.payload.sortBy) || state.sortBy;
+    let sort = (action.payload && action.payload.orderBy) || state.orderBy;
+    let sortBy = (action.payload && action.payload.sortBy) || state.sortBy;
     switch(action.type) {
         case GET_NOTEBOOKS:
             return {
