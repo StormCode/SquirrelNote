@@ -19,14 +19,33 @@ import {
     CLEAR_NOTE,
     NOTE_ERROR,
     NOTE_SAVE_ERROR
-} from '../types.js';
+} from '../actions/types';
 import {
     UNSAVE,
     SAVED,
     DISABLESAVE
-} from '../../saveState';
+} from '../actions/saveState';
 
-export default (state, action) => {
+const initialState = {
+    notes: null,
+    current: null,
+    cacheCurrent: null,
+    save: {
+        state: DISABLESAVE,
+        showUpdateTime: false
+    },
+    cacheMap: new Map(),    //對應筆記目錄裡的快取筆記
+    cacheNotes: [],
+    deleteEnable: false,
+    filtered: null,
+    orderBy: 'asc',
+    sortBy: 'title',
+    success: null,
+    error: null,
+    loading: true
+};
+
+export default (state = initialState, action) => {
     switch(action.type){
         case GET_NOTES:
             return {

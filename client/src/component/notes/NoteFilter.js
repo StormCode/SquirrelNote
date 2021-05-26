@@ -1,4 +1,6 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import { MagnifyingGlass, X } from "phosphor-react";
 import IconInput from '../general/IconInput';
 import styled from 'styled-components';
@@ -6,7 +8,10 @@ import styled from 'styled-components';
 // Import Style
 import { theme } from '../../style/themes';
 
-import NoteContext from '../../context/notes/noteContext';
+import {
+    filterNote,
+    clearFilterNote
+} from '../../actions/noteActions';
 
 const { orange, gray } = theme;
 
@@ -21,10 +26,11 @@ const ClearIconStyle = `
     transform: translate(-150%, -120%);
 `;
 
-const NoteFilter = ({setKeyword}) => {
-    const noteContext = useContext(NoteContext);
-
-    const { filterNote, clearFilterNote } = noteContext;
+const NoteFilter = ({
+    setKeyword,
+    filterNote, 
+    clearFilterNote
+}) => {
 
     const [color, setColor] = useState(gray);
 
@@ -78,4 +84,13 @@ const NoteFilter = ({setKeyword}) => {
     )
 }
 
-export default NoteFilter;
+NoteFilter.propTypes = {
+    setKeyword: PropTypes.func.isRequired,
+    filterNote: PropTypes.func.isRequired,
+    clearFilterNote: PropTypes.func.isRequired
+}
+
+export default connect(
+    null,
+    { filterNote, clearFilterNote }
+)(NoteFilter);

@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
@@ -17,7 +17,11 @@ import NoteLargeImage from '../../assets/note/note_2000w.png';
 import { theme } from '../../style/themes';
 import IntroBox from '../../style/general/IntroBox';
 
-import NoteContext from '../../context/notes/noteContext';
+import {
+    getNotes,
+    getAllNotes,
+    clearNote
+} from '../../actions/noteActions';
 
 const { orange, gray } = theme;
 
@@ -105,25 +109,25 @@ const NoteList = styled.div`
 
 const Notes = ({ 
     notebookId,
-    currentNotedir, 
+    currentNotedir,
+    note, 
     addEvent, 
     setCacheNoteContent, 
     setNoteContent, 
     setKeyword, 
-    toggleCollapse 
+    toggleCollapse,
+    getNotes,
+    getAllNotes,
+    clearNote, 
 }) => {
-    const noteContext = useContext(NoteContext);
 
-    const { notes, 
+    const { 
+        notes, 
         filtered,
-        cacheMap,
-        // cacheNotes, 
-        getNotes,
-        getAllNotes,
-        clearNote, 
+        cacheMap, 
         loading,
         error 
-    } = noteContext;
+    } = note;
     
     const defaultColor = {
         note: gray,
@@ -273,6 +277,7 @@ Notes.propTypes = {
         PropTypes.string,
         PropTypes.object
     ]),
+    note: PropTypes.object.isRequired,
     addEvent: PropTypes.func.isRequired,
     setCacheNoteContent: PropTypes.func.isRequired,
     setNoteContent: PropTypes.func.isRequired,
@@ -281,9 +286,21 @@ Notes.propTypes = {
 }
 
 const mapStateProps = state => ({
-    currentNotedir: state.notedirs.current
+    currentNotedir: state.notedirs.current,
+    note: { 
+        notes: state.notes.notes, 
+        filtered: state.notes.filtered,
+        cacheMap: state.notes.cacheMap, 
+        loading: state.notes.loading,
+        error: state.notes.error
+    }
 });
 
 export default connect(
-    mapStateProps
+    mapStateProps,
+    {
+        getNotes,
+        getAllNotes,
+        clearNote
+    }
 )(Notes);

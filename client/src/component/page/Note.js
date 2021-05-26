@@ -30,13 +30,28 @@ import deleteStyle from '../../style/model/delete';
 import IntroBox from '../../style/general/IntroBox';
 
 import AuthContext from '../../context/auth/authContext';
-import NoteContext from '../../context/notes/noteContext';
 import { setNoteCount } from '../../actions/notedirActions';
 import { setAlert } from '../../actions/alertActions';
 import {
     getNotebooks,
     setCurrentNotebook
 } from '../../actions/notebookActions';
+import {
+    appendCacheNote,
+    modifyCacheNote,
+    removeCacheNote,
+    setCacheNote,
+    setCurrentNote,
+    clearCurrentNote,
+    getNoteDetail, 
+    setSave,
+    enableDelete,
+    disableDelete,
+    addNote,
+    updateNote,
+    deleteNote,
+    moveNote
+} from '../../actions/noteActions';
 
 import SaveButton from '../notes/SaveButton';
 import {
@@ -506,19 +521,30 @@ const EditorArea = styled.div`
 
 const Note = ({ 
     match,
-    notebooks,
-    currentNotebook,
-    notedirLoading,
-    notedirs,
-    currentNotedir,
+    notebook,
+    notedir,
+    note,
     getNotebooks,
     setCurrentNotebook,
     setNoteCount,
+    appendCacheNote,
+    modifyCacheNote,
+    removeCacheNote,
+    setCacheNote,
+    setCurrentNote,
+    clearCurrentNote,
+    getNoteDetail, 
+    setSave,
+    enableDelete,
+    disableDelete,
+    addNote,
+    updateNote,
+    deleteNote,
+    moveNote,
     setAlert 
 }) => {
     const history = useHistory();
     const authContext = useContext(AuthContext);
-    const noteContext = useContext(NoteContext);
 
     useEffect(() => {
         authContext.loadUser();
@@ -533,32 +559,28 @@ const Note = ({
     }, []);
 
     const {
+        notebooks,
+        currentNotebook,
+    } = notebook;
+
+    const {
+        notedirLoading,
+        notedirs,
+        currentNotedir
+    } = notedir;
+
+    const {
         notes,
         current,
         cacheCurrent,
         cacheMap,
-        appendCacheNote,
-        modifyCacheNote,
-        removeCacheNote,
-        setCacheNote,
-        setCurrentNote,
-        clearCurrentNote,
-        getNoteDetail,
+        noteLoading,
         save,
-        setSave,
         deleteEnable,
-        enableDelete,
-        disableDelete,
-        addNote,
-        updateNote,
-        deleteNote,
-        moveNote,
         success,
-        error,
-        loading
-    } = noteContext;
+        error
+    } = note;
 
-    const noteLoading = noteContext.loading;
     const autoSaveInterval = process.env.REACT_APP_AUTOSAVE_INTERVAL || 300000;
     const [autoSave] = useState(true);
     const [saveTextUpdateInterval] = useState(10000);
@@ -1133,7 +1155,7 @@ const Note = ({
                             <Editor
                                 enable={noteMode === NOTEMODE.EDIT}
                                 content={current.content ? current.content : ''}
-                                loading={loading}
+                                loading={noteLoading}
                                 contentChange={contentChange}
                                 onDoubleClick={onEditorDoubleClick} />
                             : <IntroBox>
@@ -1201,27 +1223,50 @@ const Note = ({
 
 Note.propTypes = {
     match: PropTypes.object.isRequired,
-    notebooks: PropTypes.array,
-    currentNotebook: PropTypes.object,
-    current: PropTypes.object,
-    notedirLoading: PropTypes.bool.isRequired,
-    notedirs: PropTypes.array,
-    currentNotedir: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.object
-    ]),
+    notebook: PropTypes.object.isRequired,
+    notedir: PropTypes.object.isRequired,
+    note: PropTypes.object.isRequired,
     setNoteCount: PropTypes.func.isRequired,
     getNotebooks: PropTypes.func.isRequired,
     setCurrentNotebook: PropTypes.func.isRequired,
+    appendCacheNote: PropTypes.func.isRequired,
+    modifyCacheNote: PropTypes.func.isRequired,
+    removeCacheNote: PropTypes.func.isRequired,
+    setCacheNote: PropTypes.func.isRequired,
+    setCurrentNote: PropTypes.func.isRequired,
+    clearCurrentNote: PropTypes.func.isRequired,
+    getNoteDetail: PropTypes.func.isRequired, 
+    setSave: PropTypes.func.isRequired,
+    enableDelete: PropTypes.func.isRequired,
+    disableDelete: PropTypes.func.isRequired,
+    addNote: PropTypes.func.isRequired,
+    updateNote: PropTypes.func.isRequired,
+    deleteNote: PropTypes.func.isRequired,
+    moveNote: PropTypes.func.isRequired,
     setAlert: PropTypes.func.isRequired
 }
 
 const mapStateProps = state => ({
-    notebooks: state.notebooks.notebooks,
-    currentNotebook: state.notebooks.current,
-    notedirLoading: state.notedirs.loading,
-    notedirs: state.notedirs.notedirs,
-    currentNotedir: state.notedirs.current
+    notebook: {
+        notebooks: state.notebooks.notebooks,
+        currentNotebook: state.notebooks.current
+    },
+    notedir: {
+        notedirLoading: state.notedirs.loading,
+        notedirs: state.notedirs.notedirs,
+        currentNotedir: state.notedirs.current
+    },
+    note: {
+        notes: state.notes.notes,
+        current: state.notes.current,
+        cacheCurrent: state.notes.cacheCurrent,
+        cacheMap: state.notes.cacheMap,
+        noteLoading: state.notes.loading,
+        save: state.notes.save,
+        deleteEnable: state.notes.deleteEnable,
+        success: state.notes.success,
+        error: state.notes.error
+    }
 });
 
 export default connect(
@@ -1230,6 +1275,20 @@ export default connect(
         getNotebooks, 
         setCurrentNotebook, 
         setNoteCount, 
-        setAlert 
+        setAlert,
+        appendCacheNote,
+        modifyCacheNote,
+        removeCacheNote,
+        setCacheNote,
+        setCurrentNote,
+        clearCurrentNote,
+        getNoteDetail, 
+        setSave,
+        enableDelete,
+        disableDelete,
+        addNote,
+        updateNote,
+        deleteNote,
+        moveNote
     }
 )(Note);

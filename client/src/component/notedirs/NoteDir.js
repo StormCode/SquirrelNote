@@ -12,7 +12,6 @@ import { theme } from '../../style/themes';
 import deleteStyle from '../../style/model/delete';
 import NoteDirContainer from '../../style/components/Notedir';
 
-import NoteContext from '../../context/notes/noteContext';
 import {
     enableEditNotedir,
     disableEditNotedir,
@@ -60,6 +59,7 @@ const Notedir = ({
     current,
     currentEditNotedir,
     currentDeleteNotedir,
+    cacheMap,
     enableEditNotedir,
     disableEditNotedir,
     enableDeleteNotedir,
@@ -68,12 +68,6 @@ const Notedir = ({
     deleteNotedir,
     ...props
 }) => {
-    const noteContext = useContext(NoteContext);
-    
-    const {
-        // cacheNotes
-        cacheMap
-    } = noteContext;
 
     const [notedir, setNotedir] = useState({
         ...props.notedir
@@ -296,6 +290,7 @@ Notedir.propTypes = {
     ]),
     currentEditNotedir: PropTypes.string,
     currentDeleteNotedir: PropTypes.string,
+    cacheMap: PropTypes.object,
     enableEditNotedir: PropTypes.func.isRequired,
     disableEditNotedir: PropTypes.func.isRequired,
     enableDeleteNotedir: PropTypes.func.isRequired,
@@ -307,7 +302,8 @@ Notedir.propTypes = {
 const mapStateProps = state => ({
     current: state.notedirs.current,
     currentEditNotedir: state.notedirs.currentEditNotedir,
-    currentDeleteNotedir: state.notedirs.currentDeleteNotedir
+    currentDeleteNotedir: state.notedirs.currentDeleteNotedir,
+    cacheMap: state.notes.cacheMap
 });
 
 export default connect(

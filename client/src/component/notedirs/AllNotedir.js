@@ -1,20 +1,14 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import NoteDirContainer from '../../style/components/Notedir';
 
-import NoteContext from '../../context/notes/noteContext';
-
 const AllNotedir = ({ 
     count, 
     setCurrent, 
-    current
+    current,
+    cacheMap
 }) => {
-    const noteContext = useContext(NoteContext);
-    const {
-        // cacheNotes
-        cacheMap
-    } = noteContext;
 
     const currentNotedirId = current !== '' ? current ? current._id : null : current;
     const currentCacheNotes = cacheMap.get('') || [];      // 目前目錄裡的快取筆記
@@ -43,11 +37,13 @@ AllNotedir.propTypes = {
     current: PropTypes.oneOfType([
         PropTypes.string,
         PropTypes.object
-    ])
+    ]),
+    cacheMap: PropTypes.object
 };
 
 const mapStateProps = state => ({
-    current: state.notedirs.current
+    current: state.notedirs.current,
+    cacheMap: state.notes.cacheMap
 });
 
 export default connect(

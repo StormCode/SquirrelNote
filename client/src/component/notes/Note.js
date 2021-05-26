@@ -1,11 +1,11 @@
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { ReactComponent as UnsavedMark } from  '../../assets/general/unsaved_mark.svg';
 
 // Import Style
 import { theme } from '../../style/themes';
-
-import NoteContext from '../../context/notes/noteContext';
 
 const { orange, darkOrange, gray } = theme;
 
@@ -40,9 +40,8 @@ const NoteContainer = styled.li`
     }
 `;
 
-const Note = ({ note, setCurrentNote, isUnsaved }) => {
-    const noteContext = useContext(NoteContext);
-    const currentNoteId = noteContext.current ? noteContext.current._id : null;
+const Note = ({ note, setCurrentNote, isUnsaved, current }) => {
+    const currentNoteId = current ? current._id : null;
 
     const onClick = e => {
         e.preventDefault();
@@ -65,4 +64,17 @@ const Note = ({ note, setCurrentNote, isUnsaved }) => {
     )
 }
 
-export default Note;
+Note.propTypes = {
+    note: PropTypes.object.isRequired, 
+    setCurrentNote: PropTypes.func.isRequired,
+    isUnsaved: PropTypes.bool,
+    current: PropTypes.object
+};
+
+const mapStateProps = state => ({
+    current: state.notes.current
+});
+
+export default connect(
+    mapStateProps
+)(Note);

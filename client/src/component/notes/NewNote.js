@@ -1,12 +1,9 @@
-import React, { Fragment, useState, useContext } from 'react';
+import React, { Fragment, useState } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import Note from './Note';
 
-import NoteContext from '../context/notes/noteContext';
-
-const NewNote = () => {
-    const noteContext = useContext(NoteContext);
-
-    const { addNoteVisible } = noteContext;
+const NewNote = ({ addNoteVisible }) => {
 
     const [newNoteContent, setNewNoteContent] = useState({
         title: '',
@@ -24,4 +21,14 @@ const NewNote = () => {
     )
 }
 
-export default NewNote;
+NewNote.propTypes = {
+    addNoteVisible: PropTypes.bool.isRequired
+};
+
+const mapStateProps = state => ({
+    addNoteVisible: state.notes.addNoteVisible
+});
+
+export default connect(
+    mapStateProps
+)(NewNote);
