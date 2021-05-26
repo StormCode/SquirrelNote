@@ -57,7 +57,7 @@ const AppStyle = styled.div`
 `;
 
 if (localStorage.token) {
-    setAuthToken(localStorage.token)
+    setAuthToken(localStorage.token);
 }
 
 function App() {
