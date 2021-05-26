@@ -25,7 +25,7 @@ import {
 import {
     DELETE_NOTE_SUCCESS,
     MOVE_NOTE_SUCCESS
-} from './success';
+} from '../success';
 import {
     DELETE_NOTE_ERROR,
     MOVE_NOTE_ERROR,
@@ -33,7 +33,7 @@ import {
     GET_NOTE_DETAIL_ERROR,
     SERVER_ERROR,
     UNKNOW_ERROR
-} from './error';
+} from '../error';
 
 //查詢筆記本裡全部筆記清單
 export const getAllNotes = notebookId => async dispatch => {

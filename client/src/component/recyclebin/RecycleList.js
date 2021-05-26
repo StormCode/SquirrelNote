@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import { v4 as uuidv4 } from 'uuid';
@@ -7,12 +7,14 @@ import makeResponsiveCSS from '../../utils/make-responsive-css'
 import Pagination from '../general/Pagination';
 import RecycleItem from './RecycleItem';
 import Spinner from '../layout/Spinner';
+import { 
+    getDeletedItems, 
+    clearRecyclebin
+} from '../../actions/recyclebinActions';
 import { setAlert } from '../../actions/alertActions';
 
 // Import Style
 import { RwdTableBaseStyle, RwdTableForDestopStyle, RwdTableForPhoneStyle } from '../../style/general/RwdTable';
-
-import RecyclebinContext from '../../context/recyclebin/recyclebinContext';
 
 const RecycleListContainerBaseStyle = theme => {
     return `
@@ -141,18 +143,20 @@ const Table = styled.table`
     ${TableResponsiveStyle()}
 `;
 
-const RecycleList = ({ setAlert }) => {
-    const recyclebinContext = useContext(RecyclebinContext);
+const RecycleList = ({ 
+    recyclebin, 
+    getDeletedItems,
+    clearRecyclebin,
+    setAlert 
+}) => {
 
     const {
         deletedItems,
         filtered, 
         loading,
-        getDeletedItems,
-        clearRecyclebin,
         success,
         error
-    } = recyclebinContext;
+    } = recyclebin;
     
     useEffect(() => {
         getDeletedItems();
@@ -213,10 +217,21 @@ const RecycleList = ({ setAlert }) => {
 }
 
 RecycleList.propTypes = {
+    recyclebin: PropTypes.object.isRequired,
     setAlert: PropTypes.func.isRequired
 }
 
+const mapStateProps = state => ({
+    recyclebin: {
+        deletedItems: state.recyclebins.deletedItems,
+        filtered: state.recyclebins.filtered,
+        loading: state.recyclebins.loading,
+        success: state.recyclebins.success,
+        error: state.recyclebins.error
+    }
+});
+
 export default connect(
-    null,
-    { setAlert }
+    mapStateProps,
+    { getDeletedItems, clearRecyclebin, setAlert }
 )(RecycleList);

@@ -1,4 +1,6 @@
-import React, { useState, useContext, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import { MagnifyingGlass, X } from "phosphor-react";
 import IconInput from '../general/IconInput';
 import styled from 'styled-components';
@@ -7,7 +9,10 @@ import makeResponsiveCSS from '../../utils/make-responsive-css'
 // Import Style
 import { theme } from '../../style/themes';
 
-import RecyclebinContext from '../../context/recyclebin/recyclebinContext';
+import { 
+    filterRecycleList, 
+    clearFilterRecycleList 
+} from '../../actions/recyclebinActions';
 
 const { defaultColor, orange, gray } = theme;
 
@@ -98,10 +103,7 @@ const IconInputContainerResponsiveStyle = () => {
 
 const IconInputContainerStyle = IconInputContainerBaseStyle.concat(IconInputContainerResponsiveStyle());
 
-const RecycleFilter = () => {
-    const recycleContext = useContext(RecyclebinContext);
-
-    const { filterRecycleList, clearFilterRecycleList } = recycleContext;
+const RecycleFilter = ({ filterRecycleList, clearFilterRecycleList }) => {
 
     const [focus, setFocus] = useState(false);
     const [color, setColor] = useState(gray);
@@ -185,4 +187,12 @@ const RecycleFilter = () => {
     )
 }
 
-export default RecycleFilter;
+RecycleFilter.propTypes = {
+    filterRecycleList: PropTypes.func.isRequired, 
+    clearFilterRecycleList: PropTypes.func.isRequired
+};
+
+export default connect(
+    null,
+    { filterRecycleList, clearFilterRecycleList }
+)(RecycleFilter);

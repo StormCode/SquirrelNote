@@ -1,4 +1,6 @@
-import React, { useState, useContext, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import { FunnelSimple } from "phosphor-react";
 import styled from 'styled-components';
 import Sorter from '../general/Sorter'
@@ -7,7 +9,7 @@ import makeResponsiveCSS from '../../utils/make-responsive-css'
 // Import Style
 import { theme } from '../../style/themes';
 
-import RecyclebinContext from '../../context/recyclebin/recyclebinContext';
+import { sortRecycleList } from '../../actions/recyclebinActions';
 
 const { defaultColor, orange, gray } = theme;
 
@@ -41,13 +43,11 @@ const SorterContainer = styled.span`
     ${SorterContainerResponsiveStyle()}
 `;
 
-const RecycleSorter = () => {
-    const recyclebinContext = useContext(RecyclebinContext);
-    const {
-        orderBy,
-        sortBy,
-        sortRecycleList
-    } = recyclebinContext;
+const RecycleSorter = ({
+    orderBy,
+    sortBy,
+    sortRecycleList
+}) => {
 
     // 下拉選單狀態
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -107,4 +107,18 @@ const RecycleSorter = () => {
     )
 }
 
-export default RecycleSorter;
+RecycleSorter.propTypes = {
+    orderBy: PropTypes.string.isRequired,
+    sortBy: PropTypes.string.isRequired,
+    sortRecycleList: PropTypes.func.isRequired
+}
+
+const mapStateProps = state => ({
+    orderBy: state.recyclebins.orderBy,
+    sortBy: state.recyclebins.sortBy
+});
+
+export default connect(
+    mapStateProps,
+    { sortRecycleList }
+)(RecycleSorter);

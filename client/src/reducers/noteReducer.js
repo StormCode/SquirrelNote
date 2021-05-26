@@ -24,7 +24,7 @@ import {
     UNSAVE,
     SAVED,
     DISABLESAVE
-} from '../actions/saveState';
+} from '../saveState';
 
 const initialState = {
     notes: null,

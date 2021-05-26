@@ -7,8 +7,18 @@ import {
     PERMANENTLY_DELETE,
     CLEAR_RECYCLEBIN,
     RECYCLEBIN_ERROR
-} from '../types';
-import SortRecyclebin from '../../general/sort';
+} from '../actions/types';
+import SortRecyclebin from '../general/sort';
+
+const initialState = {
+    deletedItems: null,
+    orderBy: 'desc',
+    sortBy: 'date',
+    filtered: null,
+    loading: true,
+    success: null,
+    error: null
+};
 
 const GetRestoredlist = (data, id) => {
     const current = data.find(item => item.id === id);
@@ -96,20 +106,17 @@ const GetPermanentedlist = (data, id) => {
     });
 }
 
-export default (state,action) => {
-    let sort, sortBy;
+export default (state = initialState,action) => {
+    let sort = (action.payload && action.payload.orderBy) || state.orderBy;
+    let sortBy = (action.payload && action.payload.sortBy) || state.sortBy;
     switch(action.type){
         case GET_DELETED_ITEMS:
-            sort = action.payload.orderBy || state.orderBy;
-            sortBy = action.payload.sortBy || state.sortBy;
             return {
                 ...state,
                 deletedItems: action.payload.sort((a,b) => SortRecyclebin(sort, sortBy, a, b)),
                 loading: false
             }
         case SORT_RECYCLELIST:
-            sort = action.payload.orderBy || state.orderBy;
-            sortBy = action.payload.sortBy || state.sortBy;
             return {
                 ...state,
                 orderBy: action.payload.orderBy,
@@ -118,8 +125,6 @@ export default (state,action) => {
                 deletedItems: state.deletedItems === null ? state.deletedItems : state.deletedItems.sort((a,b) => SortRecyclebin(sort, sortBy, a, b))
             }
         case FILTER_RECYCLELIST:
-            sort = action.payload.orderBy || state.orderBy;
-            sortBy = action.payload.sortBy || state.sortBy;
             return {
                 ...state,
                 filtered: state.deletedItems.filter(deletedItem => {

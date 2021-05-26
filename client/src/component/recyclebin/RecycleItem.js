@@ -5,19 +5,16 @@ import { Notebook, FolderOpen, Note, Warning } from "phosphor-react";
 import Tooltip from "@material-ui/core/Tooltip";
 import { CustomShortDate } from '../../utils/date';
 import Models from '../general/Models';
-import RecyclebinContext from '../../context/recyclebin/recyclebinContext';
+import { 
+    restore, 
+    permanentlyDelete 
+} from '../../actions/recyclebinActions';
 import { setAlert } from '../../actions/alertActions';
 
 // Import Style
 import deleteStyle from '../../style/model/delete';
 
-const RecycleItem = ({ item, setAlert }) => {
-    const recyclebinContext = useContext(RecyclebinContext);
-    
-    const { 
-        restore, 
-        permanentlyDelete
-    } = recyclebinContext;
+const RecycleItem = ({ item, restore, permanentlyDelete, setAlert }) => {
 
     const {
         id, 
@@ -138,10 +135,12 @@ const RecycleItem = ({ item, setAlert }) => {
 
 RecycleItem.propTypes = {
     item: PropTypes.object.isRequired,
+    restore: PropTypes.func.isRequired, 
+    permanentlyDelete: PropTypes.func.isRequired,
     setAlert: PropTypes.func.isRequired
 }
 
 export default connect(
     null,
-    { setAlert }
+    { restore, permanentlyDelete, setAlert }
 )(RecycleItem);

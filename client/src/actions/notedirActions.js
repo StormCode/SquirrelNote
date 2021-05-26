@@ -23,7 +23,7 @@ import {
     ADD_NOTEDIR_SUCCESS,
     UPDATE_NOTEDIR_SUCCESS,
     DELETE_NOTEDIR_SUCCESS
-} from './success';
+} from '../success';
 import {
     GET_NOTEDIR_ERROR,
     ADD_NOTEDIR_ERROR,
@@ -31,7 +31,7 @@ import {
     DELETE_NOTEDIR_ERROR,
     SERVER_ERROR,
     UNKNOW_ERROR
-} from './error';
+} from '../error';
 
 //查詢全部筆記目錄清單
 export const getNotedirs = notebookId => async dispatch => {

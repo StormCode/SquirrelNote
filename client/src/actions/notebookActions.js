@@ -22,7 +22,7 @@ import {
     ADD_NOTEBOOK_SUCCESS,
     UPDATE_NOTEBOOK_SUCCESS,
     DELETE_NOTEBOOK_SUCCESS
-} from './success';
+} from '../success';
 import {
     GET_NOTEBOOK_ERROR,
     ADD_NOTEBOOK_ERROR,
@@ -30,7 +30,7 @@ import {
     DELETE_NOTEBOOK_ERROR,
     SERVER_ERROR,
     UNKNOW_ERROR
-} from './error';
+} from '../error';
 
 //設定目前正在使用的筆記本
 export const setCurrentNotebook = id => async dispatch => {
