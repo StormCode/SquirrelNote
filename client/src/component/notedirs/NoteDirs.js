@@ -115,7 +115,6 @@ const NotedirList = styled.div`
 const Notedirs = ({ 
     notebookId, 
     toggleCollapse,
-    notebooks,
     notedirs, 
     current,
     addNotedirVisible, 
@@ -130,37 +129,23 @@ const Notedirs = ({
     addNotedir, 
     setAlert 
 }) => {
-
-    useEffect(() => {
-        return () => {
-            clearNotedir();
-        }
-    
-        // eslint-disable-next-line
-    }, []);
     
     useEffect(() => {
         getNotedirs(notebookId);
 
+        return () => {
+            clearNotedir();
+        }
+
         // eslint-disable-next-line
     }, []);
 
     useEffect(() => {
-        let count = 0;
-
-        if(notebooks && notedirs) {
-            // 筆記目錄設定為全部
-            !current && setCurrentNotedir('');
-
-            // 計算全部筆記數量
-            notedirs.forEach(notedir => {
-                count += notedir.note_count;
-            });
-            setAllNoteCount(count);
-        }
+        // 筆記目錄設定為全部
+        if(notedirs && !current) setCurrentNotedir('');
 
         // eslint-disable-next-line
-    }, [notebooks, notedirs, current]);
+    }, [notedirs, current]);
 
     useEffect(() => {
         current ? setCurrentNotedir(current._id) : setCurrentNotedir('');
@@ -187,7 +172,6 @@ const Notedirs = ({
         collapse: gray
     };
     
-    const [allNoteCount, setAllNoteCount] = useState(0);
     const [color, setColor] = useState(defaultColor);
 
     const iconChange = {
@@ -257,8 +241,8 @@ const Notedirs = ({
 
     return (
         <Fragment>
-            { !loading ?
-                notedirs && !error ? (<NotedirList className='notedir-list'>
+            { !loading &&
+                notedirs && !error && (<NotedirList className='notedir-list'>
                     <div className='notedir-header'>
                         <i className='parlgrm'></i>
                         <span className='title'>目錄</span>
@@ -270,10 +254,10 @@ const Notedirs = ({
                             <BtnContent onChange={iconChange.collapse} children={<ArrowLineLeft size={22} color={color.collapse} />} tooltip='隱藏清單' />
                         </button>
                     </div>
-                    {notedirs.length >= 1 ?
+                    { notedirs.length >= 1 ?
                         <Fragment>
                             <ul>
-                                <AllNotedir count={allNoteCount} setCurrent={setCurrent} />
+                                <AllNotedir setCurrent={setCurrent} />
                                 <TextInput  
                                     visible={addNotedirVisible}
                                     placeholder={'請輸入筆記目錄名稱'}
@@ -286,33 +270,32 @@ const Notedirs = ({
                                         <BtnContent onChange={iconChange.cancel} children={<X size={22} color={color.cancel} weight='bold' />} tooltip='取消' />
                                     </TextInput.CancelBtn>
                                 </TextInput>
-                                {notedirs.map(notedir => {
-                                    return !notedir.default 
-                                    && (<Notedir 
-                                        key={notedir._id} 
-                                        notebookId={notebookId}
-                                        notedir={notedir} 
-                                        toolPanel={currentToolPanel}
-                                        setCurrent={setCurrent}
-                                        setToolPanel={setToolPanel} />)
-                                })}
+                                {notedirs
+                                    .filter(notedir => !notedir.default)
+                                    .map(notedir => 
+                                        <Notedir 
+                                            key={notedir._id} 
+                                            notebookId={notebookId}
+                                            notedir={notedir} 
+                                            toolPanel={currentToolPanel}
+                                            setCurrent={setCurrent}
+                                            setToolPanel={setToolPanel} 
+                                        />
+                                )}
                             </ul>
-                            {notedirs.length === 1 ?
-                                <IntroBox>
-                                    <img alt='notedir-bg' src={NotedirSmallImage}
-                                        srcSet={`
-                                        ${NotedirSmallImage} 300w, 
-                                        ${NotedirMediumImage} 1000w, 
-                                        ${NotedirLargeImage} 2000w
-                                        `} />
-                                    <p>建立目錄可以幫助你分類筆記</p>
-                                </IntroBox>
-                            : null }
-                        </Fragment> : null
+                        </Fragment>
+                        : <IntroBox>
+                            <img alt='notedir-bg' src={NotedirSmallImage}
+                                srcSet={`
+                                ${NotedirSmallImage} 300w, 
+                                ${NotedirMediumImage} 1000w, 
+                                ${NotedirLargeImage} 2000w
+                                `} 
+                            />
+                            <p>建立目錄可以幫助你分類筆記</p>
+                        </IntroBox>
                     }
-                </NotedirList>)
-                : null
-            : null }
+                </NotedirList>)}
         </Fragment>
     )
 }
@@ -320,7 +303,6 @@ const Notedirs = ({
 Notedirs.propTypes = {
     notebookId: PropTypes.string.isRequired,
     toggleCollapse: PropTypes.func.isRequired,
-    notebooks: PropTypes.array,
     notedirs: PropTypes.array,
     current: PropTypes.oneOfType([
         PropTypes.string,
@@ -340,7 +322,6 @@ Notedirs.propTypes = {
 }
 
 const mapStateProps = state => ({
-    notebooks: state.notebooks.notebooks,
     notedirs: state.notedirs.notedirs,
     current: state.notedirs.current,
     addNotedirVisible: state.notedirs.addNotedirVisible, 

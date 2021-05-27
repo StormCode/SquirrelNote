@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import NoteDirContainer from '../../style/components/Notedir';
 
 const AllNotedir = ({ 
-    count, 
-    setCurrent, 
     current,
-    cacheMap
+    notedirs,
+    cacheMap,
+    setCurrent
 }) => {
+    const [count, setCount] = useState(0);
 
     const currentNotedirId = current !== '' ? current ? current._id : null : current;
     const currentCacheNotes = cacheMap.get('') || [];      // 目前目錄裡的快取筆記
@@ -18,6 +19,17 @@ const AllNotedir = ({
         e.preventDefault();
         setCurrent('');
     }
+
+    useEffect(() => {
+        // 計算全部筆記數量
+        let _count = 0;
+        notedirs.forEach(notedir => {
+            _count += notedir.note_count;
+        });
+        setCount(_count);
+
+        // eslint-disable-next-line
+    }, []);
 
     return <NoteDirContainer
             isCurrent = {currentNotedirId === ''}>
@@ -38,11 +50,14 @@ AllNotedir.propTypes = {
         PropTypes.string,
         PropTypes.object
     ]),
-    cacheMap: PropTypes.object
+    notedirs: PropTypes.array,
+    cacheMap: PropTypes.object,
+    setCurrent: PropTypes.func.isRequired
 };
 
 const mapStateProps = state => ({
     current: state.notedirs.current,
+    notedirs: state.notedirs.notedirs,
     cacheMap: state.notes.cacheMap
 });
 
