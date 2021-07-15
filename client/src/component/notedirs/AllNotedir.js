@@ -26,10 +26,10 @@ const AllNotedir = ({
         notedirs.forEach(notedir => {
             _count += notedir.note_count;
         });
-        setCount(_count);
+        count !== _count && setCount(_count);
 
         // eslint-disable-next-line
-    }, []);
+    }, [notedirs]);
 
     return <NoteDirContainer
             isCurrent = {currentNotedirId === ''}>

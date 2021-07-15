@@ -118,12 +118,9 @@ export default (state = initialState, action) => {
         case SET_NOTE_COUNT:
             return {
                 ...state,
-                notedirs: state.notedirs.map(notedir => {
-                    if(notedir._id === action.payload.id) {
-                        notedir.note_count = action.payload.count;
-                    }
-                    return notedir;
-                })
+                notedirs: state.notedirs.map(notedir => 
+                    notedir._id !== action.payload.id ? notedir : Object.assign({}, notedir, {note_count: action.payload.count})
+                )
             }
         case CLEAR_NOTEDIR:
             return {

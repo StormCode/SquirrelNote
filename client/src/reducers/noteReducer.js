@@ -92,7 +92,7 @@ export default (state = initialState, action) => {
                 ...state,
                 current: Object.assign({}, state.current, 
                     {
-                        // _id: action.payload.note._id,
+                        _id: action.payload.note._id,
                         content: action.payload.note.content, 
                         date: action.payload.note.date
                     }),
