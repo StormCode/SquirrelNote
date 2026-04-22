@@ -2,9 +2,11 @@ kind: "AppHostingYaml"
 schemaVersion: "v1"
 
 buildConfig:
-  # 1. 確保編譯成功
-  # 2. 移除 outputDirectory (有時它會干擾手動路徑)
+  # 1. 執行編譯 (確保每一步都成功)
   buildCommand: "npm install && npm install --prefix client && CI=false npm run build --prefix client"
+  # 2. 【核心修正】明確宣告輸出目錄。
+  # 這會強迫 Firebase 在打包 Runtime 鏡像時，將此資料夾的內容提取出來。
+  outputDirectory: "client/build"
 
 runConfig:
   cpu: 1
