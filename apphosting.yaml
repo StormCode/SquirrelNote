@@ -2,12 +2,11 @@ kind: "AppHostingYaml"
 schemaVersion: "v1"
 
 buildConfig:
-  # 1. 正常編譯
-  # 2. 直接把內容搬到根目錄一個叫 'frontend' 的資料夾 (這名字比較大眾)
-  buildCommand: |
-    npm install
-    npm install --prefix client
-    cd client && CI=false npm run build
-    cd ..
-    mkdir -p frontend
-    cp -r client/build/. frontend/
+  # 這裡只做最基礎的安裝，不要在這裡 Build 前端
+  buildCommand: "npm install && npm install --prefix client"
+
+runConfig:
+  cpu: 1
+  memoryMiB: 1024
+  # 關鍵：拉長超時，給我們在啟動時「第一次也是唯一一次」編譯的機會
+  timeoutSeconds: 300
