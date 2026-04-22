@@ -4,10 +4,21 @@ const path = require('path');
 const app = express();
 const fs = require('fs');
 
-// 嘗試兩個可能的位置
-const buildPath = fs.existsSync(path.join(__dirname, 'client', 'build')) 
-    ? path.join(__dirname, 'client', 'build') 
-    : path.join(__dirname, 'build'); // Firebase 有時會把 outputDirectory 內容移到根目錄
+// 這是目前最有可能的三個路徑
+const buildPaths = [
+    path.join(__dirname, 'build'),           // Firebase 提拔後的位置
+    path.join(__dirname, 'client', 'build'),  // 原本的位置
+    path.join(__dirname, 'public_html')       // 備用位置
+];
+
+// 找出第一個包含 index.html 的路徑
+const buildPath = buildPaths.find(p => {
+    const exists = fs.existsSync(path.join(p, 'index.html'));
+    console.log(`[Check] 測試路徑: ${p} -> ${exists ? '找到 index.html' : '沒找到'}`);
+    return exists;
+}) || buildPaths[0];
+
+console.log(`[Deployment] 最終決定使用的靜態路徑: ${buildPath}`);
 
 // Setting CORS
 // app.all('*', function(req, res, next) {
