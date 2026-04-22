@@ -4,7 +4,7 @@
   "description": "Squirrel Note App",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "if [ ! -d \"client/build\" ]; then cd client && CI=false npm run build && cd ..; fi && node server.js",
     "server": "nodemon server.js",
     "client": "npm start --prefix client",
     "clientinstall": "npm install --prefix client",
