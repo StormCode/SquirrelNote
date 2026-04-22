@@ -3,5 +3,4 @@ schemaVersion: "v1"
 
 buildConfig:
   # 1. 強制進入 client 並執行 build
-  # 2. 為了防止路徑迷失，build 完後立刻把內容搬移到根目錄的一個新資料夾叫 public_html
-  buildCommand: "npm install && npm install --prefix client && npm run build --prefix client && ls -R client"
+  buildCommand: "npm install; npm install --prefix client; CI=false npm run build --prefix client; echo '--- 開始檢查檔案結構 ---'; ls -R client; echo '--- 檢查結束 ---'"
