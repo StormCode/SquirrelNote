@@ -2,9 +2,9 @@ kind: "AppHostingYaml"
 schemaVersion: "v1"
 
 buildConfig:
-  # 增加 ls 指令，這樣如果這次還失敗，我們去 Build Log 就能看到 build 裡面到底有什麼
-  buildCommand: "npm install && npm install --prefix client && CI=false npm run build --prefix client && ls -R client/build"
-  outputDirectory: "client/build"
+  # 1. 確保編譯成功
+  # 2. 移除 outputDirectory (有時它會干擾手動路徑)
+  buildCommand: "npm install && npm install --prefix client && CI=false npm run build --prefix client"
 
 runConfig:
   cpu: 1
