@@ -25,6 +25,20 @@ app.use('/api/notes', require('./routes/notes'));
 app.use('/api/images', require('./routes/images'));
 app.use('/api/recyclebin', require('./routes/recyclebin'));
 
+// 在 server.js 裡加入這段，直接在網頁上看答案
+app.get('/debug-path', (req, res) => {
+    const fs = require('fs');
+    const path = require('path');
+    const checkPath = path.join(__dirname, 'public'); // 或是你設定的路徑
+    
+    res.json({
+        __dirname: __dirname,
+        exists: fs.existsSync(checkPath),
+        contents: fs.existsSync(checkPath) ? fs.readdirSync(checkPath) : 'Folder not found',
+        processCwd: process.cwd()
+    });
+});
+
 // Serve static assets in production
 if(process.env.NODE_ENV === 'production'){
     // 優先找根目錄下的 public
