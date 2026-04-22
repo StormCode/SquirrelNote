@@ -1,0 +1,8 @@
+kind: "AppHostingYaml"
+schemaVersion: "v1"
+
+buildConfig:
+  buildCommand: "npm install --prefix client && npm run build --prefix client"
+  
+  # 打包後的成品路徑
+  outputDirectory: "client/build"
