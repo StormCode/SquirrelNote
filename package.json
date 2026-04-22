@@ -4,7 +4,7 @@
   "description": "Squirrel Note App",
   "main": "server.js",
   "scripts": {
-    "start": "npm run start",
+    "start": "node start",
     "server": "nodemon server.js",
     "client": "npm start --prefix client",
     "clientinstall": "npm install --prefix client",
