@@ -9,6 +9,9 @@ const buildPath = path.join(__dirname, 'web_dist');
 
 console.log(`[Deployment] 最終鎖定路徑: ${buildPath}`);
 
+// Set static folder
+app.use(express.static(buildPath));
+
 // Setting CORS
 // app.all('*', function(req, res, next) {
 //     res.header("Access-Control-Allow-Origin", "*");
@@ -32,8 +35,6 @@ app.use('/api/recyclebin', require('./routes/recyclebin'));
 
 // Serve static assets in production
 if(process.env.NODE_ENV === 'production'){
-    // Set static folder
-    app.use(express.static(buildPath));
 
     app.get('*', (req, res) => {
         const indexPath = path.join(buildPath, 'index.html');
