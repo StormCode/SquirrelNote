@@ -27,12 +27,11 @@ app.use('/api/recyclebin', require('./routes/recyclebin'));
 
 // Serve static assets in production
 if(process.env.NODE_ENV === 'production'){
-    // 優先找根目錄下的 public
-    const cloudPath = path.join(__dirname, 'public_html');
-    const localPath = path.join(__dirname, 'client', 'build');
+    // 根據 outputDirectory 的行為，路徑可能是這兩個其中之一
+    const path1 = path.join(__dirname, 'client', 'build');
+    const path2 = path.join(__dirname, 'build'); // Firebase 有時會提拔到根目錄
     
-    // 自動切換
-    const buildPath = fs.existsSync(cloudPath) ? cloudPath : localPath;
+    const buildPath = fs.existsSync(path1) ? path1 : path2;
     
     // Set static folder
     app.use(express.static(buildPath));
