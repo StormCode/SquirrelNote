@@ -4,14 +4,17 @@ const path = require('path');
 const app = express();
 const fs = require('fs');
 
-const buildPath = path.join(__dirname, 'client', 'build');
+// 偵測兩個可能的位置：
+// 1. 原本的位置
+// 2. 被 Firebase 提拔到根目錄後的位置
+const paths = [
+    path.join(__dirname, 'client', 'build'),
+    path.join(__dirname, 'build')
+];
 
-console.log(`[Final Check] 正在檢查路徑: ${buildPath}`);
-if (fs.existsSync(buildPath)) {
-    console.log(`[Final Check] 內容有: ${fs.readdirSync(buildPath)}`);
-} else {
-    console.log(`[Final Check] 還是找不到！試試看列出 client 內容: ${fs.readdirSync(path.join(__dirname, 'client'))}`);
-}
+const buildPath = paths.find(p => fs.existsSync(path.join(p, 'index.html'))) || paths[0];
+
+console.log(`[System] 最終鎖定靜態路徑: ${buildPath}`);
 
 // Setting CORS
 // app.all('*', function(req, res, next) {
@@ -44,20 +47,12 @@ if(process.env.NODE_ENV === 'production'){
         if (fs.existsSync(indexPath)) {
             res.sendFile(indexPath);
         } else {
-            // 最終 Debug：如果到這裡還失敗，直接列出 client/build 的內容
-            let detail = "路徑不存在";
-            try {
-                const clientBuildContent = fs.readdirSync(path.join(__dirname, 'client', 'build'));
-                detail = `資料夾存在，內容有: ${JSON.stringify(clientBuildContent)}`;
-            } catch(e) {
-                detail = `資料夾真的不存在，錯誤: ${e.message}`;
-            }
-            
+            const currentFiles = fs.readdirSync(__dirname);
             res.status(404).send(`
-                <h3>最後的診斷</h3>
-                <p>目標路徑: ${indexPath}</p>
-                <p>狀態: ${detail}</p>
-                <p>建議：檢查 client/.gitignore 是否忽略了 build 資料夾</p>
+                <h3>環境診斷中...</h3>
+                <p>嘗試路徑: ${indexPath}</p>
+                <p>根目錄內容: ${JSON.stringify(currentFiles)}</p>
+                <p>請檢查 Build Logs 是否有成功產出檔案。</p>
             `);
         }
     });
