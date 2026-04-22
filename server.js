@@ -4,21 +4,14 @@ const path = require('path');
 const app = express();
 const fs = require('fs');
 
-// 這是目前最有可能的三個路徑
-const buildPaths = [
-    path.join(__dirname, 'build'),           // Firebase 提拔後的位置
-    path.join(__dirname, 'client', 'build'),  // 原本的位置
-    path.join(__dirname, 'public_html')       // 備用位置
-];
+const buildPath = path.join(__dirname, 'client', 'build');
 
-// 找出第一個包含 index.html 的路徑
-const buildPath = buildPaths.find(p => {
-    const exists = fs.existsSync(path.join(p, 'index.html'));
-    console.log(`[Check] 測試路徑: ${p} -> ${exists ? '找到 index.html' : '沒找到'}`);
-    return exists;
-}) || buildPaths[0];
-
-console.log(`[Deployment] 最終決定使用的靜態路徑: ${buildPath}`);
+console.log(`[Final Check] 正在檢查路徑: ${buildPath}`);
+if (fs.existsSync(buildPath)) {
+    console.log(`[Final Check] 內容有: ${fs.readdirSync(buildPath)}`);
+} else {
+    console.log(`[Final Check] 還是找不到！試試看列出 client 內容: ${fs.readdirSync(path.join(__dirname, 'client'))}`);
+}
 
 // Setting CORS
 // app.all('*', function(req, res, next) {
@@ -51,15 +44,22 @@ if(process.env.NODE_ENV === 'production'){
     if (fs.existsSync(indexPath)) {
         res.sendFile(indexPath);
     } else {
-        // 如果連這裡都找不到，把目錄結構印在網頁上給你看，我們直接對答案
-        const rootFiles = fs.readdirSync(__dirname);
+        // 最終 Debug：如果到這裡還失敗，直接列出 client/build 的內容
+        let detail = "路徑不存在";
+        try {
+            const clientBuildContent = fs.readdirSync(path.join(__dirname, 'client', 'build'));
+            detail = `資料夾存在，內容有: ${JSON.stringify(clientBuildContent)}`;
+        } catch(e) {
+            detail = `資料夾真的不存在，錯誤: ${e.message}`;
+        }
+        
         res.status(404).send(`
-            <h3>還是找不到 index.html</h3>
-            <p>嘗試路徑: ${indexPath}</p>
-            <p>根目錄內容: ${JSON.stringify(rootFiles)}</p>
+            <h3>最後的診斷</h3>
+            <p>目標路徑: ${indexPath}</p>
+            <p>狀態: ${detail}</p>
+            <p>建議：檢查 client/.gitignore 是否忽略了 build 資料夾</p>
         `);
     }
-});
 }
 
 app.listen(PORT, "0.0.0.0", () => {
