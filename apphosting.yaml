@@ -2,11 +2,10 @@ kind: "AppHostingYaml"
 schemaVersion: "v1"
 
 buildConfig:
-  # 這裡只做基礎安裝，編譯留到 start 階段
-  buildCommand: "npm install"
-
-runConfig:
-  cpu: 1
-  memoryMiB: 1024
-  # 因為要在啟動時編譯，超時時間要拉長
-  timeoutSeconds: 300
+  buildCommand: |
+    npm install
+    npm install --prefix client
+    cd client && CI=false npm run build
+    cd ..
+    # 將產出搬移到一個絕對不會被誤刪的名字
+    cp -r client/build ./dist_final
