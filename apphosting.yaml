@@ -3,4 +3,12 @@ schemaVersion: "v1"
 
 buildConfig:
   # 1. 強制進入 client 並執行 build
-  buildCommand: "npm install && npm install --prefix client && CI=false npm run build --prefix client && mkdir -p ./public && cp -r client/build/* ./public/"
+  buildCommand: |
+    npm install
+    npm install --prefix client
+    cd client && CI=false npm run build
+    cd ..
+    mkdir -p public_html
+    cp -r client/build/* public_html/
+    echo "Files in public_html:"
+    ls public_html
