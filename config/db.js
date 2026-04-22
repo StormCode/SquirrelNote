@@ -8,7 +8,9 @@ const connectDB = async () => {
             {
                 useNewUrlParser: true,
                 useCreateIndex: true,
-                useFindAndModify: false
+                useFindAndModify: false,
+                useUnifiedTopology: true,
+                serverSelectionTimeoutMS: 10000 // 10秒連不上就報錯
             });
 
         console.log('MongoDB connected');
