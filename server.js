@@ -27,15 +27,12 @@ app.use('/api/recyclebin', require('./routes/recyclebin'));
 
 // 在 server.js 裡加入這段，直接在網頁上看答案
 app.get('/debug-path', (req, res) => {
-    const fs = require('fs');
-    const path = require('path');
-    const checkPath = path.join(__dirname, 'public_html'); // 或是你設定的路徑
-    
     res.json({
-        __dirname: __dirname,
-        exists: fs.existsSync(checkPath),
-        contents: fs.existsSync(checkPath) ? fs.readdirSync(checkPath) : 'Folder not found',
-        processCwd: process.cwd()
+        __dirname,
+        buildPath, // 看看路徑對不對
+        exists: fs.existsSync(buildPath),
+        contents: fs.existsSync(buildPath) ? fs.readdirSync(buildPath) : 'Still not found',
+        clientFolder: fs.readdirSync(path.join(__dirname, 'client')) // 看看 client 裡面到底有什麼
     });
 });
 
