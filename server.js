@@ -4,6 +4,27 @@ const path = require('path');
 
 const app = express();
 
+const fs = require('fs');
+
+// 讓 Log 告訴我們真相
+console.log("=== 檔案系統檢查開始 ===");
+console.log("當前目錄 (CWD):", process.cwd());
+console.log("server.js 所在路徑 (__dirname):", __dirname);
+
+const checkDir = (dirPath) => {
+    if (fs.existsSync(dirPath)) {
+        console.log(`✅ 找到路徑: ${dirPath}`);
+        console.log(`內容:`, fs.readdirSync(dirPath));
+    } else {
+        console.log(`❌ 找不到路徑: ${dirPath}`);
+    }
+};
+
+// 檢查各個層級
+checkDir(path.join(__dirname, 'client'));
+checkDir(path.join(__dirname, 'client/build'));
+console.log("=== 檔案系統檢查結束 ===");
+
 // Setting CORS
 // app.all('*', function(req, res, next) {
 //     res.header("Access-Control-Allow-Origin", "*");
