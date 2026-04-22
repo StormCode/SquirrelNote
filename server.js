@@ -4,17 +4,10 @@ const path = require('path');
 const app = express();
 const fs = require('fs');
 
-// 偵測兩個可能的位置：
-// 1. 原本的位置
-// 2. 被 Firebase 提拔到根目錄後的位置
-const paths = [
-    path.join(__dirname, 'client', 'build'),
-    path.join(__dirname, 'build')
-];
+// 鎖定我們強行建立的資料夾
+const buildPath = path.join(__dirname, 'web_dist');
 
-const buildPath = paths.find(p => fs.existsSync(path.join(p, 'index.html'))) || paths[0];
-
-console.log(`[System] 最終鎖定靜態路徑: ${buildPath}`);
+console.log(`[Deployment] 最終鎖定路徑: ${buildPath}`);
 
 // Setting CORS
 // app.all('*', function(req, res, next) {
@@ -47,12 +40,21 @@ if(process.env.NODE_ENV === 'production'){
         if (fs.existsSync(indexPath)) {
             res.sendFile(indexPath);
         } else {
-            const currentFiles = fs.readdirSync(__dirname);
+            // 萬一還是失敗，直接列出 web_dist 裡面到底有什麼
+            let folderStatus = "資料夾不存在";
+            try {
+                if (fs.existsSync(buildPath)) {
+                    folderStatus = `內容: ${JSON.stringify(fs.readdirSync(buildPath))}`;
+                }
+            } catch (e) {
+                folderStatus = `錯誤: ${e.message}`;
+            }
+    
             res.status(404).send(`
-                <h3>環境診斷中...</h3>
+                <h3>最後的防線失敗</h3>
                 <p>嘗試路徑: ${indexPath}</p>
-                <p>根目錄內容: ${JSON.stringify(currentFiles)}</p>
-                <p>請檢查 Build Logs 是否有成功產出檔案。</p>
+                <p>web_dist 狀態: ${folderStatus}</p>
+                <p>根目錄內容: ${JSON.stringify(fs.readdirSync(__dirname))}</p>
             `);
         }
     });
