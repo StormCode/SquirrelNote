@@ -46,7 +46,20 @@ if(process.env.NODE_ENV === 'production'){
     // Set static folder
     app.use(express.static(buildPath));
 
-    app.get('*', (req, res) => res.sendFile(path.join(buildPath, 'index.html')));
+    app.get('*', (req, res) => {
+    const indexPath = path.join(buildPath, 'index.html');
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else {
+        // 如果連這裡都找不到，把目錄結構印在網頁上給你看，我們直接對答案
+        const rootFiles = fs.readdirSync(__dirname);
+        res.status(404).send(`
+            <h3>還是找不到 index.html</h3>
+            <p>嘗試路徑: ${indexPath}</p>
+            <p>根目錄內容: ${JSON.stringify(rootFiles)}</p>
+        `);
+    }
+});
 }
 
 app.listen(PORT, "0.0.0.0", () => {
