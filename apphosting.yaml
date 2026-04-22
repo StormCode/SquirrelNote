@@ -3,4 +3,13 @@ schemaVersion: "v1"
 
 buildConfig:
   # 1. 強制進入 client 並執行 build
-  buildCommand: "npm install; npm install --prefix client; CI=false npm run build --prefix client; echo '--- 開始檢查檔案結構 ---'; ls -R client; echo '--- 檢查結束 ---'"
+  buildCommand: |
+    export NODE_OPTIONS="--max-old-space-size=2048"
+    npm install
+    npm install --prefix client
+    echo "--- 啟動前端編譯 ---"
+    cd client && CI=false npm run build && cd ..
+    echo "--- 編譯完成，當前根目錄結構 ---"
+    ls -F
+    echo "--- 檢查 client 目錄 ---"
+    ls -F client/
