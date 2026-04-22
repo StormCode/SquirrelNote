@@ -36,9 +36,6 @@ if(process.env.NODE_ENV === 'production'){
     
     // Set static folder
     app.use(express.static(buildPath));
-
-    app.get('*', (req, res) => res.sendFile(path.join(buildPath, 'index.html')));
-
     
 
     // 在 server.js 裡加入這段，直接在網頁上看答案
@@ -51,6 +48,8 @@ if(process.env.NODE_ENV === 'production'){
             clientFolder: fs.readdirSync(path.join(__dirname, 'client')) // 看看 client 裡面到底有什麼
         });
     });
+
+    app.get('*', (req, res) => res.sendFile(path.join(buildPath, 'index.html')));
 }
 
 app.listen(PORT, "0.0.0.0", () => {
