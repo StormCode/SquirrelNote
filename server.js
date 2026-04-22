@@ -27,7 +27,12 @@ app.use('/api/recyclebin', require('./routes/recyclebin'));
 
 // Serve static assets in production
 if(process.env.NODE_ENV === 'production'){
-    let buildPath = path.join(__dirname, 'client', 'build');
+    // 優先找根目錄下的 public
+    const cloudPath = path.join(__dirname, 'public');
+    const localPath = path.join(__dirname, 'client', 'build');
+    
+    // 自動切換
+    const buildPath = fs.existsSync(cloudPath) ? cloudPath : localPath;
     
     // Set static folder
     app.use(express.static(buildPath));
