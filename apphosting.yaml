@@ -2,9 +2,8 @@ kind: "AppHostingYaml"
 schemaVersion: "v1"
 
 buildConfig:
-  # 確保編譯指令正確執行
-  buildCommand: "npm install && npm install --prefix client && CI=false npm run build --prefix client"
-  # 關鍵：明確宣告產出目錄，這樣 Firebase 才會把它搬進 Runtime 容器
+  # 增加 ls 指令，這樣如果這次還失敗，我們去 Build Log 就能看到 build 裡面到底有什麼
+  buildCommand: "npm install && npm install --prefix client && CI=false npm run build --prefix client && ls -R client/build"
   outputDirectory: "client/build"
 
 runConfig:
