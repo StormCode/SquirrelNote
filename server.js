@@ -4,7 +4,10 @@ const path = require('path');
 const app = express();
 const fs = require('fs');
 
-const buildPath = path.join(__dirname, 'client', 'build');
+// 嘗試兩個可能的位置
+const buildPath = fs.existsSync(path.join(__dirname, 'client', 'build')) 
+    ? path.join(__dirname, 'client', 'build') 
+    : path.join(__dirname, 'build'); // Firebase 有時會把 outputDirectory 內容移到根目錄
 
 // Setting CORS
 // app.all('*', function(req, res, next) {
