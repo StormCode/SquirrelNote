@@ -40,26 +40,27 @@ if(process.env.NODE_ENV === 'production'){
     app.use(express.static(buildPath));
 
     app.get('*', (req, res) => {
-    const indexPath = path.join(buildPath, 'index.html');
-    if (fs.existsSync(indexPath)) {
-        res.sendFile(indexPath);
-    } else {
-        // 最終 Debug：如果到這裡還失敗，直接列出 client/build 的內容
-        let detail = "路徑不存在";
-        try {
-            const clientBuildContent = fs.readdirSync(path.join(__dirname, 'client', 'build'));
-            detail = `資料夾存在，內容有: ${JSON.stringify(clientBuildContent)}`;
-        } catch(e) {
-            detail = `資料夾真的不存在，錯誤: ${e.message}`;
+        const indexPath = path.join(buildPath, 'index.html');
+        if (fs.existsSync(indexPath)) {
+            res.sendFile(indexPath);
+        } else {
+            // 最終 Debug：如果到這裡還失敗，直接列出 client/build 的內容
+            let detail = "路徑不存在";
+            try {
+                const clientBuildContent = fs.readdirSync(path.join(__dirname, 'client', 'build'));
+                detail = `資料夾存在，內容有: ${JSON.stringify(clientBuildContent)}`;
+            } catch(e) {
+                detail = `資料夾真的不存在，錯誤: ${e.message}`;
+            }
+            
+            res.status(404).send(`
+                <h3>最後的診斷</h3>
+                <p>目標路徑: ${indexPath}</p>
+                <p>狀態: ${detail}</p>
+                <p>建議：檢查 client/.gitignore 是否忽略了 build 資料夾</p>
+            `);
         }
-        
-        res.status(404).send(`
-            <h3>最後的診斷</h3>
-            <p>目標路徑: ${indexPath}</p>
-            <p>狀態: ${detail}</p>
-            <p>建議：檢查 client/.gitignore 是否忽略了 build 資料夾</p>
-        `);
-    }
+    });
 }
 
 app.listen(PORT, "0.0.0.0", () => {
