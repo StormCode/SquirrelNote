@@ -3,8 +3,9 @@ schemaVersion: "v1"
 
 buildConfig:
   # 1. 安裝根目錄與 client 的依賴 2. 編譯前端
-  buildCommand: "npm install && npm install --prefix client && npm run build --prefix client"
-
+  # 確保先進入 client 資料夾執行 build
+  buildCommand: "npm install && cd client && npm install && npm run build"
+  
 runConfig:
   # 確保與 Express 監聽的變數一致
   environmentVariables:
