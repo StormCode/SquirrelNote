@@ -12,9 +12,6 @@ const app = express();
 //     next();
 // });
 
-// Connect DataBase
-connectDB();
-
 // Init Middleware
 app.use(express.json({ extended: false }));
 
@@ -37,5 +34,9 @@ if(process.env.NODE_ENV === 'production'){
 }
 
 app.listen(PORT, "0.0.0.0", () => {
+    
     console.log(`server started on port: ${PORT}`)
+    
+    // Connect DataBase
+    connectDB();
 });
