@@ -1,29 +1,8 @@
 const express = require('express');
 const connectDB = require('./config/db');
 const path = require('path');
-
 const app = express();
-
 const fs = require('fs');
-
-// 讓 Log 告訴我們真相
-console.log("=== 檔案系統檢查開始 ===");
-console.log("當前目錄 (CWD):", process.cwd());
-console.log("server.js 所在路徑 (__dirname):", __dirname);
-
-const checkDir = (dirPath) => {
-    if (fs.existsSync(dirPath)) {
-        console.log(`✅ 找到路徑: ${dirPath}`);
-        console.log(`內容:`, fs.readdirSync(dirPath));
-    } else {
-        console.log(`❌ 找不到路徑: ${dirPath}`);
-    }
-};
-
-// 檢查各個層級
-checkDir(path.join(__dirname, 'client'));
-checkDir(path.join(__dirname, 'client/build'));
-console.log("=== 檔案系統檢查結束 ===");
 
 // Setting CORS
 // app.all('*', function(req, res, next) {
@@ -56,6 +35,8 @@ if(process.env.NODE_ENV === 'production'){
     
     // 2. 自動偵測：優先使用產出的 public_html，如果沒有，就退回本地路徑
     let buildPath = fs.existsSync(prodPath) ? prodPath : localPath;
+
+    console.log(`[Production] Serving static files from: ${buildPath}`);
     
     // Set static folder
     app.use(express.static(buildPath));
