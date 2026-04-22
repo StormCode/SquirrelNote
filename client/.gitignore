@@ -2,7 +2,10 @@ node_modules/
 /config/production.json
 /config/default.json
 
-/client/build
+# 忽略所有 build 內容
+/client/build/*
+# 但不要忽略資料夾本身和 .gitkeep (如果有)
+!/client/build/.gitkeep
 
 .DS_Store
 /client/.env.local
