@@ -2,10 +2,12 @@ kind: "AppHostingYaml"
 schemaVersion: "v1"
 
 buildConfig:
+  # 1. 正常編譯
+  # 2. 直接把內容搬到根目錄一個叫 'frontend' 的資料夾 (這名字比較大眾)
   buildCommand: |
     npm install
     npm install --prefix client
     cd client && CI=false npm run build
     cd ..
-    # 將產出搬移到一個絕對不會被誤刪的名字
-    cp -r client/build ./dist_final
+    mkdir -p frontend
+    cp -r client/build/. frontend/
