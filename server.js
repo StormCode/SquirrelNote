@@ -4,15 +4,7 @@ const path = require('path');
 const app = express();
 const fs = require('fs');
 
-// 鎖定這個我們在 Build 階段強行塞進去的資料夾
-const buildPath = path.join(__dirname, 'frontend');
-
-console.log(`[Check] 伺服器啟動，前端路徑: ${buildPath}`);
-if (fs.existsSync(buildPath)) {
-    console.log(`[Check] 資料夾內容: ${fs.readdirSync(buildPath)}`);
-} else {
-    console.log(`[Check] 找不到資料夾！這代表 Firebase 沒把它帶過來。`);
-}
+const buildPath = path.join(__dirname, 'client', 'build');
 
 // Setting CORS
 // app.all('*', function(req, res, next) {
