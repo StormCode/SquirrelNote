@@ -1,4 +1,12 @@
 kind: "AppHostingYaml"
 schemaVersion: "v1"
 
-buildCommand: "npm install && npm install --prefix client && CI=false npm run build --prefix client"
+buildConfig:
+  # 1. 確保編譯指令正確
+  buildCommand: "npm install && npm install --prefix client && CI=false npm run build --prefix client"
+  # 2. 這是關鍵！明確告訴 Firebase 要保留這個資料夾
+  outputDirectory: "client/build"
+
+runConfig:
+  cpu: 1
+  memoryMiB: 1024
