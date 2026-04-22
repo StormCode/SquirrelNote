@@ -25,17 +25,6 @@ app.use('/api/notes', require('./routes/notes'));
 app.use('/api/images', require('./routes/images'));
 app.use('/api/recyclebin', require('./routes/recyclebin'));
 
-// 在 server.js 裡加入這段，直接在網頁上看答案
-app.get('/debug-path', (req, res) => {
-    res.json({
-        __dirname,
-        buildPath, // 看看路徑對不對
-        exists: fs.existsSync(buildPath),
-        contents: fs.existsSync(buildPath) ? fs.readdirSync(buildPath) : 'Still not found',
-        clientFolder: fs.readdirSync(path.join(__dirname, 'client')) // 看看 client 裡面到底有什麼
-    });
-});
-
 // Serve static assets in production
 if(process.env.NODE_ENV === 'production'){
     // 優先找根目錄下的 public
@@ -49,6 +38,19 @@ if(process.env.NODE_ENV === 'production'){
     app.use(express.static(buildPath));
 
     app.get('*', (req, res) => res.sendFile(path.join(buildPath, 'index.html')));
+
+    
+
+    // 在 server.js 裡加入這段，直接在網頁上看答案
+    app.get('/debug-path', (req, res) => {
+        res.json({
+            __dirname,
+            buildPath, // 看看路徑對不對
+            exists: fs.existsSync(buildPath),
+            contents: fs.existsSync(buildPath) ? fs.readdirSync(buildPath) : 'Still not found',
+            clientFolder: fs.readdirSync(path.join(__dirname, 'client')) // 看看 client 裡面到底有什麼
+        });
+    });
 }
 
 app.listen(PORT, "0.0.0.0", () => {
