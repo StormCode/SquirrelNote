@@ -29,7 +29,7 @@ app.use('/api/recyclebin', require('./routes/recyclebin'));
 app.get('/debug-path', (req, res) => {
     const fs = require('fs');
     const path = require('path');
-    const checkPath = path.join(__dirname, 'public'); // 或是你設定的路徑
+    const checkPath = path.join(__dirname, 'public_html'); // 或是你設定的路徑
     
     res.json({
         __dirname: __dirname,
@@ -42,7 +42,7 @@ app.get('/debug-path', (req, res) => {
 // Serve static assets in production
 if(process.env.NODE_ENV === 'production'){
     // 優先找根目錄下的 public
-    const cloudPath = path.join(__dirname, 'public');
+    const cloudPath = path.join(__dirname, 'public_html');
     const localPath = path.join(__dirname, 'client', 'build');
     
     // 自動切換
