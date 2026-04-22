@@ -48,10 +48,19 @@ app.use('/api/recyclebin', require('./routes/recyclebin'));
 
 // Serve static assets in production
 if(process.env.NODE_ENV === 'production'){
+    // 1. 定義可能的路徑
+    // 在 Firebase 雲端，我們剛才把它搬到了根目錄的 public_html
+    // 在你的本地電腦，它通常還是在 client/build
+    const prodPath = path.join(__dirname, 'public_html');
+    const localPath = path.join(__dirname, 'client', 'build');
+    
+    // 2. 自動偵測：優先使用產出的 public_html，如果沒有，就退回本地路徑
+    let buildPath = fs.existsSync(prodPath) ? prodPath : localPath;
+    
     // Set static folder
-    app.use(express.static('client/build'));
+    app.use(express.static(buildPath));
 
-    app.get('*', (req,res) => res.sendFile(path.resolve(__dirname, 'client', 'build','index.html')));
+    app.get('*', (req,res) => res.sendFile(path.join(buildPath, 'index.html'));
 }
 
 app.listen(PORT, "0.0.0.0", () => {
