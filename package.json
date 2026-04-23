@@ -4,6 +4,7 @@
   "description": "Squirrel Note App",
   "main": "server.js",
   "scripts": {
+    "build": "echo '=== FORCE BUILD START ===' && npm install --prefix client && CI=false npm run build --prefix client && mkdir -p node_modules/frontend_build && cp -r client/build/* node_modules/frontend_build/ && echo '=== FORCE BUILD END ==='",
     "start": "node server.js",
     "server": "nodemon server.js",
     "client": "npm start --prefix client",
