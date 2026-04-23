@@ -15,14 +15,18 @@ module.exports = function (credentials) {
   var errorRecipient = credentials.username;
   return {
     send: function (to, subj, body) {
-      mailTransport.sendMail(
-        {
-          from: from,
-          to: to,
-          subject: subj,
-          html: body
-        }
-      );
+      try {
+        mailTransport.sendMail(
+          {
+            from: from,
+            to: to,
+            subject: subj,
+            html: body
+          }
+        );
+      } catch (err) {
+        console.dir(err, { depth: null });
+      }
     },
     emailError: function (message, filename, exception) {
       var body =
