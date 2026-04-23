@@ -1,15 +1,10 @@
-kind: "AppHostingYaml"
-schemaVersion: "v1"
-
 buildConfig:
-  # 1. 強迫編譯
-  # 2. 建立一個全新的根目錄資料夾 web_dist
-  # 3. 把內容搬過去，並 ls 確認
   buildCommand: |
     npm install
     npm install --prefix client
     cd client && CI=false npm run build && cd ..
-    mkdir -p web_dist
-    cp -r client/build/. web_dist/
-    echo "--- 檢查 web_dist 內容 ---"
-    ls web_dist
+    # 不要 mkdir web_dist 了，直接用現有的或是把 client/build 內容硬塞
+    mkdir -p public_html
+    cp -r client/build/* public_html/
+    echo "--- 檢查 public_html ---"
+    ls public_html
