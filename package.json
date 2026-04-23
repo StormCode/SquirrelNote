@@ -4,7 +4,7 @@
   "description": "Squirrel Note App",
   "main": "server.js",
   "scripts": {
-    "build": "echo '--- 1. START ---'; npm install --prefix client; echo '--- 2. BUILD ---'; CI=false NODE_OPTIONS='--max-old-space-size=1024' npm run build --prefix client; echo '--- 3. SEARCH & COPY ---'; FIND_PATH=$(find client -name index.html -path '*/build/*' | sed 's/index.html//'); echo \"Found build at: $FIND_PATH\"; mkdir -p node_modules/frontend_build; cp -rv ${FIND_PATH}* node_modules/frontend_build/; echo '--- 4. END ---'",
+    "build": "npm install --prefix client && CI=false npm run build --prefix client",
     "start": "node server.js",
     "server": "nodemon server.js",
     "client": "npm start --prefix client",
