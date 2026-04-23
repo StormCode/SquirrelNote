@@ -2,27 +2,8 @@ kind: "AppHostingYaml"
 schemaVersion: "v1"
 
 buildConfig:
-  buildCommand: |
-    echo "=== BUILD START: $(date) ==="
-    echo "Current directory: $(pwd)"
-    
-    # 1. 驗證 npm install 是否真的在跑
-    npm install && npm install --prefix client
-    
-    # 2. 執行編譯並捕捉所有錯誤輸出 (2>&1)
-    echo "Starting React Build..."
-    cd client && CI=false npm run build 2>&1
-    cd ..
-    
-    # 3. 關鍵驗證：如果 build 資料夾存在，建立一個標記檔案
-    if [ -d "client/build" ]; then
-      echo "SUCCESS: client/build folder exists."
-      ls -R client/build
-      # 寄生到 node_modules
-      mkdir -p node_modules/frontend_build
-      cp -r client/build/* node_modules/frontend_build/
-      echo "DEBIAN_MARKER" > node_modules/frontend_build/build_was_here.txt
-    else
-      echo "FAILURE: client/build folder NOT FOUND!"
-    fi
-    echo "=== BUILD END: $(date) ==="
+  buildCommand: "npm run build"
+
+runConfig:
+  cpu: 1
+  memoryMiB: 2048
