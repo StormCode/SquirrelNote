@@ -28,17 +28,17 @@ router.post('/', [
         .isLength({ min: 6 })
 ], async (req, res) => {
     const errors = validationResult(req);
-    if(!errors.isEmpty()){
+    if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
 
     const { name, email, password } = req.body;
 
-    try{
-        let user = await User.findOne({email});
+    try {
+        let user = await User.findOne({ email });
 
-        if(user) {
-            return res.status(400).json({status: DUPLICATED_USER});
+        if (user) {
+            return res.status(400).json({ status: DUPLICATED_USER });
         }
 
         user = new User({
@@ -51,13 +51,13 @@ router.post('/', [
 
         user.password = await bcrypt.hash(password, salt);
 
-        
+
         // 產生驗證帳號連結
         let token = await bcrypt.hash(email, salt);
-        token = token.replace(/\//g,'');    //把斜線去掉
+        token = token.replace(/\//g, '');    //把斜線去掉
         const baseUrl = `${req.protocol}://${url.parse(req.get('origin'), false, true).hostname}`;
         const authUserLink = `${baseUrl}/AuthUser/${token}`;
-        
+
         // 將token存到該名使用者document
         user.activeToken = token;
         user.activeExpires = Date.now() + 3600000;
@@ -67,7 +67,7 @@ router.post('/', [
         //
         // 寄發帳號啟用信至mail
         //
-        
+
         let title = '松鼠筆記-帳號啟用信件';
         let content = `<div class='container' 
                             style='text-align: center;
@@ -82,7 +82,7 @@ router.post('/', [
             <p style='text-align: left;'><a href='${authUserLink}'>${authUserLink}</a></p>
             <br /><br /><p style='text-align: left;'>希望您使用愉快~</p><p style='text-align: left;'>松鼠筆記 敬上</p>
             </div>`;
-        
+
         let mailSender = require('../utils/email.js')({
             username: process.env.GMAIL_USERNAME,
             clientId: process.env.GMAIL_CLIENT_ID,
@@ -90,7 +90,14 @@ router.post('/', [
             refreshToken: process.env.GMAIL_REFRESH_TOKEN
         });
 
-        mailSender.send(email,title,content);
+        try {
+            await mailSender.verifyConnection();
+
+            await mailSender.send(email, title, content);
+        }
+        catch (error) {
+            console.log('寄送帳號啟用信件發生錯誤:', error.message);
+        }
 
         // 產生驗證身份的token
         const payload = {
@@ -99,14 +106,14 @@ router.post('/', [
             }
         };
 
-        jwt.sign(payload, process.env.JWTSECRET,{
+        jwt.sign(payload, process.env.JWTSECRET, {
             expiresIn: 360000
-        },(err, token) => {
-            if(err) throw err;
-            res.json({token});
+        }, (err, token) => {
+            if (err) throw err;
+            res.json({ token });
         });
     }
-    catch(err){
+    catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
     }
@@ -120,35 +127,35 @@ router.post('/forgotPassword', [
         .isEmail()
 ], async (req, res) => {
     const errors = validationResult(req);
-    if(!errors.isEmpty()){
+    if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
 
     const { email } = req.body;
 
-    try{
-        let user = await User.findOne({email});
+    try {
+        let user = await User.findOne({ email });
 
-        if(!user) {
-            return res.status(400).json({status: NOTEXIST_USER});
+        if (!user) {
+            return res.status(400).json({ status: NOTEXIST_USER });
         }
 
         // 產生重設密碼連結
         const salt = await bcrypt.genSalt(10);
         let token = await bcrypt.hash(email, salt);
-        token = token.replace(/\//g,'');    //把斜線去掉
+        token = token.replace(/\//g, '');    //把斜線去掉
         const baseUrl = `${req.protocol}://${url.parse(req.get('origin'), false, true).hostname}`;
         const resetPwdLink = `${baseUrl}/ResetPassword/${token}`;
-        
+
         // 將token存到該名使用者document
         await User.findByIdAndUpdate(user._id,
-            { $set: {'resetPasswordToken': token, 'resetPasswordExpires': Date.now() + 3600000 }},
+            { $set: { 'resetPasswordToken': token, 'resetPasswordExpires': Date.now() + 3600000 } },
             { new: true });
 
         //
         // 寄發重設密碼信至mail
         //
-        
+
         let title = '松鼠筆記-重設密碼信件';
         let content = `<div class='container' 
                             style='text-align: center;
@@ -162,7 +169,7 @@ router.post('/forgotPassword', [
                         <p style='text-align: left;'>您收到這封信件是因為您(或他人)對您的帳號做了重設密碼的操作，若非您本人的意願，請忽略這封信件；若您想重設密碼請點擊以下連結：</p>
                         <p style='text-align: left;'><a href='${resetPwdLink}'>${resetPwdLink}</a></p>
                         </div>`;
-        
+
         let mailSender = require('../utils/email.js')({
             username: process.env.GMAIL_USERNAME,
             clientId: process.env.GMAIL_CLIENT_ID,
@@ -170,11 +177,11 @@ router.post('/forgotPassword', [
             refreshToken: process.env.GMAIL_REFRESH_TOKEN
         });
 
-        mailSender.send(email,title,content);
+        mailSender.send(email, title, content);
 
         res.status(200).send();
     }
-    catch(err){
+    catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
     }
@@ -184,18 +191,18 @@ router.post('/forgotPassword', [
 // @desc            重設密碼
 // @access          Public
 router.post('/resetPassword', [
-        check('password', '請輸入6位以上的字元、數字或符號')
-            .isLength({ min: 6 })
-    ], async (req, res) => {
-    try{
-        const {token, password} = req.body;
+    check('password', '請輸入6位以上的字元、數字或符號')
+        .isLength({ min: 6 })
+], async (req, res) => {
+    try {
+        const { token, password } = req.body;
 
-        let user = await User.findOne({resetPasswordToken: token, resetPasswordExpires: {$gt: Date.now()}});
+        let user = await User.findOne({ resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } });
 
-        if(!user) {
-            return res.status(400).json({status: INVALID_CREDENTIALS});
+        if (!user) {
+            return res.status(400).json({ status: INVALID_CREDENTIALS });
         }
-        
+
         const salt = await bcrypt.genSalt(10);
 
         user.password = await bcrypt.hash(password, salt);
@@ -203,7 +210,8 @@ router.post('/resetPassword', [
         await user.save();
 
         await User.findByIdAndUpdate(user._id,
-            { $unset: {
+            {
+                $unset: {
                     'resetPasswordToken': 1,
                     'resetPasswordExpires': 1
                 }
@@ -211,7 +219,7 @@ router.post('/resetPassword', [
 
         res.status(200).send();
     }
-    catch(err){
+    catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
     }
