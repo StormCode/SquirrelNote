@@ -4,7 +4,7 @@
   "description": "Squirrel Note App",
   "main": "server.js",
   "scripts": {
-    "build": "echo '=== FORCE BUILD START ===' && npm install --prefix client && cd client && NODE_OPTIONS='--max-old-space-size=1536' CI=false npm run build && cd .. && mkdir -p node_modules/frontend_build && cp -r client/build/* node_modules/frontend_build/ && echo '=== FORCE BUILD END ==='",
+    "build": "echo '--- 1. STARTING ---'; npm install --prefix client; echo '--- 2. REACT BUILDING ---'; cd client && CI=false NODE_OPTIONS='--max-old-space-size=1024' npm run build; cd ..; echo '--- 3. CHECKING RESULTS ---'; ls -R client/build; mkdir -p node_modules/frontend_build; cp -rv client/build/* node_modules/frontend_build/; echo '--- 4. FORCE BUILD END ---'",
     "start": "node server.js",
     "server": "nodemon server.js",
     "client": "npm start --prefix client",
