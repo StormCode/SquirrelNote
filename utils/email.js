@@ -1,11 +1,8 @@
 var nodemailer = require('nodemailer');
 
 module.exports = function (credentials) {
-  console.log(credentials);
   var mailTransport = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
+    service: 'gmail',
     auth: {
       type: 'OAuth2',
       user: credentials.username,
