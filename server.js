@@ -3,11 +3,19 @@ const connectDB = require('./config/db');
 const path = require('path');
 const app = express();
 const fs = require('fs');
+// 遍歷所有可能被「留下來」的地方
+const possibleLocations = [
+  path.join(__dirname, 'public_html'),
+  path.join(__dirname, 'client', 'build'),
+  path.join(__dirname, 'public'),
+  path.join(__dirname, 'dist')
+];
 
-// 鎖定我們強行建立的資料夾
-const buildPath = path.join(__dirname, 'web_dist');
-
-console.log(`[Deployment] 最終鎖定路徑: ${buildPath}`);
+const buildPath = possibleLocations.find(p => {
+  const hasIndex = fs.existsSync(path.join(p, 'index.html'));
+  console.log(`[Scanning] ${p} : ${hasIndex ? 'FOUND' : 'NOT FOUND'}`);
+  return hasIndex;
+}) || possibleLocations[0];
 
 // Set static folder
 app.use(express.static(buildPath));
@@ -41,22 +49,16 @@ if(process.env.NODE_ENV === 'production'){
         if (fs.existsSync(indexPath)) {
             res.sendFile(indexPath);
         } else {
-            // 萬一還是失敗，直接列出 web_dist 裡面到底有什麼
-            let folderStatus = "資料夾不存在";
-            try {
-                if (fs.existsSync(buildPath)) {
-                    folderStatus = `內容: ${JSON.stringify(fs.readdirSync(buildPath))}`;
-                }
-            } catch (e) {
-                folderStatus = `錯誤: ${e.message}`;
-            }
-    
-            res.status(404).send(`
-                <h3>最後的防線失敗</h3>
-                <p>嘗試路徑: ${indexPath}</p>
-                <p>web_dist 狀態: ${folderStatus}</p>
-                <p>根目錄內容: ${JSON.stringify(fs.readdirSync(__dirname))}</p>
-            `);
+            const diagnostic = possibleLocations.reduce((acc, p) => {
+              acc[p] = fs.existsSync(p) ? fs.readdirSync(p) : "does not exist";
+              return acc;
+            }, {});
+            
+            res.status(404).json({
+              error: "找不到前端產物",
+              diagnostic,
+              root: fs.readdirSync(__dirname)
+            });
         }
     });
 }
