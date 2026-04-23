@@ -44,6 +44,7 @@ if(process.env.NODE_ENV === 'production'){
                 <p>目前鎖定路徑: ${buildPath}</p>
                 <p>該資料夾內容: ${JSON.stringify(files)}</p>
                 <p>根目錄內容: ${JSON.stringify(fs.readdirSync(__dirname))}</p>
+                <p>client 內容: ${JSON.stringify(fs.readdirSync(path.join(__dirname, 'client')))}</p>
                 <p><b>如果上面沒有 index.html，代表 React Build 沒跑完就斷了。</b></p>
             `);
         }
