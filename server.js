@@ -3,21 +3,9 @@ const connectDB = require('./config/db');
 const path = require('path');
 const app = express();
 const fs = require('fs');
-// 遍歷所有可能被「留下來」的地方
-const possibleLocations = [
-  path.join(__dirname, 'public_html'),
-  path.join(__dirname, 'client', 'build'),
-  path.join(__dirname, 'public'),
-  path.join(__dirname, 'dist')
-];
 
-const buildPath = possibleLocations.find(p => {
-  const hasIndex = fs.existsSync(path.join(p, 'index.html'));
-  console.log(`[Scanning] ${p} : ${hasIndex ? 'FOUND' : 'NOT FOUND'}`);
-  return hasIndex;
-}) || possibleLocations[0];
+const buildPath = path.join(__dirname, 'client', 'build');
 
-// Set static folder
 app.use(express.static(buildPath));
 
 // Setting CORS
@@ -49,16 +37,15 @@ if(process.env.NODE_ENV === 'production'){
         if (fs.existsSync(indexPath)) {
             res.sendFile(indexPath);
         } else {
-            const diagnostic = possibleLocations.reduce((acc, p) => {
-              acc[p] = fs.existsSync(p) ? fs.readdirSync(p) : "does not exist";
-              return acc;
-            }, {});
-            
-            res.status(404).json({
-              error: "找不到前端產物",
-              diagnostic,
-              root: fs.readdirSync(__dirname)
-            });
+            const files = fs.existsSync(buildPath) ? fs.readdirSync(buildPath) : "Directory Missing";
+    
+            res.status(200).send(`
+                <h1>診斷模式</h1>
+                <p>目前鎖定路徑: ${buildPath}</p>
+                <p>該資料夾內容: ${JSON.stringify(files)}</p>
+                <p>根目錄內容: ${JSON.stringify(fs.readdirSync(__dirname))}</p>
+                <p><b>如果上面沒有 index.html，代表 React Build 沒跑完就斷了。</b></p>
+            `);
         }
     });
 }
