@@ -4,7 +4,7 @@
   "description": "Squirrel Note App",
   "main": "server.js",
   "scripts": {
-    "build": "npm install --prefix client && CI=false npm run build --prefix client",
+    "build": "npm install --prefix client && cross-env CI=false NODE_OPTIONS='--openssl-legacy-provider --max-old-space-size=1024' npm run build --prefix client",
     "start": "node server.js",
     "server": "nodemon server.js",
     "client": "npm start --prefix client",
