@@ -1,6 +1,7 @@
 var nodemailer = require('nodemailer');
 
-module.exports = function(credentials) {
+module.exports = function (credentials) {
+  console.log(credentials);
   var mailTransport = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
@@ -16,7 +17,7 @@ module.exports = function(credentials) {
   var from = credentials.username;
   var errorRecipient = credentials.username;
   return {
-    send: function(to, subj, body) {
+    send: function (to, subj, body) {
       mailTransport.sendMail(
         {
           from: from,
@@ -26,7 +27,7 @@ module.exports = function(credentials) {
         }
       );
     },
-    emailError: function(message, filename, exception) {
+    emailError: function (message, filename, exception) {
       var body =
         '<h1>Send Mail Error</h1>' + 'message:<br><pre>' + message + '</pre><br>';
       if (exception) body += 'exception:<br><pre>' + exception + '</pre><br>';
