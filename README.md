@@ -48,6 +48,7 @@ BRAND_URL=https://stormcode.github.io/SquirrelNote/assets/brand.png
 > 以上資訊的GMAIL_CLIENT_ID、GMAIL_CLIENT_SECRET需在Google API申請(https://console.developers.google.com/apis/credentials);
 GMAIL_REFRESH_TOKEN需使用Playground生成(https://developers.google.com/oauthplayground/);
 MONGOURI請申請MongoDB Atlas並創建新Project > Clusters
+> GMAIL_REFRESH_TOKEN超過六個月沒使用或是OAuth app 還在測試模式且超過 7 天會失效
 
 
 ### Client
