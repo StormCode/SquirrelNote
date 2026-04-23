@@ -1,11 +1,11 @@
-kind: "AppHostingYaml"
-schemaVersion: "v1"
-buildConfig:
-  buildCommand: "npm run build"
 runConfig:
   cpu: 1
   memoryMiB: 2048
 env:
+  - variable: NODE_OPTIONS
+    value: "--openssl-legacy-provider"
+    availability:
+      - BUILD
   - variable: NODE_ENV
     value: production
     availability:
